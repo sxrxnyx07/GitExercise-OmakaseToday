@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 :root{
-    --accent-color: #fee273;
-    --base-color: rgb(255, 240, 155);
-    --text-color: #000000;
+    --accent-color: #fdcd10aa;
+    --base-color: rgb(252, 239, 150);
+    --text-color: #9d9595;
     --input-color: #f9f0e2;
 }
 *{
@@ -48,7 +48,7 @@ form{
     gap: 10px;
 }
 form > div{
-    width: 100;
+    width: 100%;
     display: flex;
     justify-content: center;
 }
@@ -74,10 +74,62 @@ form input{
     padding: 1em;
     font: inherit;
     border-radius: 0 10px 10px 0;
-    border: none;
+    border: 2px solid var(--input-color);
+    border-left: none;
     background-color: var(--input-color);
     transition: 150ms ease;
 }
 form input:hover{
-    border: 2px solid var(--accent-color);
+    border-color: var(--accent-color);
+}
+form input:focus{
+    outline: none;
+    border-color: var(--text-color);
+}
+div:has input:focus > label{
+    background-color: var(--text-color);
+}
+form input::placeholder{
+    color: var(--text-color);
+}
+form button{
+    margin-top: 10px;
+    border: none;
+    border-radius: 1000px;
+    padding: .85em 4em;
+    background-color: #000000;
+    color: var(--accent-color);
+    font: inherit; font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 150ms ease;
+}
+form button:hover{
+    background-color:#f31212;
+}
+form button:focus{
+    outline: none;
+    background-color: #6f0d0d;
+}
+a{
+    text-decoration: underline;
+    color: #6f0d0d;
+}
+a:hover{
+    text-decoration: none;
+}
+@media(max-width: 1100px){
+    .wrapper{
+        width: min(600px, 100%);
+        border-radius: 0;
+    }
+}
+form div.incorrect label{
+    background-color: #f9c0b1;
+}
+form div.incorrect input{
+    border-color: #e3a7a7;
+}
+#error-message{
+    color:#d53333
 }
