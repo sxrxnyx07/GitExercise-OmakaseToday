@@ -3,12 +3,15 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Register for your account</title>
+        <title>SIGNUP</title>
+        <link rel="stylesheet" href="../static/css/style.css">
+        <script type="text/javascript" src="../static/js/script1.js" defer></script>
     </head>
     <body>
         <div class="wrapper">
-            <h1>Register</h1>
-            <form>
+            <h1>SIGNUP NOW!</h1>
+            <p id="error-message"></p>
+            <form id="form">
                 <div>
                     <label for="username-input">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"/></svg>
@@ -16,7 +19,7 @@
                     <input type="text" name="username" id="username-input" placeholder="Enter your username">
                 </div>
                 <div>
-                    <label for="email">
+                    <label for="email-input">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"/></svg>
                     </label>
                     <input type="email" name="email" id="email-input" placeholder="Enter your email">
@@ -33,9 +36,9 @@
                     </label>
                     <input type="password" name="repeat-password" id="repeat-password-input" placeholder="Repeat your password">
                 </div>
-                <button type="submit">Login</button>
+                <button type="submit">SIGNUP</button>
             </form>
-            <p>Already have an Account? <a href="login.html">login</a></p>
+            <p>Already have an Account? <a href="login.html">Login</a></p>
         </div>
     </body>
 </html>
