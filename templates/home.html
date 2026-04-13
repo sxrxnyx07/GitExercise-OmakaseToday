@@ -1,29 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>HOMEPAGE</title>
-        <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-        <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    </head>
-    <body>
+    <title>Omakase Today</title>
 
-    <h1>OMAKASE TODAY</h1>
+    <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</head>
 
-    <p>
-        <a href="{{ url_for('login') }}">Login</a>
-    </p>
+<body>
 
-    <p>
-        <a href="{{ url_for('register') }}">Register</a>
-    </p>
+<!-- =========================
+     NAV (UNCHANGED)
+========================= -->
+<nav>
+    <ul class="sidebar">
+        <li onclick=hideSidebar()><a href="#">X</a></li>
+        <li><a href="{{ url_for('home') }}">HOME</a></li>
+        <li><a href="#">SEARCH</a></li>
+        <li><a href="#">SAVED RECIPE</a></li>
+        <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
+    </ul>
 
-    <p>
-        <a href="{{ url_for('resetpassword') }}">Reset Password</a>
-    </p>
+    <ul>
+        <li><a href="#">Omakase Today</a></li>
+        <li class="hideOnMobile"><a href="{{ url_for('home') }}">HOME</a></li>
+        <li class="hideOnMobile"><a href="#">SEARCH</a></li>
+        <li class="hideOnMobile"><a href="#">SAVED RECIPE</a></li>
+        <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
+        <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
+    </ul>
+</nav>
+
+<!-- =========================
+     HOME CONTENT (NEW STRUCTURE ONLY)
+========================= -->
+
+<div class="home-container">
+
+    <!-- TITLE -->
+    <h1 class="home-title">
+        What should I eat <span>today?</span>
+    </h1>
+
+    <!-- IMAGE + LID BUTTON -->
+    <div class="home-image-wrapper">
+        <img id="foodImage" src="{{ url_for('static', filename='css/picture/dishclose.png') }}" alt="food">
+        <button class="lid-btn" onclick="liftLid()">
+            🍽 Lift the lid
+        </button>
+
+    </div>
+
+    <!-- CTA BUTTON -->
+    <a href="#" class="menu-btn">
+        Access Menu →
+    </a>
+
+</div>
 
 </body>
 </html>

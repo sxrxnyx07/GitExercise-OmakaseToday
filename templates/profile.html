@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omakase Today</title>
+    <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</head>
+
+<body>
+
+<nav>
+    <ul class="sidebar">
+        <li onclick=hideSidebar()><a href="#">X</a></li>
+        <li><a href="{{ url_for('home') }}">HOME</a></li>
+        <li><a href="#">SEARCH</a></li>
+        <li><a href="#">SAVED RECIPE</a></li>
+        <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
+    </ul>
+
+    <ul>
+        <li><a href="#">Omakase Today</a></li>
+        <li class="hideOnMobile"><a href="{{ url_for('home') }}">HOME</a></li>
+        <li class="hideOnMobile"><a href="#">SEARCH</a></li>
+        <li class="hideOnMobile"><a href="#">SAVED RECIPE</a></li>
+        <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
+        <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
+    </ul>
+</nav>
+
+
+<div class="profile-container">
+
+    <!-- LEFT -->
+    <div class="profile-left">
+
+        <div class="profile-card">
+
+            <div class="profile-img-box">
+                <img src="#">
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                <label class="upload-circle">
+                    +
+                    <input type="file" name="profile_pic" hidden>
+                </label>
+            </form>
+
+            <p class="upload-text">Upload Profile Picture</p>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="profile-right">
+
+        <div class="info-card">
+
+            <h1>PROFILE</h1>
+
+            <form method="POST" action="{{ url_for('profile') }}">
+
+                <div class="input-box">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" value="{{ username }}" disabled>
+                </div>
+
+                <div class="input-box">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" value="{{ email }}" disabled>
+                </div>
+
+                <div class="input-box">
+                    <label for="bio">Bio</label>
+                    <input id="bio" type="text" value="{{ bio }}" disabled>
+                </div>
+
+                <button type="submit" class="edit-btn">
+                    Edit Profile
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</body>
+</html>
