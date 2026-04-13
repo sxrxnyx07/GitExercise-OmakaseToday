@@ -10,7 +10,7 @@ form.addEventListener('submit', (e) => {
     let errors = []
 
     // ✅ SIGNUP
-    if (username_input && email_input && repeat_password_input) {
+    if (username_input && repeat_password_input) {
         errors = getSignupFormErrors(
             username_input.value,
             email_input.value,
