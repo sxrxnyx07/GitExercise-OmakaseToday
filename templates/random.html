@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gacha Recipe System</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎰 Gacha Recipe System</h1>
+
+    <!-- GACHA IMAGE -->
+    <img id="gachaImg" class="gacha-img"
+     src="{{ url_for('static', filename='gacha.png') }}">
+
+    <div class="machine-box">
+
+        <div id="result">
+            Click spin to get your recipe 🍽️
+        </div>
+
+        <button onclick="spin()">SPIN 🎲</button>
+
+    </div>
+
+</div>
+
+<script>
+function spin() {
+
+    let resultBox = document.getElementById("result");
+    let button = document.querySelector("button");
+    let gachaImg = document.getElementById("gachaImg");
+
+    // disable button
+    button.disabled = true;
+
+    // start spin animation
+    gachaImg.classList.add("spin");
+
+resultBox.innerText = "Spinning...";
+
+gachaImg.classList.add("spin");
+
+setTimeout(() => {
+
+    fetch('/random')
+    .then(res => res.json())
+    .then(data => {
+
+        resultBox.innerText = "Revealing...";
+
+        setTimeout(() => {
+            resultBox.innerText = "You got: " + data.recipe;
+
+            gachaImg.classList.remove("spin");
+
+            button.disabled = false;
+
+        }, 500);
+
+    });
+
+}, 1000);
+}
+</script>
+
+</body>
+</html>
