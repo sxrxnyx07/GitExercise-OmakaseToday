@@ -1,34 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omakase Today</title>
-    <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block title %}Profile{% endblock %}
 
-<nav>
-    <ul class="sidebar">
-        <li onclick=hideSidebar()><a href="#">X</a></li>
-        <li><a href="{{ url_for('home') }}">HOME</a></li>
-        <li><a href="#">SEARCH</a></li>
-        <li><a href="#">SAVED RECIPE</a></li>
-        <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
-    </ul>
-
-    <ul>
-        <li><a href="#">Omakase Today</a></li>
-        <li class="hideOnMobile"><a href="{{ url_for('home') }}">HOME</a></li>
-        <li class="hideOnMobile"><a href="#">SEARCH</a></li>
-        <li class="hideOnMobile"><a href="#">SAVED RECIPE</a></li>
-        <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
-        <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
-    </ul>
-</nav>
+{% block content %}
 
 
 <div class="profile-container">
@@ -90,7 +64,4 @@
     </div>
 
 </div>
-
-
-</body>
-</html>
+{% endblock %}

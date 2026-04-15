@@ -144,26 +144,6 @@ function getResetPasswordErrors(password, repeatpassword) {
     return errors
 }
 
-let currentPage = 1;
-
-function showPage(page){
-    document.querySelectorAll('.book-page').forEach(p => {
-        p.classList.remove('active');
-    });
-
-    document.getElementById('page' + page).classList.add('active');
-}
-
-function nextPage(){
-    currentPage = currentPage === 2 ? 1 : currentPage + 1;
-    showPage(currentPage);
-}
-
-function prevPage(){
-    currentPage = currentPage === 1 ? 2 : currentPage - 1;
-    showPage(currentPage);
-}
-
 
 // =========================
 // REMOVE ERROR STYLE
