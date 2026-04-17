@@ -17,6 +17,26 @@ def about():
 def random_page():
     return render_template('random.html')
 
+@app.route('/breakfast')
+def breakfast():
+    return render_template('breakfast.html')
+
+@app.route('/lunch')
+def lunch():
+    return render_template('lunch.html')
+
+@app.route('/dinner')
+def dinner():
+    return render_template('dinner.html')
+
+@app.route('/dessert')
+def dessert():
+    return render_template('dessert.html')
+
+@app.route('/drinks')
+def drinks():
+    return render_template('drinks.html')
+
 @app.route('/random')
 def get_random_recipe():
     return jsonify({
