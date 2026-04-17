@@ -33,11 +33,30 @@
 
     <div class="balls-inside">
         <div class="mini-ball red"></div>
-        <div class="mini-ball blue"></div>
+        <div class="mini-ball red"></div>
+        <div class="mini-ball red"></div>
+        <div class="mini-ball red"></div>
+        <div class="mini-ball red"></div>
+
         <div class="mini-ball yellow"></div>
+        <div class="mini-ball yellow"></div>
+        <div class="mini-ball yellow"></div>
+        <div class="mini-ball yellow"></div>
+        <div class="mini-ball yellow"></div>
+        <div class="mini-ball yellow"></div>
+        <div class="mini-ball yellow"></div>
+
         <div class="mini-ball green"></div>
+        <div class="mini-ball green"></div>
+        <div class="mini-ball green"></div>
+        <div class="mini-ball green"></div>
+
         <div class="mini-ball purple"></div>
-    </div>
+        <div class="mini-ball purple"></div>
+        <div class="mini-ball purple"></div>
+        <div class="mini-ball purple"></div>
+        <div class="mini-ball purple"></div>
+</div>
 
 </div>
 
@@ -56,47 +75,62 @@
 </div>
 
 <script>
+    
+let balls = document.querySelectorAll(".mini-ball");
+
+window.onload = function () {
+
+    balls.forEach(ball => {
+
+        let angle = Math.random() * Math.PI * 2;
+
+        let radius = Math.sqrt(Math.random()) * 55;
+
+        let x = Math.cos(angle) * radius;
+        let y = Math.sin(angle) * radius;
+
+        ball.style.transform = `translate(${x}px, ${y}px)`;
+    });
+
+};
+
 function spin() {
 
     let resultBox = document.getElementById("result");
     let button = document.querySelector("button");
     let gachaImg = document.getElementById("gachaImg");
-
     let inside = document.querySelector(".balls-inside");
-    inside.classList.add("spin-inside");
+
+    let colors = ["red","yellow","green","blue","purple"];
 
     button.disabled = true;
 
     gachaImg.classList.add("shake");
+    inside.classList.add("spin-inside");
+
     resultBox.innerText = "Spinning...";
 
     setTimeout(() => {
 
-    let colors = ["red", "yellow", "green", "blue", "purple"];
-    let ball = document.getElementById("ball");
+        let ball = document.getElementById("ball");
 
-    ball.classList.remove(...colors);
+        let randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    let randomColor = colors[Math.floor(Math.random() * colors.length)];
-    ball.classList.add(randomColor);
+        ball.className = "ball " + randomColor;
+        ball.classList.add("drop");
 
-    ball.classList.add("drop");
-
-    fetch('/random')
+        fetch('/random')
         .then(res => res.json())
         .then(data => {
-
-            resultBox.innerText = "Revealing...";
 
             setTimeout(() => {
 
                 resultBox.innerText = "You got: " + data.recipe;
 
                 gachaImg.classList.remove("shake");
+                inside.classList.remove("spin-inside");
 
                 ball.classList.remove("drop");
-                ball.classList.remove(...colors);
-                inside.classList.remove("spin-inside");
 
                 button.disabled = false;
 

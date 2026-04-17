@@ -185,7 +185,7 @@ button:active {
     border-radius: 50%;
 
     position: absolute;
-    top: 260px;
+    top: 270px;
     left: 50%;
     transform: translateX(-50%);
 
@@ -214,14 +214,12 @@ button:active {
     left: 50%;
     transform: translateX(-50%);
 
-    width: 120px;
-    height: 80px;
+    width: 180px;
+    height: 180px;
 
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
+    border-radius: 50%;
+
+    overflow: visible;   
 }
 
 @keyframes spinBalls {
@@ -234,7 +232,10 @@ button:active {
 }
 
 .mini-ball {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
+    position: absolute;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2); 
 }
