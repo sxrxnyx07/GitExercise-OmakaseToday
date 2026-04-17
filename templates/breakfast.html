@@ -29,14 +29,14 @@
 <div class="machine-wrapper">
 
     <img id="gachaImg" class="gacha-img fade-in"
-         src="{{ url_for('static', filename='gacha.png') }}">   <!-- GACHA IMAGE -->
+         src="{{ url_for('static', filename='gacha1.png') }}">   <!-- GACHA IMAGE -->
 
     <div class="balls-inside">
         <div class="mini-ball red"></div>
         <div class="mini-ball red"></div>
         <div class="mini-ball red"></div>
         <div class="mini-ball red"></div>
-        <div class="mini-ball red"></div>
+
 
         <div class="mini-ball yellow"></div>
         <div class="mini-ball yellow"></div>
@@ -80,14 +80,20 @@ let balls = document.querySelectorAll(".mini-ball");
 
 window.onload = function () {
 
-    balls.forEach(ball => {
+    let balls = document.querySelectorAll(".mini-ball");
 
-        let angle = Math.random() * Math.PI * 2;
+    let maxX = 70;
+    let maxY = 70;
 
-        let radius = Math.sqrt(Math.random()) * 45;
+    let colors = ["red","yellow","green","blue","purple"];
 
-        let x = Math.cos(angle) * radius;
-        let y = Math.sin(angle) * radius;
+    balls.forEach((ball, index) => {
+
+        let color = colors[Math.floor(Math.random() * colors.length)];
+        ball.className = "mini-ball " + color;
+
+        let x = (Math.random() - 0.5) * 2 * maxX;
+        let y = (Math.random() - 0.5) * 2 * maxY;
 
         let jitterX = (Math.random() - 0.5) * 10;
         let jitterY = (Math.random() - 0.5) * 10;
