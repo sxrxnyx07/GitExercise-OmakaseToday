@@ -1,114 +1,209 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
+import sqlite3
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = "secretkey123"
 
-users = {}
-reset_user = None
-current_user = None
+# ---------------- DB ----------------
+def init_db():
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
 
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        email TEXT PRIMARY KEY,
+        username TEXT,
+        password TEXT,
+        bio TEXT
+    )
+    """)
 
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return render_template("home.html")
 
-
+# ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form.get("username")
-        email = request.form.get("email")
-        password = request.form.get("password")
+        username = request.form["username"]
+        email = request.form["email"]
+        password = request.form["password"]
 
-        if email in users:
-            return "User already exists!"
+        hashed_pw = generate_password_hash(password)
 
-        users[email] = {
-            "username": username,
-            "password": password,
-            "bio": ""
-        }
+        try:
+            with sqlite3.connect("users.db") as conn:
+                c = conn.cursor()
 
-        return redirect(url_for("login"))
+                c.execute("""
+                    INSERT INTO users (email, username, password, bio)
+                    VALUES (?, ?, ?, ?)
+                """, (email, username, hashed_pw, ""))
+
+                conn.commit()
+
+            return redirect(url_for("login"))
+
+        except sqlite3.IntegrityError:
+            return render_template(
+                "register.html",
+                error="This email is already registered!"
+            )
 
     return render_template("register.html")
 
 
+@app.route("/check-email")
+def check_email():
+    email = request.args.get("email")
+
+    with sqlite3.connect("users.db") as conn:
+        c = conn.cursor()
+        c.execute("SELECT 1 FROM users WHERE email = ?", (email,))
+        user = c.fetchone()
+
+    return {"exists": user is not None}
+
+# ---------------- LOGIN ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    global current_user
-
     if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
+        email = request.form["email"]
+        password = request.form["password"]
 
-        if email in users and users[email]["password"] == password:
-            current_user = email
+        with sqlite3.connect("users.db") as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM users WHERE email = ?", (email,))
+            user = c.fetchone()
+
+        if user and check_password_hash(user[2], password):
+            session["user"] = email
             return redirect(url_for("profile"))
         else:
-            return "Invalid email or password!"
+            return render_template(
+                "login.html",
+                error="Invalid email or password"
+            )
 
     return render_template("login.html")
 
+# ---------------- PROFILE ----------------
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    if "user" not in session:
+        return redirect(url_for("login"))
 
+    email = session["user"]
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    # UPDATE
+    if request.method == "POST":
+        username = request.form["username"]
+        bio = request.form["bio"]
+
+        c.execute("""
+            UPDATE users
+            SET username = ?, bio = ?
+            WHERE email = ?
+        """, (username, bio, email))
+
+        conn.commit()
+
+    # GET DATA
+    c.execute("""
+        SELECT username, email, bio
+        FROM users
+        WHERE email = ?
+    """, (email,))
+
+    user = c.fetchone()
+    conn.close()
+
+    return render_template(
+        "profile.html",
+        username=user[0],
+        email=user[1],
+        bio=user[2]
+    )
+
+# ---------------- RESET STEP 1 ----------------
 @app.route("/resetpassword", methods=["GET", "POST"])
 def resetpassword():
-    global reset_user
-
     if request.method == "POST":
-        username = request.form.get("username")
-        email = request.form.get("email")
+        username = request.form["username"]
+        email = request.form["email"]
 
-        if email in users and users[email]["username"] == username:
-            reset_user = email
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        c.execute(
+            "SELECT * FROM users WHERE email=? AND username=?",
+            (email, username)
+        )
+        user = c.fetchone()
+        conn.close()
+
+        if user:
+            session["reset_user"] = email
             return redirect(url_for("newpassword"))
         else:
-            return "Invalid username or email!"
+            return render_template(
+                "resetpassword.html",
+                error="Invalid username or email"
+            )
 
     return render_template("resetpassword.html")
-
-
+# ---------------- RESET STEP 2 ----------------
 @app.route("/newpassword", methods=["GET", "POST"])
 def newpassword():
-    global reset_user
-
-    if reset_user is None:
-        reset_user = "test@example.com"
-        users.setdefault(reset_user, {
-            "username": "testuser",
-            "password": "12345678",
-            "bio": ""
-        })
+    if "reset_user" not in session:
+        return redirect(url_for("login"))
 
     if request.method == "POST":
-        password = request.form.get("password")
+        password = request.form["password"]
+        repeat = request.form["repeat-password"]
 
-        users[reset_user]["password"] = password
-        reset_user = None
+        # ❗后端 validation
+        if not password:
+            return render_template("newpassword.html", error="Password is required")
+
+        if len(password) < 8:
+            return render_template("newpassword.html", error="Password must be at least 8 characters")
+
+        if password != repeat:
+            return render_template("newpassword.html", error="Passwords do not match")
+
+        hashed_pw = generate_password_hash(password)
+        email = session["reset_user"]
+
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        c.execute("UPDATE users SET password=? WHERE email=?", (hashed_pw, email))
+        conn.commit()
+        conn.close()
+
+        session.pop("reset_user", None)
 
         return redirect(url_for("login"))
 
     return render_template("newpassword.html")
 
-
-@app.route("/profile")
-def profile():
-    global current_user
-
-    if current_user is None:
-        return redirect(url_for("login"))
-
-    user = users[current_user]
-
-    return render_template(
-        "profile.html",
-        username=user["username"],
-        email=current_user,
-        bio=user.get("bio", "")
-    )
-
-@app.route("/base")
-def base():
-    return render_template("base.html")
+# ---------------- LOGOUT ----------------
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("home"))
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -4,6 +4,7 @@
 
 {% block content %}
 
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
 
 <div class="profile-container">
 
@@ -13,17 +14,8 @@
         <div class="profile-card">
 
             <div class="profile-img-box">
-                <img src="#">
+                <img src="{{ url_for('static', filename='default.png') }}">
             </div>
-
-            <form method="POST" enctype="multipart/form-data">
-                <label class="upload-circle">
-                    +
-                    <input type="file" name="profile_pic" hidden>
-                </label>
-            </form>
-
-            <p class="upload-text">Upload Profile Picture</p>
 
         </div>
 
@@ -36,32 +28,40 @@
 
             <h1>PROFILE</h1>
 
-            <form method="POST" action="{{ url_for('profile') }}">
-
+            <form method="POST">
                 <div class="input-box">
-                    <label for="username">Username</label>
-                    <input id="username" type="text" value="{{ username }}" disabled>
+                    <label>Username</label>
+                    <input name="username" id="username" type="text"
+                        value="{{ username }}" disabled>
                 </div>
-
                 <div class="input-box">
-                    <label for="email">Email</label>
-                    <input id="email" type="email" value="{{ email }}" disabled>
+                    <label>Email</label>
+                    <input type="text" value="{{ email }}" disabled>
                 </div>
-
                 <div class="input-box">
-                    <label for="bio">Bio</label>
-                    <input id="bio" type="text" value="{{ bio }}" disabled>
+                    <label>Bio</label>
+                    <input name="bio" id="bio" type="text"
+                        value="{{ bio }}" disabled>
                 </div>
+                <div class="profile-buttons">
 
-                <button type="submit" class="edit-btn">
-                    Edit Profile
-                </button>
+                    <button type="button" class="edit-btn" onclick="enableEdit()">
+                        Edit Profile
+                    </button>
+
+                    <button type="submit" class="edit-btn" id="saveBtn" style="display:none;">
+                        Save
+                    </button>
+
+                </div>
 
             </form>
+
 
         </div>
 
     </div>
 
 </div>
+
 {% endblock %}

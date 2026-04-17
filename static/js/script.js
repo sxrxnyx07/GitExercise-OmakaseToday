@@ -1,20 +1,5 @@
-// =========================
-// SIDEBAR TOGGLE
-// =========================
-function showSidebar(){
-    const sidebar = document.querySelector('.sidebar')
-    if (sidebar) sidebar.style.display = 'flex'
-}
+const page = document.body.dataset.page || ""
 
-function hideSidebar(){
-    const sidebar = document.querySelector('.sidebar')
-    if (sidebar) sidebar.style.display = 'none'
-}
-
-
-// =========================
-// FORM VALIDATION
-// =========================
 const form = document.getElementById('form')
 const username_input = document.getElementById('username-input')
 const email_input = document.getElementById('email-input')
@@ -22,145 +7,157 @@ const password_input = document.getElementById('password-input')
 const repeat_password_input = document.getElementById('repeat-password-input')
 const error_message = document.getElementById('error-message')
 
+let emailExists = false
 
+// =========================
+// SUBMIT
+// =========================
 if (form) {
     form.addEventListener('submit', (e) => {
 
         let errors = []
 
-        // SIGNUP
-        if (username_input && repeat_password_input) {
+        if (page === "register") {
             errors = getSignupFormErrors(
-                username_input.value,
-                email_input.value,
-                password_input.value,
-                repeat_password_input.value
+                username_input?.value,
+                email_input?.value,
+                password_input?.value,
+                repeat_password_input?.value,
+                emailExists
             )
         }
 
-        // NEW PASSWORD
-        else if (password_input && repeat_password_input) {
-            errors = getResetPasswordErrors(
-                password_input.value,
-                repeat_password_input.value
+        else if (page === "reset") {
+            errors = getResetErrors(
+                username_input?.value,
+                email_input?.value
             )
         }
 
-        // LOGIN
-        else {
+        else if (page === "newpassword") {
+            errors = getNewPasswordErrors(
+                password_input?.value,
+                repeat_password_input?.value
+            )
+        }
+
+        else if (page === "login") {
             errors = getLoginFormErrors(
-                email_input.value,
-                password_input.value
+                email_input?.value,
+                password_input?.value
             )
         }
 
         if (errors.length > 0) {
             e.preventDefault()
-            if (error_message) {
-                error_message.innerText = errors.join(". ")
-            }
+            error_message.innerText = errors.join("\n")
         }
     })
 }
 
-
 // =========================
-// SIGNUP VALIDATION
+// RESET STEP 1
 // =========================
-function getSignupFormErrors(username, email, password, repeatpassword) {
+function getResetErrors(username, email) {
     let errors = []
 
-    if (!username) {
-        errors.push('Username is required')
-        if (username_input) username_input.parentElement.classList.add('incorrect')
-    }
-    if (!email) {
-        errors.push('Email is required')
-        if (email_input) email_input.parentElement.classList.add('incorrect')
-    }
-    if (!password) {
-        errors.push('Password is required')
-        if (password_input) password_input.parentElement.classList.add('incorrect')
-    }
-    if (password && password.length < 8) {
-        errors.push('Password must have at least 8 characters')
-        if (password_input) password_input.parentElement.classList.add('incorrect')
-    }
-    if (password !== repeatpassword) {
-        errors.push('Password does not match repeated password')
-        if (password_input) password_input.parentElement.classList.add('incorrect')
-        if (repeat_password_input) repeat_password_input.parentElement.classList.add('incorrect')
-    }
+    if (!username) errors.push("Username is required")
+    if (!email) errors.push("Email is required")
 
     return errors
 }
 
+// =========================
+// NEW PASSWORD
+// =========================
+function getNewPasswordErrors(password, repeat) {
+    let errors = []
+
+    if (!password) errors.push("Password is required")
+    if (password && password.length < 8)
+        errors.push("Password must be at least 8 characters")
+
+    if (password !== repeat)
+        errors.push("Passwords do not match")
+
+    return errors
+}
 
 // =========================
-// LOGIN VALIDATION
+// LOGIN
 // =========================
 function getLoginFormErrors(email, password) {
     let errors = []
 
-    if (!email) {
-        errors.push('Email is required')
-        if (email_input) email_input.parentElement.classList.add('incorrect')
-    }
-    if (!password) {
-        errors.push('Password is required')
-        if (password_input) password_input.parentElement.classList.add('incorrect')
-    }
-    if (password && password.length < 8) {
-        errors.push('Password must have at least 8 characters')
-        if (password_input) password_input.parentElement.classList.add('incorrect')
-    }
+    if (!email) errors.push("Email is required")
+    if (!password) errors.push("Password is required")
 
     return errors
 }
 
-
 // =========================
-// RESET PASSWORD VALIDATION
+// REGISTER
 // =========================
-function getResetPasswordErrors(password, repeatpassword) {
+function getSignupFormErrors(username, email, password, repeat, emailExists) {
     let errors = []
 
-    if (!password) {
-        errors.push('Password is required')
-        if (password_input) password_input.parentElement.classList.add('incorrect')
-    }
-
-    if (password && password.length < 8) {
-        errors.push('Password must have at least 8 characters')
-        if (password_input) password_input.parentElement.classList.add('incorrect')
-    }
-
-    if (password !== repeatpassword) {
-        errors.push('Passwords do not match')
-        if (password_input) password_input.parentElement.classList.add('incorrect')
-        if (repeat_password_input) repeat_password_input.parentElement.classList.add('incorrect')
-    }
+    if (!username) errors.push("Username is required")
+    if (!email) errors.push("Email is required")
+    if (emailExists) errors.push("This email is already registered!")
+    if (!password) errors.push("Password is required")
+    if (password !== repeat) errors.push("Passwords do not match")
 
     return errors
 }
 
+// =========================
+// EMAIL CHECK REGISTER ONLY
+// =========================
+if (page === "register" && email_input) {
+
+    let timeout
+
+    email_input.addEventListener('input', () => {
+
+        clearTimeout(timeout)
+
+        timeout = setTimeout(async () => {
+
+            const email = email_input.value.trim()
+
+            if (!email) {
+                emailExists = false
+                return
+            }
+
+            const res = await fetch(`/check-email?email=${email}`)
+            const data = await res.json()
+
+            emailExists = data.exists
+
+            if (emailExists) {
+                error_message.innerText = "This email is already registered!"
+            } else {
+                if (error_message.innerText === "This email is already registered!") {
+                    error_message.innerText = ""
+                }
+            }
+
+        }, 300)
+    })
+}
 
 // =========================
-// REMOVE ERROR STYLE
+// CLEAR STYLE
 // =========================
-const allInputs = [
-    username_input,
-    email_input,
-    password_input,
-    repeat_password_input
-].filter(input => input != null)
-
-allInputs.forEach(input => {
-    input.addEventListener('input', () => {
-        if (input.parentElement.classList.contains('incorrect')) {
-            input.parentElement.classList.remove('incorrect')
-            if (error_message) error_message.innerText = ''
-        }
+document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", () => {
+        input.parentElement.classList.remove("incorrect")
     })
 })
+
+
+
+
+
 
