@@ -84,12 +84,18 @@ window.onload = function () {
 
         let angle = Math.random() * Math.PI * 2;
 
-        let radius = Math.sqrt(Math.random()) * 55;
+        let radius = Math.sqrt(Math.random()) * 45;
 
         let x = Math.cos(angle) * radius;
         let y = Math.sin(angle) * radius;
 
-        ball.style.transform = `translate(${x}px, ${y}px)`;
+        let jitterX = (Math.random() - 0.5) * 10;
+        let jitterY = (Math.random() - 0.5) * 10;
+
+        ball.style.left = "50%";
+        ball.style.top = "50%";
+
+        ball.style.transform = `translate(${x + jitterX}px, ${y + jitterY}px)`;
     });
 
 };
@@ -100,11 +106,13 @@ function spin() {
     let button = document.querySelector("button");
     let gachaImg = document.getElementById("gachaImg");
     let inside = document.querySelector(".balls-inside");
+    let ball = document.getElementById("ball");
 
     let colors = ["red","yellow","green","blue","purple"];
 
     button.disabled = true;
 
+    // start shake and spin inside
     gachaImg.classList.add("shake");
     inside.classList.add("spin-inside");
 
@@ -112,11 +120,11 @@ function spin() {
 
     setTimeout(() => {
 
-        let ball = document.getElementById("ball");
-
+        // ball come out via ramdom color
         let randomColor = colors[Math.floor(Math.random() * colors.length)];
-
         ball.className = "ball " + randomColor;
+
+        // ball come out
         ball.classList.add("drop");
 
         fetch('/random')
@@ -125,8 +133,10 @@ function spin() {
 
             setTimeout(() => {
 
+                // show result
                 resultBox.innerText = "You got: " + data.recipe;
 
+                // stop animation
                 gachaImg.classList.remove("shake");
                 inside.classList.remove("spin-inside");
 
@@ -134,7 +144,7 @@ function spin() {
 
                 button.disabled = false;
 
-            }, 800);
+            }, 500);
 
         });
 
