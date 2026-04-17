@@ -26,9 +26,20 @@
     Grab a refreshing drink and cool yourself down with a little surprise ❄️
 </p>
 
-    <!-- GACHA IMAGE -->
+<div class="machine-wrapper">
+
     <img id="gachaImg" class="gacha-img fade-in"
-     src="{{ url_for('static', filename='gacha.png') }}">
+         src="{{ url_for('static', filename='gacha.png') }}">   <!-- GACHA IMAGE -->
+
+    <div class="balls-inside">
+        <div class="mini-ball red"></div>
+        <div class="mini-ball blue"></div>
+        <div class="mini-ball yellow"></div>
+        <div class="mini-ball green"></div>
+        <div class="mini-ball purple"></div>
+    </div>
+
+</div>
 
     <div id="ball" class="ball red"></div>
 
@@ -51,9 +62,12 @@ function spin() {
     let button = document.querySelector("button");
     let gachaImg = document.getElementById("gachaImg");
 
+    let inside = document.querySelector(".balls-inside");
+    inside.classList.add("spin-inside");
+
     button.disabled = true;
 
-    gachaImg.classList.add("spin");
+    gachaImg.classList.add("shake");
     resultBox.innerText = "Spinning...";
 
     setTimeout(() => {
@@ -78,10 +92,11 @@ function spin() {
 
                 resultBox.innerText = "You got: " + data.recipe;
 
-                gachaImg.classList.remove("spin");
+                gachaImg.classList.remove("shake");
 
                 ball.classList.remove("drop");
                 ball.classList.remove(...colors);
+                inside.classList.remove("spin-inside");
 
                 button.disabled = false;
 

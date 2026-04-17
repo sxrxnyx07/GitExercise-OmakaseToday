@@ -203,3 +203,38 @@ button:active {
 .blue { background: blue; }
 .green { background: green; }
 .purple { background: purple; }
+
+.machine-wrapper {
+    position: relative;
+}
+
+.balls-inside {
+    position: absolute;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 120px;
+    height: 80px;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+@keyframes spinBalls {
+    0% { transform: translateX(-50%) rotate(0deg); }
+    100% { transform: translateX(-50%) rotate(360deg); }
+}
+
+.spin-inside {
+    animation: spinBalls 2s linear infinite;
+}
+
+.mini-ball {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
