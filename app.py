@@ -1,3 +1,4 @@
+
 import os
 import string
 from flask import Flask, render_template, request, url_for
@@ -98,4 +99,5 @@ def recipe_detail(recipe_id):
     return render_template('recipe.html', recipe=recipe, ingredients=detailed_list)
 
 if __name__ == "__main__":
+
     app.run(debug=True)
