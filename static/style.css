@@ -1,20 +1,17 @@
 body {
     font-family: Arial, sans-serif;
-
-    /* soft arcade background */
     background: linear-gradient(135deg, #eef2ff, #ffe6f0);
-
     margin: 0;
-    height: 100vh;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
-/* center wrapper */
 .container {
     text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin-top: 90px; 
 }
 
 /* title */
@@ -118,4 +115,42 @@ button:active {
 
 .gacha-img:hover {
     filter: brightness(1.05);
+}
+
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+
+    z-index: 1000;
+}
+
+.topbar a {
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 15px 0;
+
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+
+    background: #fff7b2;
+
+    border-right: 1px solid #e0e0e0;
+}
+
+.topbar a:hover {
+    background: #ffe97a;
+}
+
+.topbar a.active {
+    background: #ffdd57;
+    color: #000;
 }
