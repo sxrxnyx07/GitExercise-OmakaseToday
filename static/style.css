@@ -46,6 +46,7 @@ body {
 
 /* machine card */
 .machine-box {
+    position: relative;
     width: 300px;
 
     background: #ffffff;
@@ -108,16 +109,15 @@ button:active {
     transform: scale(0.95);
 }
 
-.spin {
-    animation: shake 0.2s ease-in-out 10;
+.shake {
+    animation: shakeMachine 0.4s ease-in-out 3;
 }
 
-@keyframes shake {
+@keyframes shakeMachine {
     0% { transform: translateX(0); }
-    20% { transform: translateX(-12px); }
-    40% { transform: translateX(12px); }
-    60% { transform: translateX(-12px); }
-    80% { transform: translateX(12px); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
     100% { transform: translateX(0); }
 }
 
@@ -184,27 +184,22 @@ button:active {
     height: 40px;
     border-radius: 50%;
 
-    background: radial-gradient(circle, #ff4d6d, #ffb703);
-
     position: absolute;
-    top: 200px;
+    top: 260px;
     left: 50%;
     transform: translateX(-50%);
 
     opacity: 0;
 }
 
-.drop {
-    animation: dropBall 0.6s ease forwards;
+.ball.drop {
+    opacity: 1;
+    transform: translate(-50%, 200px);
+    transition: all 0.6s ease;
 }
 
-@keyframes dropBall {
-    0% {
-        transform: translate(-50%, -50px);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-50%, 100px);
-        opacity: 1;
-    }
-}
+.red { background: red; }
+.yellow { background: yellow; }
+.blue { background: blue; }
+.green { background: green; }
+.purple { background: purple; }
