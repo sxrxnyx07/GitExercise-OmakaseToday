@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+
+<div class="profile-container">
+
+    <!-- LEFT -->
+    <div class="profile-left">
+
+        <div class="profile-card">
+
+            <div class="profile-img-box">
+                <img src="{{ url_for('static', filename='default.png') }}">
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="profile-right">
+
+        <div class="info-card">
+
+            <h1>PROFILE</h1>
+
+            <form method="POST">
+                <div class="input-box">
+                    <label>Username</label>
+                    <input name="username" id="username" type="text"
+                        value="{{ username }}" disabled>
+                </div>
+                <div class="input-box">
+                    <label>Email</label>
+                    <input type="text" value="{{ email }}" disabled>
+                </div>
+                <div class="input-box">
+                    <label>Bio</label>
+                    <input name="bio" id="bio" type="text"
+                        value="{{ bio }}" disabled>
+                </div>
+                <div class="profile-buttons">
+
+                    <button type="button" class="edit-btn" onclick="enableEdit()">
+                        Edit Profile
+                    </button>
+
+                    <button type="submit" class="edit-btn" id="saveBtn" style="display:none;">
+                        Save
+                    </button>
+
+                </div>
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
