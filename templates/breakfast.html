@@ -31,32 +31,7 @@
     <img id="gachaImg" class="gacha-img fade-in"
          src="{{ url_for('static', filename='gacha1.png') }}">   <!-- GACHA IMAGE -->
 
-    <div class="balls-inside">
-        <div class="mini-ball red"></div>
-        <div class="mini-ball red"></div>
-        <div class="mini-ball red"></div>
-        <div class="mini-ball red"></div>
-
-
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-
-        <div class="mini-ball green"></div>
-        <div class="mini-ball green"></div>
-        <div class="mini-ball green"></div>
-        <div class="mini-ball green"></div>
-
-        <div class="mini-ball purple"></div>
-        <div class="mini-ball purple"></div>
-        <div class="mini-ball purple"></div>
-        <div class="mini-ball purple"></div>
-        <div class="mini-ball purple"></div>
-</div>
+    <div class="balls-inside" id="ballsInside"></div>
 
 </div>
 
@@ -80,30 +55,29 @@ let balls = document.querySelectorAll(".mini-ball");
 
 window.onload = function () {
 
-    let balls = document.querySelectorAll(".mini-ball");
-
-    let maxX = 70;
-    let maxY = 70;
+    const wrapper = document.getElementById("ballsInside");
 
     let colors = ["red","yellow","green","blue","purple"];
 
-    balls.forEach((ball, index) => {
+    let totalBalls = 20;
 
+    for (let i = 0; i < totalBalls; i++) {
+
+        let ball = document.createElement("div");
+        ball.classList.add("mini-ball");
+
+        // 🎨 random color
         let color = colors[Math.floor(Math.random() * colors.length)];
-        ball.className = "mini-ball " + color;
+        ball.classList.add(color);
 
-        let x = (Math.random() - 0.5) * 2 * maxX;
-        let y = (Math.random() - 0.5) * 2 * maxY;
+        // 📍 random location (limit in box)
+        let x = (Math.random() - 0.5) * 260;
+        let y = (Math.random() - 0.5) * 260;
 
-        let jitterX = (Math.random() - 0.5) * 10;
-        let jitterY = (Math.random() - 0.5) * 10;
+        ball.style.transform = `translate(${x}px, ${y}px)`;
 
-        ball.style.left = "50%";
-        ball.style.top = "50%";
-
-        ball.style.transform = `translate(${x + jitterX}px, ${y + jitterY}px)`;
-    });
-
+        wrapper.appendChild(ball);
+    }
 };
 
 function spin() {
