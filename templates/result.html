@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Result | Omakase Today</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS RESET */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            text-align: center;
+            padding: 20px;
+            color: #222;
+        }
+
+        .page-header {
+            margin: 40px auto 20px;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #111;
+        }
+
+        .header-subtext {
+            color: #444;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* --- INGREDIENT STYLES --- */
+        .kitchen-label-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .kitchen-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #ff9800;
+            border-bottom: 2px solid #ff9800;
+            padding-bottom: 5px;
+        }
+
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            padding: 10px;
+        }
+
+        .ingredient-pop {
+            background: #fff;
+            color: #111;
+            border: 2px solid #111;
+            padding: 10px 22px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 5px 5px 0px #ff9800;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: default;
+            text-transform: capitalize;
+        }
+
+        .ingredient-pop:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px #ff9800;
+        }
+
+        .star-icon {
+            color: #ff9800;
+            font-size: 1.2rem;
+        }
+
+        /* --- GRID & BOLD CARDS --- */
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 45px;
+            margin-top: 40px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 40px;
+        }
+
+        .recipe-card {
+            background: #fff;
+            border: 3px solid #111;
+            border-radius: 16px;
+            overflow: hidden;
+            text-align: left;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 8px 8px 0px #ff9800;
+        }
+
+        .recipe-card:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px #ff9800;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 230px;
+            overflow: hidden;
+            border-bottom: 3px solid #111;
+        }
+
+        .recipe-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        /* --- MODIFIED HEART (TOP RIGHT) --- */
+        .heart-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 38px;
+            color: white; /* Default white heart on image */
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            text-shadow: 0px 0px 8px rgba(0,0,0,0.8); /* Helps visibility on light images */
+        }
+
+        .heart-btn.saved {
+            color: #ff6b81; /* Pink when saved */
+        }
+
+        .card-meta {
+            padding: 20px;
+        }
+
+        .meal-category {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: #d32f2f;
+            letter-spacing: 2px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .recipe-title {
+            display: block;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 12px;
+            text-decoration: none;
+            line-height: 1.2;
+        }
+
+        .rating-stars {
+            color: #ff9800;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .rating-count {
+            color: #666;
+            font-size: 0.85rem;
+            margin-left: 6px;
+        }
+
+        /* --- MODIFIED MATCH BADGE (SOFT PILL) --- */
+        .match-badge {
+            display: inline-block;
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 10px; /* Rounded pill shape from your image */
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        /* Dynamic colors from reference */
+        .match-high { background-color: #e8f5e9; color: #2e7d32; } 
+        .match-mid { background-color: #fff8e1; color: #f57f17; }  
+        .match-low { background-color: #fce4ec; color: #c2185b; }  
+
+        .perfect-match {
+            background: #4caf50; 
+            color: white; 
+            width: 100%; 
+            text-align: center; 
+            margin-top: 15px;
+            border: 2px solid #111;
+            box-shadow: 3px 3px 0px #111;
+        }
+
+        .missing-info {
+            background-color: #fff3f3;
+            padding: 12px;
+            border-radius: 10px;
+            color: #d32f2f;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border: 2px solid #ffcccc;
+        }
+
+        .empty-container {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            margin: 0 auto;
+        }
+
+        .btn-return {
+            display: block;
+            width: fit-content;
+            margin: 60px auto;
+            padding: 18px 45px;
+            background-color: #ff9800;
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            border: 3px solid #111;
+            box-shadow: 6px 6px 0px #111;
+        }
+
+        .btn-return:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px #111;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <h1>🍳 Omakase Today</h1>
+        <p class="header-subtext">
+            <strong>Turn your leftovers into a masterpiece! ✨<br>
+            We've curated the perfect recipes based on what's in your kitchen right now.</strong>
+        </p>
+        
+        {% if selected %}
+            <div class="kitchen-label-wrapper">
+                <h2 class="kitchen-label">In Your Kitchen</h2>
+            </div>
+            <div class="tag-container">
+                {% for item in selected %}
+                    <div class="ingredient-pop">
+                        <span class="star-icon">★</span>
+                        {{ item }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="recipe-grid">
+        {% for r in results %}
+        <div class="recipe-card" onclick="window.location.href='/recipe/{{ r.id }}'">
+            <div class="image-container">
+                <button class="heart-btn" onclick="event.stopPropagation(); toggleSave(this);">❤</button>
+                {% if r.image and r.image.startswith('http') %}
+                    <img src="{{ r.image }}" alt="{{ r.name }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
+                {% endif %}
+            </div>
+            
+            <div class="card-meta">
+                <div class="meal-category">{{ r.meal_category|default('RECIPE') }}</div>
+                <a href="/recipe/{{ r.id }}" class="recipe-title">{{ r.name }}</a>
+                
+                <div class="rating-stars">
+                    ★ ★ ★ ★ ☆ 
+                    <span class="rating-count">(4.0)</span>
+                </div>
+
+                <div class="match-badge match-status" data-percent="{{ r.match }}">Match: {{ r.match }}%</div>
+                
+                {% if r.missing %}
+                    <div class="missing-info">
+                        <strong>Missing:</strong>
+                        <span class="missing-tags">{{ r.missing|join(', ') }}</span>
+                    </div>
+                {% else %}
+                    <p class="match-badge perfect-match">✨ PERFECT COMBO!</p>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-container">
+            <h3 style="font-size: 2.5rem; margin-bottom: 20px; color: #444;">No matches found! 😕</h3>
+            <p style="color: #666; font-size: 1.2rem;">Try removing some ingredients to see more results.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <a href="/" class="btn-return">⬅ Back to Search</a>
+
+    <script>
+        function toggleSave(button) {
+            button.classList.toggle('saved');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const badges = document.querySelectorAll('.match-status');
+            badges.forEach(badge => {
+                const percent = parseInt(badge.getAttribute('data-percent'));
+                if (percent >= 80) {
+                    badge.classList.add('match-high');
+                } else if (percent >= 50) {
+                    badge.classList.add('match-mid');
+                } else {
+                    badge.classList.add('match-low');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Omakase Today</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f9f9f9;
+            text-align: center;
+            margin: 0;
+            color: #222;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            font-size: 22px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            border-bottom: 2px solid #111;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            margin-top: 40px;
+            font-size: 2.5rem;
+        }
+
+        .search-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .search-box {
+            width: 450px;
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: 2px solid #111;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            box-shadow: 0px 4px 0px #111;
+        }
+
+        .suggestions-box {
+            position: absolute;
+            background: white;
+            width: 100%;
+            border: 2px solid #111;
+            border-top: none;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .suggestions-box div {
+            padding: 12px;
+            cursor: pointer;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .suggestions-box div:hover {
+            background: #ff9800;
+            color: white;
+        }
+
+        /* --- COMPACT SELECTED BOX --- */
+        .selected-box {
+            max-width: 600px;
+            margin: 15px auto 5px auto; /* Reduced bottom margin for the message */
+            padding: 10px;
+            min-height: auto; 
+            background: white;
+            border: 2px dashed #ff9800;
+            border-radius: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* --- LIMIT REMINDER TEXT --- */
+        #limitReminder {
+            display: none; /* Hidden by default */
+            color: #d32f2f;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        /* --- BLACK STICKER STYLE --- */
+        .selected-tag {
+             background: white;
+             color: black;
+             padding: 6px 14px;
+             font-size: 0.9rem;
+             border-radius: 10px;
+             font-weight: bold;
+             border: 2px solid #111;
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             gap: 8px;
+             transition: 0.2s;
+        }
+
+        .selected-tag span {
+            font-size: 1.1rem;
+            margin-left: 5px;
+        }
+
+        .selected-tag:hover {
+            background: white;
+            border-color: black;
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px #ff9800;
+        }
+
+        .btn {
+            margin-top: 15px;
+            padding: 15px 45px;
+            background: #ff9800;
+            color: white;
+            border: 2px solid #111;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 5px 5px 0px #111;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px #111;
+        }
+
+        /* --- ALPHABET NAV STYLE --- */
+        .letters { 
+            margin: 40px auto; 
+        }
+
+        .az-row { 
+            display: flex; 
+            justify-content: center; gap: 10px; margin: 10px 0; 
+        }
+        .letters a, .disabled {
+            width: 42px; 
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px; 
+            font-weight: bold; 
+            border: 2px solid #111;
+            text-decoration: none; 
+            transition: 0.2s;
+        }
+
+        .letters a { 
+            background: white; 
+            color: #111; 
+            box-shadow: 3px 3px 0px #ff9800; 
+        }
+
+        .letters a:hover { 
+            background: #ff9800; 
+            color: white; 
+            transform: translateY(-3px); 
+            box-shadow: 3px 6px 0px #111; 
+        }
+
+        .disabled { 
+            background: #eee; 
+            color: #bbb; 
+            border-color: #ccc; 
+            cursor: not-allowed;
+         }
+
+        /* --- LIST TAG STYLE --- */
+        .ingredient-section { 
+            max-width: 900px;
+            margin: 60px auto; 
+            text-align: left; 
+            padding: 0 20px; 
+        }
+
+        h2 { 
+            font-family: 'Montserrat', sans-serif; 
+            margin-top: 50px; font-size: 2rem; 
+            color: #111; 
+            border-bottom: 4px solid #ff9800; 
+            display: inline-block; 
+            margin-bottom: 25px; 
+        }
+
+        .tag-wrapper { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+        }
+
+        .tag { 
+            background: #fff; 
+            border: 2px solid #111; 
+            padding: 10px 20px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            font-size: 1rem; 
+            color: #111; 
+            box-shadow: 4px 4px 0px #eee; 
+            transition: all 0.2s ease; 
+            cursor: pointer; 
+        }
+        
+        .tag:hover { 
+            transform: translate(-2px, -2px); 
+            box-shadow: 5px 5px 0px #ff9800; 
+        }
+
+        html { 
+            scroll-behavior: smooth; 
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="header">🔍 Omakase Today</div>
+
+<h1>Find Recipes by Ingredients</h1>
+
+{% if error %}
+    <p style="color: #d32f2f; font-weight: bold;">{{ error }}</p>
+{% endif %}
+
+<form action="/search" method="POST">
+    <div class="search-container">
+        <input type="text" id="ingredientInput" class="search-box" onkeyup="filterSuggestions()" placeholder="Search ingredients (e.g. Chicken, Beef)...">
+        <div id="suggestions" class="suggestions-box"></div>
+    </div>
+
+    <div id="selectedBox" class="selected-box">
+        <span style="color: #999; font-style: italic;">No ingredients selected yet...</span>
+    </div>
+
+    <div id="limitReminder">⚠️ You can only select up to 5 ingredients.</div>
+
+    <input type="hidden" name="ingredients" id="hiddenInput">
+    <button class="btn" type="submit">Find Recipes ✨</button>
+</form>
+
+<div class="letters">
+    <div class="az-row">
+        {% for letter in alphabet[:13] %}
+            {% if letter in ingredients %}
+                <a href="#{{ letter }}">{{ letter }}</a>
+            {% else %}
+                <span class="disabled">{{ letter }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="az-row">
+        {% for letter in alphabet[13:] %}
+            {% if letter in ingredients %}
+                <a href="#{{ letter }}">{{ letter }}</a>
+            {% else %}
+                <span class="disabled">{{ letter }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<div class="ingredient-section">
+    {% for letter, items in ingredients.items() %}
+        <h2 id="{{ letter }}">{{ letter }}</h2>
+        <div class="tag-wrapper">
+            {% for item in items %}
+                <div class="tag" onclick="addIngredient('{{ item }}')"> {{ item }} </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    const ingredients = {{ all_ingredients|tojson }};
+    let selectedIngredients = [];
+
+    function addIngredient(item) {
+        if (selectedIngredients.includes(item)) return;
+
+        // CHECK LIMIT OF 5
+        if (selectedIngredients.length >= 5) {
+            document.getElementById("limitReminder").style.display = "block";
+            return;
+        }
+
+        selectedIngredients.push(item);
+        updateUI();
+        document.getElementById("ingredientInput").value = ""; 
+        
+        // Only scroll up if we're selecting from the list below
+        if (window.scrollY > 300) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function removeIngredient(item) {
+        selectedIngredients = selectedIngredients.filter(i => i !== item);
+        // Hide reminder when an item is removed
+        document.getElementById("limitReminder").style.display = "none";
+        updateUI();
+    }
+
+    function updateUI() {
+        let box = document.getElementById("selectedBox");
+        let hidden = document.getElementById("hiddenInput");
+        let reminder = document.getElementById("limitReminder");
+        
+        if (selectedIngredients.length === 0) {
+            box.innerHTML = '<span style="color: #999; font-style: italic;">No ingredients selected yet...</span>';
+        } else {
+            box.innerHTML = "";
+            selectedIngredients.forEach(item => {
+                let div = document.createElement("div");
+                div.className = "selected-tag";
+                let displayName = item.charAt(0).toUpperCase() + item.slice(1);
+                div.innerHTML = displayName + " <span>✕</span>";
+                div.onclick = () => removeIngredient(item);
+                box.appendChild(div);
+            });
+        }
+
+        // Show reminder if exactly 5 items are selected
+        reminder.style.display = (selectedIngredients.length >= 5) ? "block" : "none";
+        hidden.value = selectedIngredients.join(",");
+    }
+
+    function filterSuggestions() {
+        const inputElement = document.getElementById("ingredientInput");
+        let query = inputElement.value.toLowerCase();
+        let suggestionsBox = document.getElementById("suggestions");
+
+        suggestionsBox.innerHTML = "";
+        if (query === "") return;
+
+        const filtered = ingredients.filter(i => i.toLowerCase().startsWith(query));
+
+        filtered.forEach(item => {
+            let div = document.createElement("div");
+            div.innerHTML = item;
+            div.onclick = function() {
+                addIngredient(item);         
+                suggestionsBox.innerHTML = ""; 
+                inputElement.value = "";     
+            };
+            suggestionsBox.appendChild(div);
+        });
+    }
+</script>
+
+</body>
+</html>
