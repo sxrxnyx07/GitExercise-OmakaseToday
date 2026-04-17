@@ -30,6 +30,8 @@
     <img id="gachaImg" class="gacha-img fade-in"
      src="{{ url_for('static', filename='gacha.png') }}">
 
+    <div id="ball" class="ball"></div>
+
     <div class="machine-box">
 
         <div id="result">
@@ -48,14 +50,16 @@ function spin() {
     let resultBox = document.getElementById("result");
     let button = document.querySelector("button");
     let gachaImg = document.getElementById("gachaImg");
+    let ball = document.getElementById("ball"); 
 
     button.disabled = true;
 
     gachaImg.classList.add("spin");
-
     resultBox.innerText = "Spinning...";
 
     setTimeout(() => {
+
+        ball.classList.add("drop"); // ⭐ ball drop
 
         fetch('/random')
         .then(res => res.json())
@@ -68,10 +72,11 @@ function spin() {
                 resultBox.innerText = "You got: " + data.recipe;
 
                 gachaImg.classList.remove("spin");
+                ball.classList.remove("drop"); // reset
 
                 button.disabled = false;
 
-            }, 500);
+            }, 800);
 
         });
 
