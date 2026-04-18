@@ -191,6 +191,8 @@ button:active {
     transform: translateX(-50%);
 
     opacity: 0;
+
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.8);
 }
 
 .ball.drop {
@@ -251,6 +253,8 @@ button:active {
     top: 50%;
 
     transform: translate(var(--x), var(--y));
+
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.8);
 }
 
 @keyframes floatUp {
