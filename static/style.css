@@ -230,8 +230,15 @@ button:active {
     100% { transform: translateX(-50%) rotate(360deg); }
 }
 
-.spin-inside {
-    animation: shakeInside 0.3s infinite;
+.balls-inside {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.8s ease;
+}
+
+.balls-inside.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
 .mini-ball {
