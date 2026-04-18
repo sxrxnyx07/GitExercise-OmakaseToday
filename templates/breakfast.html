@@ -59,28 +59,50 @@ window.onload = function () {
 
     let colors = ["red","yellow","green","blue","purple"];
 
-    let totalBalls = 20;
+    // coordinate for balls
+    let positions = [
+        [-40, -40],
+        [0, -60],
+        [-20, 10],
+        [-50, -10],
+        [58, -47],
+        [-85, -15],
+        [-67, 13],
+        [-16, -20],
+        [10, 0],
+        [55, -10],
+        [37, 17],
+        [-40, 30],
+        [0, 35],
+        [20, -30],
+        [35, -80],
+        [-75, -50],
+        [-45, -75]
+    ];
 
-    for (let i = 0; i < totalBalls; i++) {
+    positions.forEach(pos => {
 
         let ball = document.createElement("div");
         ball.classList.add("mini-ball");
 
-        // 🎨 random color
         let color = colors[Math.floor(Math.random() * colors.length)];
         ball.classList.add(color);
 
-        // 📍 random location (limit in box)
-        let x = (Math.random() - 0.5) * 260;
-        let y = (Math.random() - 0.5) * 260;
-
-        ball.style.transform = `translate(${x}px, ${y}px)`;
+        ball.style.setProperty('--x', pos[0] + 'px');
+        ball.style.setProperty('--y', pos[1] + 'px');
 
         wrapper.appendChild(ball);
-    }
+    });
 };
 
 function spin() {
+
+    let miniBalls = document.querySelectorAll(".mini-ball");
+
+    miniBalls.forEach(b => {
+        b.classList.remove("fall-down");
+        b.classList.add("float-up");
+    });
 
     let resultBox = document.getElementById("result");
     let button = document.querySelector("button");
@@ -99,6 +121,11 @@ function spin() {
     resultBox.innerText = "Spinning...";
 
     setTimeout(() => {
+
+        miniBalls.forEach(b => {
+            b.classList.remove("float-up");
+            b.classList.add("fall-down");
+        });
 
         // ball come out via ramdom color
         let randomColor = colors[Math.floor(Math.random() * colors.length)];

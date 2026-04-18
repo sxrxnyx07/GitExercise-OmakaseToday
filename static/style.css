@@ -231,26 +231,35 @@ button:active {
 }
 
 .spin-inside {
-    animation: spinBalls 2s linear infinite;
+    animation: shakeInside 0.3s infinite;
 }
 
 .mini-ball {
-    width: 18px;
-    height: 18px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     position: absolute;
 
-    opacity: 0.9;   
+    left: 50%;
+    top: 50%;
+
+    transform: translate(var(--x), var(--y));
 }
 
-@keyframes shakeInside {
-    0% { transform: translate(-50%, 0); }
-    25% { transform: translate(-45%, 5px); }
-    50% { transform: translate(-55%, -5px); }
-    75% { transform: translate(-45%, 5px); }
-    100% { transform: translate(-50%, 0); }
+@keyframes floatUp {
+    0%   { transform: translate(var(--x), var(--y)); }
+    100% { transform: translate(var(--x), calc(var(--y) - 10px)); }
 }
 
-.spin-inside {
-    animation: shakeInside 0.3s infinite;
+@keyframes fallDown {
+    0%   { transform: translate(var(--x), calc(var(--y) - 10px)); }
+    100% { transform: translate(var(--x), var(--y)); }
+}
+
+.float-up {
+    animation: floatUp 0.5s ease forwards;
+}
+
+.fall-down {
+    animation: fallDown 0.5s ease forwards;
 }
