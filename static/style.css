@@ -195,7 +195,7 @@ button:active {
 
 .ball.drop {
     opacity: 1;
-    transform: translate(-50%, 60px);  
+    transform: translate(-50%, 40px);
     transition: all 0.5s ease;
 }
 
@@ -257,7 +257,7 @@ button:active {
 }
 
 .float-up {
-    animation: floatUp 0.5s ease forwards;
+    animation: floatUp 1.0s ease forwards;
 }
 
 .fall-down {

@@ -97,41 +97,45 @@ window.onload = function () {
 
 function spin() {
 
+    let ball = document.getElementById("ball");
     let miniBalls = document.querySelectorAll(".mini-ball");
-
-    miniBalls.forEach(b => {
-        b.classList.remove("fall-down");
-        b.classList.add("float-up");
-    });
 
     let resultBox = document.getElementById("result");
     let button = document.querySelector("button");
     let gachaImg = document.getElementById("gachaImg");
     let inside = document.querySelector(".balls-inside");
-    let ball = document.getElementById("ball");
 
     let colors = ["red","yellow","green","blue","purple"];
 
     button.disabled = true;
 
-    // start shake and spin inside
+    // ⭐ reset ONLY state 
+    ball.className = "ball";
+
+    // start animations
     gachaImg.classList.add("shake");
     inside.classList.add("spin-inside");
 
     resultBox.innerText = "Spinning...";
 
+    // ⭐ balls inside move up slightly
+    miniBalls.forEach(b => {
+        b.classList.remove("fall-down");
+        b.classList.add("float-up");
+    });
+
     setTimeout(() => {
 
+        // balls drop back
         miniBalls.forEach(b => {
             b.classList.remove("float-up");
             b.classList.add("fall-down");
         });
 
-        // ball come out via ramdom color
+        // ⭐ generate result ball
         let randomColor = colors[Math.floor(Math.random() * colors.length)];
-        ball.className = "ball " + randomColor;
 
-        // ball come out
+        ball.classList.add(randomColor);
         ball.classList.add("drop");
 
         fetch('/random')
@@ -140,14 +144,10 @@ function spin() {
 
             setTimeout(() => {
 
-                // show result
                 resultBox.innerText = "You got: " + data.recipe;
 
-                // stop animation
                 gachaImg.classList.remove("shake");
                 inside.classList.remove("spin-inside");
-
-                ball.classList.remove("drop");
 
                 button.disabled = false;
 
