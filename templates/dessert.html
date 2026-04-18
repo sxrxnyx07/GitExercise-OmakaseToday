@@ -31,32 +31,7 @@
     <img id="gachaImg" class="gacha-img fade-in"
          src="{{ url_for('static', filename='gacha1.png') }}">   <!-- GACHA IMAGE -->
 
-    <div class="balls-inside">
-        <div class="mini-ball red"></div>
-        <div class="mini-ball red"></div>
-        <div class="mini-ball red"></div>
-        <div class="mini-ball red"></div>
-        <div class="mini-ball red"></div>
-
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-        <div class="mini-ball yellow"></div>
-
-        <div class="mini-ball green"></div>
-        <div class="mini-ball green"></div>
-        <div class="mini-ball green"></div>
-        <div class="mini-ball green"></div>
-
-        <div class="mini-ball purple"></div>
-        <div class="mini-ball purple"></div>
-        <div class="mini-ball purple"></div>
-        <div class="mini-ball purple"></div>
-        <div class="mini-ball purple"></div>
-</div>
+    <div class="balls-inside" id="ballsInside"></div>
 
 </div>
 
@@ -75,62 +50,96 @@
 </div>
 
 <script>
-
+    
 let balls = document.querySelectorAll(".mini-ball");
 
 window.onload = function () {
 
-    let balls = document.querySelectorAll(".mini-ball");
-
-    let maxX = 70;
-    let maxY = 70;
+    const wrapper = document.getElementById("ballsInside");
 
     let colors = ["red","yellow","green","blue","purple"];
 
-    balls.forEach((ball, index) => {
+    // coordinate for balls
+    let positions = [
+        [-40, -40],
+        [0, -60],
+        [-20, 10],
+        [-50, -10],
+        [58, -47],
+        [-85, -15],
+        [-67, 13],
+        [-16, -20],
+        [10, 0],
+        [55, -10],
+        [37, 17],
+        [-40, 30],
+        [0, 35],
+        [20, -30],
+        [35, -80],
+        [-75, -50],
+        [-45, -75]
+    ];
+
+    positions.forEach(pos => {
+
+        let ball = document.createElement("div");
+        ball.classList.add("mini-ball");
 
         let color = colors[Math.floor(Math.random() * colors.length)];
-        ball.className = "mini-ball " + color;
+        ball.classList.add(color);
 
-        let x = (Math.random() - 0.5) * 2 * maxX;
-        let y = (Math.random() - 0.5) * 2 * maxY;
+        ball.style.setProperty('--x', pos[0] + 'px');
+        ball.style.setProperty('--y', pos[1] + 'px');
 
-        let jitterX = (Math.random() - 0.5) * 10;
-        let jitterY = (Math.random() - 0.5) * 10;
-
-        ball.style.left = "50%";
-        ball.style.top = "50%";
-
-        ball.style.transform = `translate(${x + jitterX}px, ${y + jitterY}px)`;
+        wrapper.appendChild(ball);
     });
+    setTimeout(() => {
+        wrapper.classList.add("show");
+    }, 100);
 
 };
 
 function spin() {
 
+    let ball = document.getElementById("ball");
+    let miniBalls = document.querySelectorAll(".mini-ball");
+
     let resultBox = document.getElementById("result");
     let button = document.querySelector("button");
     let gachaImg = document.getElementById("gachaImg");
     let inside = document.querySelector(".balls-inside");
-    let ball = document.getElementById("ball");
 
     let colors = ["red","yellow","green","blue","purple"];
 
     button.disabled = true;
 
-    // start shake and spin inside
+    // ⭐ reset ONLY state 
+    ball.className = "ball";
+
+    // start animations
     gachaImg.classList.add("shake");
     inside.classList.add("spin-inside");
 
     resultBox.innerText = "Spinning...";
 
+    // ⭐ balls inside move up slightly
+    miniBalls.forEach(b => {
+        b.classList.remove("fall-down");
+        b.classList.add("float-up");
+    });
+
     setTimeout(() => {
 
-        // ball come out via ramdom color
-        let randomColor = colors[Math.floor(Math.random() * colors.length)];
-        ball.className = "ball " + randomColor;
+        // balls drop back
+        miniBalls.forEach(b => {
+            b.classList.remove("float-up");
+            b.classList.add("fall-down");
+        });
 
-        // ball come out
+        // ⭐ generate result ball
+        let randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        ball.classList.add(randomColor);
         ball.classList.add("drop");
 
         fetch('/random')
@@ -139,14 +148,10 @@ function spin() {
 
             setTimeout(() => {
 
-                // show result
                 resultBox.innerText = "You got: " + data.recipe;
 
-                // stop animation
                 gachaImg.classList.remove("shake");
                 inside.classList.remove("spin-inside");
-
-                ball.classList.remove("drop");
 
                 button.disabled = false;
 
