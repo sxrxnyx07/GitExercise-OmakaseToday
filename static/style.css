@@ -199,11 +199,11 @@ button:active {
     transition: all 0.5s ease;
 }
 
-.red { background: red; }
-.yellow { background: yellow; }
-.blue { background: blue; }
-.green { background: green; }
-.purple { background: purple; }
+.red { background: rgb(255, 127, 116); }
+.yellow { background: rgb(255, 255, 118); }
+.blue { background: rgb(0, 225, 255); }
+.green { background: rgb(74, 255, 170); }
+.purple { background: rgb(255, 139, 255); }
 
 .machine-wrapper {
     position: relative;
