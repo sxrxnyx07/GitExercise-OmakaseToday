@@ -1,9 +1,15 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import random
 
 app = Flask(__name__)
 
-recipes = ["Pancake", "Spaghetti", "Fried Rice", "Chicken Rice"]
+recipes = {
+    "breakfast": ["🥐Toast🥪", "🥚Egg🍳", "🍚Congee🍲", "🥗Salad🥒", "🧇Pancake🥞"],
+    "lunch": ["🍛Rice🍚", "🍜Mihun🍜", "🍝Noodles🍝", "🍜Kuey Teow🍜", "🥟Wrap🌯"],
+    "dinner": ["🥩Protein🍖", "🍲Soup🍲", "🥕Vegetables🥦", "🥟Staple🍚"],
+    "dessert": ["🧁Cake🍰", "🍨Ice Cream🍦", "🍮Pudding🍮", "🍪Cookies🍪", "🥧Kuih🥮"],
+    "drinks": ["☕Caffeine Series☕", "🍵Tea Series🍵", "🍈Fresh Juice🍉", "🍋‍🟩Sparkling Drinks🍹", "❄️Blended Drinks🧊"]
+}
 
 @app.route('/')
 def home():
@@ -39,9 +45,15 @@ def drinks():
 
 @app.route('/random')
 def get_random_recipe():
-    return jsonify({
-        "recipe": random.choice(recipes)
-    })
+
+    category = request.args.get('category')
+
+    if category in recipes:
+        recipe = random.choice(recipes[category])
+    else:
+        recipe = "No recipe found"
+
+    return jsonify({"recipe": recipe})
 
 if __name__ == '__main__':
     app.run(debug=True)
