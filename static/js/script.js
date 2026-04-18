@@ -156,8 +156,39 @@ document.querySelectorAll("input").forEach(input => {
     })
 })
 
+const pages = [
+    document.getElementById("s1"),
+    document.getElementById("s2"),
+    document.getElementById("s3")
+]
 
+let currentPage = 0;
 
+function nextPage(){
+    if (currentPage < pages.length){
+        pages[currentPage].classList.add("flipped")
+        currentPage++
+    }
+}
 
+function prevPage(){
+    if (currentPage > 0){
+        currentPage--
+        pages[currentPage].classList.remove("flipped")
+    }
+}
+let autoFlip = setInterval(() => {
 
+    if (currentPage < pages.length){
+        nextPage()
+    } else {
+        // back to first page
+        while(currentPage > 0){
+            prevPage()
+        }
+    }
 
+}, 10000)
+function goLogin(){
+    window.location.href = "/login"
+}
