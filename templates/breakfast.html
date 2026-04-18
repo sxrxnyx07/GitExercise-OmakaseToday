@@ -39,6 +39,8 @@
 
     <div class="machine-box">
 
+    <div id="warningMsg" class="warning-msg"></div>
+
         <div id="result">
             Click spin to get your recipe 🍽️
         </div>
@@ -50,6 +52,8 @@
 </div>
 
 <script>
+
+    let isSpinning = false;
     
 let balls = document.querySelectorAll(".mini-ball");
 
@@ -101,6 +105,8 @@ window.onload = function () {
 
 function spin() {
 
+    let warningMsg = document.getElementById("warningMsg");
+
     let ball = document.getElementById("ball");
     let miniBalls = document.querySelectorAll(".mini-ball");
 
@@ -111,7 +117,13 @@ function spin() {
 
     let colors = ["red","yellow","green","blue","purple"];
 
-    button.disabled = true;
+    if (isSpinning) {
+        warningMsg.innerText = "⚠️ Please wait, the machine is spinning... ";
+        return;
+    }
+
+    isSpinning = true;
+    warningMsg.innerText = "";
 
     // ⭐ reset ONLY state 
     ball.className = "ball";
@@ -148,12 +160,12 @@ function spin() {
 
             setTimeout(() => {
 
+                isSpinning = false;
+                warningMsg.innerText = "";
                 resultBox.innerText = "You got: " + data.recipe;
 
                 gachaImg.classList.remove("shake");
                 inside.classList.remove("spin-inside");
-
-                button.disabled = false;
 
             }, 500);
 

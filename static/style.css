@@ -274,3 +274,14 @@ button:active {
 .fall-down {
     animation: fallDown 0.5s ease forwards;
 }
+
+.warning-msg {
+    min-height: 20px;
+    margin-bottom: 10px;
+    color: red;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+
+    display: block;   
+}
