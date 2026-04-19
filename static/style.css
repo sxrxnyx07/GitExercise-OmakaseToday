@@ -79,6 +79,17 @@ body {
     color: #333;
 }
 
+.result-hint {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #225e81; 
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    text-align: center;
+    font-style: italic;
+}
+
 /* spin button */
 button {
     padding: 12px 28px;

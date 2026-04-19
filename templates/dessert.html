@@ -45,6 +45,10 @@
             Click spin to get your recipe 🍽️
         </div>
 
+        <div id="resultHint" class="result-hint">
+            Want more? Try spin again~
+        </div>
+
         <button onclick="spin()">SPIN 🎲</button>
 
     </div>
@@ -105,6 +109,8 @@ window.onload = function () {
 
 function spin() {
 
+    document.getElementById("resultHint").style.opacity = 0;
+
     let warningMsg = document.getElementById("warningMsg");
 
     let ball = document.getElementById("ball");
@@ -163,6 +169,8 @@ function spin() {
                 isSpinning = false;
                 warningMsg.innerText = "";
                 resultBox.innerText = "You got: " + data.recipe;
+
+                document.getElementById("resultHint").style.opacity = 1;
 
                 gachaImg.classList.remove("shake");
                 inside.classList.remove("spin-inside");
