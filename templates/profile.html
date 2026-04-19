@@ -14,7 +14,19 @@
         <div class="profile-card">
 
             <div class="profile-img-box">
-                <img src="{{ url_for('static', filename='default.png') }}">
+                <img src="{{ url_for('static', filename='uploads/' + profile_pic) if profile_pic else url_for('static', filename='uploads/default.png') }}">
+
+                <form action="/upload-profile-pic" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="image" id="fileInput" accept="image/*" hidden>
+                    <label for="fileInput" class="upload-btn">
+                        Choose Photo
+                    </label>
+
+                    <button type="submit" class="upload-submit">
+                        Upload
+                    </button>
+
+                </form>
             </div>
 
         </div>
@@ -25,8 +37,6 @@
     <div class="profile-right">
 
         <div class="info-card">
-
-            <h1>PROFILE</h1>
 
             <form method="POST">
                 <div class="input-box">
@@ -63,5 +73,34 @@
     </div>
 
 </div>
+<section class="saved-rituals">
+
+    <!-- Header -->
+    <div class="rituals-header">
+        <h2>Saved Rituals</h2>
+        <a href="#" class="view-all">View all</a>
+    </div>
+
+    <!-- Grid -->
+    <div class="rituals-grid">
+
+        <div class="ritual-card">
+            <img src="{{ url_for('static', filename='css/picture/f1.jpg') }}">
+            <h3>Sweet Apples Squares</h3>
+        </div>
+
+        <div class="ritual-card">
+            <img src="{{ url_for('static', filename='css/picture/f2.jpg') }}">
+            <h3>Chicken Adobo</h3>
+        </div>
+
+        <div class="ritual-card">
+            <img src="{{ url_for('static', filename='css/picture/f3.jpg') }}">
+            <h3>Cinanamon Chicken Curry</h3>
+        </div>
+
+    </div>
+
+</section>
 
 {% endblock %}

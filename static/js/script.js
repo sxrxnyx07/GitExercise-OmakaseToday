@@ -1,5 +1,4 @@
 const page = document.body.dataset.page || ""
-
 const form = document.getElementById('form')
 const username_input = document.getElementById('username-input')
 const email_input = document.getElementById('email-input')
@@ -111,40 +110,77 @@ function getSignupFormErrors(username, email, password, repeat, emailExists) {
 }
 
 // =========================
-// EMAIL CHECK REGISTER ONLY
+// EMAIL CHECK (ONLY UI WARNING)
 // =========================
 if (page === "register" && email_input) {
 
-    let timeout
+    let timeout;
 
-    email_input.addEventListener('input', () => {
+    email_input.addEventListener("input", () => {
 
-        clearTimeout(timeout)
+        clearTimeout(timeout);
 
         timeout = setTimeout(async () => {
 
-            const email = email_input.value.trim()
+            const email = email_input.value.trim();
 
             if (!email) {
-                emailExists = false
-                return
+                emailExists = false;
+                error_message.innerText = "";
+                return;
             }
 
-            const res = await fetch(`/check-email?email=${email}`)
-            const data = await res.json()
+            const res = await fetch(`/check-email?email=${email}`);
+            const data = await res.json();
 
-            emailExists = data.exists
+            emailExists = data.exists;
 
             if (emailExists) {
-                error_message.innerText = "This email is already registered!"
+                error_message.innerText = "⚠ This email is already registered";
+                error_message.style.color = "red";
             } else {
-                if (error_message.innerText === "This email is already registered!") {
-                    error_message.innerText = ""
-                }
+                error_message.innerText = "";
             }
 
-        }, 300)
-    })
+        }, 300);
+    });
+}
+
+// =========================
+// ONLY FRONTEND VALIDATION (NOT BLOCK SUBMIT)
+// =========================
+if (form) {
+    form.addEventListener("submit", (e) => {
+
+        let errors = [];
+
+        if (!username_input.value) errors.push("Username required");
+        if (!email_input.value) errors.push("Email required");
+        if (!password_input.value) errors.push("Password required");
+
+        if (password_input.value !== repeat_password_input.value) {
+            errors.push("Passwords do not match");
+        }
+
+        if (errors.length > 0) {
+            e.preventDefault();
+            error_message.innerText = errors.join("\n");
+        }
+    });
+}
+function enableEdit() {
+    const username = document.getElementById("username")
+    const bio = document.getElementById("bio")
+    const saveBtn = document.getElementById("saveBtn")
+
+    if (username && bio) {
+        username.disabled = false
+        bio.disabled = false
+    }
+
+    if (saveBtn) {
+        saveBtn.style.display = "inline-block"
+    }
 }
 
 // =========================
@@ -191,4 +227,31 @@ let autoFlip = setInterval(() => {
 }, 10000)
 function goLogin(){
     window.location.href = "/login"
+}
+
+function slideLeft() {
+    document.getElementById("slider").scrollBy({
+        left: -220,
+        behavior: "smooth"
+    });
+}
+
+function slideRight() {
+    document.getElementById("slider").scrollBy({
+        left: 220,
+        behavior: "smooth"
+    });
+}
+function showSidebar() {
+    const sidebar = document.querySelector(".sidebar")
+    if (sidebar) {
+        sidebar.style.display = "flex"
+    }
+}
+
+function hideSidebar() {
+    const sidebar = document.querySelector(".sidebar")
+    if (sidebar) {
+        sidebar.style.display = "none"
+    }
 }

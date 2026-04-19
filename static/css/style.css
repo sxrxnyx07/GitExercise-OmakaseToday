@@ -4,10 +4,10 @@
 *{
   margin: 0;
   padding: 0;
+  font-family: 'DM Serif Display', serif;
 }
 
 html{
-  font-family: "Supermercado One", sans-serif;
   text-align: center;
 }
 
@@ -405,25 +405,25 @@ LAST PAGE BUTTON
 ========================= */
 .profile-container{
     display: flex;
-    min-height: 100vh;
+    max-width: 1200px;  
+    margin: 20px 20px;   
+    justify-content: flex-start; 
+    gap: 1px; 
 }
 
 /* LEFT */
 .profile-left{ 
-    width: 40%; 
+    width: 400px; 
     display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    background: rgba(255,255,255,0.2); 
+    background: rgba(255,255,255,0.2);
 }
 /* CARD around image */ 
 .profile-card{ 
     width: 420px; 
-    height: 500px;
-    background: rgba(255,255,255,0.9); 
-    backdrop-filter: blur(15px); 
+    height: 300px;
+    background: rgba(255, 255, 255, 0.192); 
+    backdrop-filter: blur(100px); 
     border-radius: 25px; 
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15); 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
@@ -432,53 +432,65 @@ LAST PAGE BUTTON
     position: relative; 
 }
 .profile-img-box img{ 
-    width: 180px; 
-    height: 180px; 
+    width: 200px; 
+    height: 200px; 
     border-radius: 50%; 
     object-fit: cover; 
     border: 4px solid #f4c542; 
 }
 .profile-buttons{
-    margin-top: 20px;
+    margin-top: 10px;
     display: flex;
-    gap: 10px;
+    justify-content: flex-end;
 }
-.upload-circle{ 
-    position: absolute; 
-    bottom: 250px; 
-    right: 185px; 
-    width: 50px; 
-    height: 50px; 
-    background: black; 
-    color: white; 
-    border-radius: 50%; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    cursor: pointer; 
-    font-size: 28px; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+.upload-btn{
+    display: inline-block;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #000, #333);
+    color: #fff;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    margin-top: 10px;
 }
-/* text under upload */ 
-.upload-text{ 
-    font-size: 12px; 
-    color: gray; 
+
+.upload-btn:hover{
+    background: linear-gradient(135deg, #d62828, #ff4d4d);
+    transform: translateY(-2px);
+}
+
+.upload-submit{
+    margin-top: 10px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 25px;
+    background: #f4c542;
+    color: black;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.upload-submit:hover{
+    background: #ffcc00;
+    transform: translateY(-2px);
 }
 
 /* RIGHT SIDE */ 
 .profile-right{ 
-    width: 60%; 
+    flex: 1;
     display: flex; 
-    justify-content: center; 
-    align-items: center; 
 }
 .info-card{
-    width: 480px;
+    height: 220px;
+    width: 1000px;
     padding: 40px;
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(15px);
+    background: rgba(255, 255, 255, 0.192); 
+    backdrop-filter: blur(100px); 
     border-radius: 25px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     text-align: left;
 }
 
@@ -494,8 +506,7 @@ LAST PAGE BUTTON
 }
 
 .edit-btn{
-    width: 100%;
-    margin-top: 10px;
+    width: 200px;
     padding: 12px;
     background: linear-gradient(135deg, #000, #333);
     color: #bbb074;
@@ -513,6 +524,9 @@ LAST PAGE BUTTON
 }
 .input-box{
     margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .input-box label{
@@ -548,12 +562,73 @@ LAST PAGE BUTTON
     color: #888; 
     cursor: not-allowed; 
 }
+/* SECTION */
+.saved-rituals{
+    margin: 50px auto;
+    width: 90%;
+}
+
+/* HEADER */
+.rituals-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.rituals-header h2{
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.view-all{
+    text-decoration: none;
+    color: #d94f4f;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.view-all:hover{
+    text-decoration: underline;
+}
+
+/* GRID */
+.rituals-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+/* CARD */
+.ritual-card{
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: 0.3s;
+    text-align: center;
+}
+
+.ritual-card:hover{
+    transform: translateY(-5px);
+}
+
+.ritual-card img{
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.ritual-card h3{
+    padding: 10px;
+    font-size: 1rem;
+}
 
 /* =========================
    HOME PAGE
 ========================= */
 .home-container {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -565,7 +640,6 @@ LAST PAGE BUTTON
     font-size: 3.5rem;
     font-weight: 900;
     margin-bottom: 40px;
-    font-family: 'Fredoka', sans-serif;
 }
 
 .home-title span {
@@ -627,4 +701,124 @@ LAST PAGE BUTTON
 
 .menu-btn:hover {
     transform: scale(1.05);
+}
+.recipe-slider {
+    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+    background: rgb(255, 238, 163);
+    padding: 30px 10px;
+}
+.recipe-slider h2 {
+    margin-bottom: 20px;
+}
+
+.slider-container {
+    position: relative;
+    overflow: hidden;
+    
+}
+
+.slider {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+}
+.slider::-webkit-scrollbar {
+    display: none;
+}
+
+
+.home-card {
+    min-width: 300px;  
+    max-width: 300px;
+    flex-shrink: 0;
+    background: white;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.home-card:hover{
+    transform: translateY(-5px);
+}
+
+.home-card img {
+    width: 100%;
+    height: 200px;        
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.slide-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+}
+
+.slide-btn.left {
+    left: 10px;
+}
+
+.slide-btn.right {
+    right: 10px;
+}
+.card-img-wrapper {
+    position: relative;
+}
+
+.saved-tag {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+.feature-section {
+    margin: 40px auto 100px;
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+}
+
+.feature-card {
+    width: 220px;
+    background: white;
+    border-radius: 15px;
+    padding: 20px 20px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+.feature-card img{
+    max-width: 100px;
+    max-height: 100px;
+}
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card h3 {
+    margin-bottom: 10px;
+}
+
+.feature-card p {
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.feature-card a {
+    text-decoration: none;
+    font-weight: bold;
 }

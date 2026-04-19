@@ -3,7 +3,7 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap" rel="stylesheet">
 <div class="home-container">
 
     <h1 class="home-title">
@@ -18,5 +18,90 @@
     <a href="#" class="menu-btn">Access Menu →</a>
 
 </div>
+<div class="recipe-slider">
+
+    <h2>Popular Picks🔥</h2>
+
+    <div class="slider-container">
+
+        <div class="slider" id="slider">
+        
+            <div class="home-card">
+                <div class="card-img-wrapper">
+                    <img src="{{ url_for('static', filename='css/picture/f1.jpg') }}">
+                    <div class="saved-tag">💾 120 saved</div>
+                </div>
+                <p>Sweet Apples Squares</p>
+            </div>
+
+            <div class="home-card">
+                <div class="card-img-wrapper">
+                    <img src="{{ url_for('static', filename='css/picture/f2.jpg') }}">
+                    <div class="saved-tag">💾 70 saved</div>
+                </div>
+                <p>Chicken Adobo</p>
+            </div>
+
+            <div class="home-card">
+                <div class="card-img-wrapper">
+                    <img src="{{ url_for('static', filename='css/picture/f3.jpg') }}">
+                    <div class="saved-tag">💾 10 saved</div>
+                </div>
+                <p>Cinanamon Chicken Curry</p>
+            </div>
+            <div class="home-card">
+                <div class="card-img-wrapper">
+                    <img src="{{ url_for('static', filename='css/picture/f4.jpg') }}">
+                    <div class="saved-tag">💾 90 saved</div>
+                </div>
+                <p>Chickpea stew</p>
+            </div>
+            <div class="home-card">
+                <div class="card-img-wrapper">
+                    <img src="{{ url_for('static', filename='css/picture/f5.jpg') }}">
+                    <div class="saved-tag">💾 70 saved</div>
+                </div>
+                <p>Rainbow Salad</p>
+            </div>
+            <div class="home-card">
+                <div class="card-img-wrapper">
+                    <img src="{{ url_for('static', filename='css/picture/f5.jpg') }}">
+                    <div class="saved-tag">💾 70 saved</div>
+                </div>
+                <p>Avocado Toast</p>
+            </div>
+        </div>
+        <button class="slide-btn left" onclick="slideLeft()">‹</button>
+        <button class="slide-btn right" onclick="slideRight()">›</button>
+
+    </div>
+
+</div>
+<div class="feature-section">
+
+    <div class="feature-card">
+        <img src="{{ url_for('static', filename='css/picture/ingredients.jpg') }}">
+        <h3>Ingredients</h3>
+        <p>Find recipes based on what you have</p>
+        <a href="#">Try Now →</a>
+    </div>
+
+    <div class="feature-card">
+        <img src="{{ url_for('static', filename='css/picture/gacha.png') }}">
+        <h3>Spin</h3>
+        <p>Let us decide for you</p>
+        <a href="#">Spin Now →</a>
+    </div>
+
+    <div class="feature-card">
+        <img src="{{ url_for('static', filename='css/picture/search.jpg') }}">
+        <h3>Search</h3>
+        <p>Search for your favorite meals</p>
+        <a href="#">Explore →</a>
+    </div>
+
+</div>
+
+
 {% endblock %}
 
