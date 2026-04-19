@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Recipes{% endblock %}
+
+{% block content %}
+
+<div class="admin-recipes-wrapper">
+
+    <h1 class="admin-title">Manage Recipes</h1>
+
+    <!-- ADD FORM -->
+    <form action="/admin/recipes/add" method="POST" class="add-form">
+
+        <input type="text" name="title" placeholder="Enter recipe name..." required>
+
+        <button type="submit">Add Recipe</button>
+
+    </form>
+
+    <!-- TABLE -->
+    <table class="recipes-table">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Recipe Title</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for r in recipes %}
+            <tr>
+                <td>{{ r[0] }}</td>
+                <td>{{ r[1] }}</td>
+                <td>
+                    <a href="/admin/recipes/delete/{{ r[0] }}"
+                       class="delete-btn"
+                       onclick="return confirm('Delete this recipe?')">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
+
+
+

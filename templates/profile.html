@@ -62,7 +62,14 @@
                     <button type="submit" class="edit-btn" id="saveBtn" style="display:none;">
                         Save
                     </button>
-
+                    {% if role == 'admin' %}
+                    <a href="/admin" class="admin-access-btn">
+                        Admin Page
+                    </a>
+                    {% endif %}
+                    <a href="/logout" class="logout-btn">
+                        Logout
+                    </a>
                 </div>
 
             </form>

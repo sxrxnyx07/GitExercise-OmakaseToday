@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="admin-dashboard">
+
+    <h1 class="admin-title">Admin Dashboard</h1>
+
+    <!-- TOP: USERS -->
+    <div class="admin-section">
+
+        <div class="section-header">
+            <h2>Recent Users</h2>
+            <a href="/admin/users" class="manage-btn">Manage Users</a>
+        </div>
+
+        <div class="card-grid">
+
+            {% for user in recent_users %}
+            <div class="mini-card">
+                <p><b>{{ user[1] }}</b></p>
+                <p class="muted">{{ user[0] }}</p>
+                <span class="badge">{{ user[2] }}</span>
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM: RECIPES -->
+    <div class="admin-section">
+
+        <div class="section-header">
+            <h2>Recent Recipes</h2>
+            <a href="/admin/recipes" class="manage-btn">Manage Recipes</a>
+        </div>
+
+        <div class="card-grid">
+
+            {% for r in recent_recipes %}
+            <div class="mini-card">
+                <p><b>{{ r[0] }}</b></p>
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+

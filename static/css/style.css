@@ -822,3 +822,285 @@ LAST PAGE BUTTON
     text-decoration: none;
     font-weight: bold;
 }
+/* =========================
+   ADMIN DASHBOARD LAYOUT
+========================= */
+
+.admin-dashboard{
+    width: 90%;
+    margin: 50px auto;
+}
+
+.admin-title{
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    color: #d94f4f;
+}
+
+/* SECTION */
+.admin-section{
+    margin-bottom: 50px;
+}
+
+/* HEADER */
+.section-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-header h2{
+    font-size: 1.4rem;
+}
+
+/* BUTTON */
+.manage-btn{
+    padding: 8px 16px;
+    background: black;
+    color: white;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.manage-btn:hover{
+    background: #d94f4f;
+}
+
+/* GRID */
+.card-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+/* MINI CARD */
+.mini-card{
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: 0.2s;
+}
+
+.mini-card:hover{
+    transform: translateY(-5px);
+}
+
+.muted{
+    font-size: 0.85rem;
+    color: #777;
+}
+
+/* ROLE BADGE */
+.badge{
+    display: inline-block;
+    margin-top: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    background: #eee;
+}
+
+
+/* =========================
+   ADMIN USERS TABLE 
+========================= */
+
+.admin-users-wrapper{
+    width: 90%;
+    margin: 60px auto;
+    text-align: center;
+}
+
+.users-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* HEADER */
+.users-table thead{
+    background: #f4c542;
+    color: black;
+}
+
+.users-table th{
+    padding: 15px;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+/* ROWS */
+.users-table td{
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+/* hover effect */
+.users-table tbody tr{
+    transition: 0.2s;
+}
+
+.users-table tbody tr:hover{
+    background: #fff8dc;
+    transform: scale(1.01);
+}
+
+/* ROLE BADGE */
+.role-badge{
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* user */
+.role-badge.user{
+    background: #e0e0e0;
+    color: #333;
+}
+
+/* admin */
+.role-badge.admin{
+    background: #d94f4f;
+    color: white;
+}
+
+/* DELETE BUTTON */
+.delete-btn{
+    padding: 6px 12px;
+    background: red;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: 0.2s;
+}
+
+.delete-btn:hover{
+    background: darkred;
+    transform: scale(1.05);
+}
+/* =========================
+   ADMIN RECIPES PAGE
+========================= */
+
+.admin-recipes-wrapper{
+    width: 90%;
+    margin: 50px auto;
+    text-align: center;
+}
+
+/* ADD FORM */
+.add-form{
+    margin-bottom: 20px;
+}
+
+.add-form input{
+    padding: 10px;
+    width: 250px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.add-form button{
+    padding: 10px 15px;
+    border: none;
+    background: black;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.add-form button:hover{
+    background: #d94f4f;
+}
+
+/* TABLE */
+.recipes-table{
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+.recipes-table th{
+    background: #f4c542;
+    padding: 12px;
+}
+
+.recipes-table td{
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* hover */
+.recipes-table tr:hover{
+    background: #fff8dc;
+}
+
+/* DELETE */
+.delete-btn{
+    padding: 6px 12px;
+    background: red;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.delete-btn:hover{
+    background: darkred;
+}
+/* =========================
+   ADMIN ACCESS BUTTON
+========================= */
+
+.admin-access-btn{
+    display: inline-block;
+    padding: 12px 18px;
+    background: #d94f4f;
+    color: white;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 10px;
+    transition: 0.3s;
+}
+
+.admin-access-btn:hover{
+    background: #000;
+    transform: translateY(-2px);
+}
+/* =========================
+   LOGOUT BUTTON
+========================= */
+
+.logout-btn{
+    display: inline-block;
+    padding: 12px 18px;
+    background: #444;
+    color: white;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 10px;
+    transition: 0.3s;
+}
+
+.logout-btn:hover{
+    background: red;
+    transform: translateY(-2px);
+}
