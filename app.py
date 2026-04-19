@@ -6,14 +6,13 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# --- 1. DATABASE CONFIGURATION ---
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'omakase.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# --- 2. DATABASE MODEL ---
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
@@ -26,13 +25,12 @@ class Recipe(db.Model):
     meal_category = db.Column(db.String(50))
     flavor_type = db.Column(db.String(50))
 
-# --- 3. ROUTES ---
 
 @app.route("/")
 def home():
     all_recipes = Recipe.query.all()
     
-    # Initialize dictionary with all letters
+  
     ingredients_dict = {char: [] for char in string.ascii_uppercase}
     all_names_flat = set()
 
@@ -47,11 +45,10 @@ def home():
                             ingredients_dict[first_letter].append(name)
                             all_names_flat.add(name)
 
-    # --- THE FIX: Remove letters that have 0 ingredients ---
-    # This ensures that empty letters don't show up as 'active' in your HTML
+ 
     active_ingredients = {k: v for k, v in ingredients_dict.items() if len(v) > 0}
 
-    # Sort the lists for the active letters
+  
     for char in active_ingredients:
         active_ingredients[char].sort()
     
@@ -85,6 +82,7 @@ def search():
                     "id": recipe.id,
                     "name": recipe.name,
                     "image": recipe.image,
+                    "rating": recipe.rating,
                     "match": percent,
                     "missing": missing[:5]
                 })
