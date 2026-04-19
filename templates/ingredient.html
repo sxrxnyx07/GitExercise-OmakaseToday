@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Omakase Today</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="header">🔍 Omakase Today</div>
+
+<h1>Find Recipes by Ingredients</h1>
+
+{% if error %}
+    <p style="color: #d32f2f; font-weight: bold;">{{ error }}</p>
+{% endif %}
+
+
+<form action="/search" method="POST" onsubmit="return validateForm()">
+
+    <div class="search-container">
+        <input type="text" id="ingredientInput" class="search-box" onkeyup="filterSuggestions()" placeholder="Search ingredients (e.g. Chicken, Beef)...">
+        <div id="suggestions" class="suggestions-box"></div>
+    </div>
+
+    <div id="selectedBox" class="selected-box">
+        <span style="color: #999; font-style: italic;">No ingredients selected yet...</span>
+    </div>
+
+    
+    <div id="limitReminder"></div>
+
+    <input type="hidden" name="ingredients" id="hiddenInput">
+    <button class="btn" type="submit">Find Recipes</button>
+</form>
+
+
+<div class="letters">
+    <div class="az-row">
+        {% for letter in alphabet[:13] %}
+            {% if letter in ingredients %}
+                <a href="#{{ letter }}">{{ letter }}</a>
+            {% else %}
+                <span class="disabled">{{ letter }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="az-row">
+        {% for letter in alphabet[13:] %}
+            {% if letter in ingredients %}
+                <a href="#{{ letter }}">{{ letter }}</a>
+            {% else %}
+                <span class="disabled">{{ letter }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+
+<div class="ingredient-section">
+    {% for letter, items in ingredients.items() %}
+        <h2 id="{{ letter }}">{{ letter }}</h2>
+        <div class="tag-wrapper">
+            {% for item in items %}
+                <div class="tag" onclick="addIngredient('{{ item }}')">
+                    {{ item }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    const ingredients = {{ all_ingredients|tojson }};
+    let selectedIngredients = [];
+
+    function addIngredient(item) {
+        if (selectedIngredients.includes(item)) return;
+
+        if (selectedIngredients.length >= 5) {
+            const reminder = document.getElementById("limitReminder");
+            reminder.innerText = "⚠️ You can only select up to 5 ingredients.";
+            reminder.style.display = "block";
+            return;
+        }
+
+        selectedIngredients.push(item);
+        updateUI();
+        document.getElementById("ingredientInput").value = "";
+
+        if (window.scrollY > 300) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function removeIngredient(item) {
+        selectedIngredients = selectedIngredients.filter(i => i !== item);
+        updateUI();
+    }
+
+    function updateUI() {
+        let box = document.getElementById("selectedBox");
+        let hidden = document.getElementById("hiddenInput");
+        let reminder = document.getElementById("limitReminder");
+
+        if (selectedIngredients.length === 0) {
+            box.innerHTML = '<span style="color: #999; font-style: italic;">No ingredients selected yet...</span>';
+        } else {
+            box.innerHTML = "";
+            selectedIngredients.forEach(item => {
+                let div = document.createElement("div");
+                div.className = "selected-tag";
+
+                let displayName = item.charAt(0).toUpperCase() + item.slice(1);
+
+                div.innerHTML = displayName + " <span>✕</span>";
+                div.onclick = () => removeIngredient(item);
+
+                box.appendChild(div);
+            });
+        }
+
+        reminder.style.display = "none"; 
+        hidden.value = selectedIngredients.join(",");
+    }
+
+    function filterSuggestions() {
+        const inputElement = document.getElementById("ingredientInput");
+        let query = inputElement.value.toLowerCase();
+        let suggestionsBox = document.getElementById("suggestions");
+
+        suggestionsBox.innerHTML = "";
+        if (query === "") return;
+
+        const filtered = ingredients.filter(i => i.toLowerCase().startsWith(query));
+
+        filtered.forEach(item => {
+            let div = document.createElement("div");
+            div.innerHTML = item;
+
+            div.onclick = function() {
+                addIngredient(item);
+                suggestionsBox.innerHTML = "";
+                inputElement.value = "";
+            };
+
+            suggestionsBox.appendChild(div);
+        });
+    }
+
+
+    function validateForm() {
+        if (selectedIngredients.length === 0) {
+            const reminder = document.getElementById("limitReminder");
+            reminder.innerText = "⚠️ Please select at least 1 ingredient before searching!";
+            reminder.style.display = "block";
+            return false; 
+        }
+        return true;
+    }
+</script>
+
+</body>
+</html>

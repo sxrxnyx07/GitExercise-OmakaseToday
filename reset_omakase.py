@@ -7,7 +7,7 @@ def reset_db():
         db.drop_all()
         db.create_all()
         
-        # Point EXACTLY to the name you just saved
+
         target_file = 'master_recipes.csv' 
         
         try:

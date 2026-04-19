@@ -1,4 +1,3 @@
-
 import os
 import string
 from flask import Flask, render_template, request, url_for
@@ -25,12 +24,10 @@ class Recipe(db.Model):
     meal_category = db.Column(db.String(50))
     flavor_type = db.Column(db.String(50))
 
-
 @app.route("/")
 def home():
     all_recipes = Recipe.query.all()
     
-  
     ingredients_dict = {char: [] for char in string.ascii_uppercase}
     all_names_flat = set()
 
@@ -45,17 +42,15 @@ def home():
                             ingredients_dict[first_letter].append(name)
                             all_names_flat.add(name)
 
- 
     active_ingredients = {k: v for k, v in ingredients_dict.items() if len(v) > 0}
 
-  
     for char in active_ingredients:
         active_ingredients[char].sort()
     
     alphabet = list(string.ascii_uppercase)
     sorted_flat_list = sorted(list(all_names_flat))
 
-    return render_template("index.html", 
+    return render_template("ingredient.html", 
                            ingredients=active_ingredients, 
                            all_ingredients=sorted_flat_list,
                            alphabet=alphabet)
@@ -90,12 +85,5 @@ def search():
     results = sorted(results, key=lambda x: x['match'], reverse=True)
     return render_template('result.html', results=results, selected=user_input)
 
-@app.route('/recipe/<int:recipe_id>')
-def recipe_detail(recipe_id):
-    recipe = Recipe.query.get_or_404(recipe_id)
-    detailed_list = [i.strip() for i in str(recipe.full_ingredients).split(',') if i.strip()]
-    return render_template('recipe.html', recipe=recipe, ingredients=detailed_list)
-
 if __name__ == "__main__":
-
     app.run(debug=True)
