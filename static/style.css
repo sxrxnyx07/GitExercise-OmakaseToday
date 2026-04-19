@@ -12,6 +12,7 @@ body {
     align-items: center;
 
     margin-top: 90px; 
+    animation: fadeIn 1s ease;
 }
 
 /* title */

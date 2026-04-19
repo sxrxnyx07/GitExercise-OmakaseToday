@@ -19,66 +19,15 @@
 
 <div class="container">
 
-    <h1>🎰 Gacha Recipe System</h1>
+    <h1>🍽️ Welcome to Omakase Today</h1>
 
-    <!-- GACHA IMAGE -->
-    <img id="gachaImg" class="gacha-img"
-     src="{{ url_for('static', filename='gacha.png') }}">
-
-    <div id="ball" class="ball"></div>
-
-    <div class="machine-box">
-
-        <div id="result">
-            Click spin to get your recipe 🍽️
-        </div>
-
-        <button onclick="spin()">SPIN 🎲</button>
-
-    </div>
+    <p class="subtitle">
+        Not sure what to eat today?<br><br>
+        Let our gacha system decide for you! 🎲<br><br>
+        Choose a category from the top menu to get started.
+    </p>
 
 </div>
-
-<script>
-function spin() {
-
-    let resultBox = document.getElementById("result");
-    let button = document.querySelector("button");
-    let gachaImg = document.getElementById("gachaImg");
-    let ball = document.getElementById("ball");  
-
-    button.disabled = true;
-
-    gachaImg.classList.add("spin");
-    resultBox.innerText = "Spinning...";
-
-    setTimeout(() => {
-
-        // ⭐ ball drop
-        ball.classList.add("drop");
-
-        fetch('/random')
-        .then(res => res.json())
-        .then(data => {
-
-            resultBox.innerText = "Revealing...";
-
-            setTimeout(() => {
-
-                resultBox.innerText = "You got: " + data.recipe;
-
-                gachaImg.classList.remove("spin");
-                ball.classList.remove("drop");
-
-                button.disabled = false;
-
-            }, 800);
-
-        });
-
-    }, 1000);
-}
-</script>
 
 </body>
 </html>
