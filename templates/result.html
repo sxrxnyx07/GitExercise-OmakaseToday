@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Result | Omakase Today</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="page-header">
+        <h1>🍳 Omakase Today</h1>
+        <p class="header-subtext">
+            <strong>Turn your leftovers into a masterpiece! ✨<br>
+            We've curated the perfect recipes based on what's in your kitchen right now.</strong>
+        </p>
+        
+        {% if selected %}
+            <div class="kitchen-label-wrapper">
+                <h2 class="kitchen-label">In Your Kitchen</h2>
+            </div>
+            <div class="tag-container">
+                {% for item in selected %}
+                    <div class="ingredient-pop">
+                        <span class="star-icon">★</span>
+                        {{ item }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="recipe-grid">
+        {% for r in results %}
+        <div class="recipe-card">
+            <div class="image-container">
+                <button class="heart-btn" onclick="event.stopPropagation(); toggleSave(this);">❤</button>
+                {% if r.image and r.image.startswith('http') %}
+                    <img src="{{ r.image }}" alt="{{ r.name }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
+                {% endif %}
+            </div>
+            
+            <div class="card-meta">
+                <div class="meal-category">{{ r.meal_category|default('RECIPE') }}</div>
+                
+                <span class="recipe-title" style="display: block; font-weight: bold; margin-bottom: 10px;">{{ r.name }}</span>
+                
+                <div class="rating-stars">
+                   {% set current_rating = r.rating|default(0)|int %}
+                   {% for i in range(5) %}
+                       {% if i < current_rating %}
+                           <span style="color: #ffc107;">★</span>
+                       {% else %}
+                           <span style="color: #e4e5e9;">★</span>
+                       {% endif %}
+                   {% endfor %}
+                   <span class="rating-count">({{ r.rating|default('0.0') }})</span>
+                </div>
+
+                <div class="match-badge match-status" data-percent="{{ r.match }}">Match: {{ r.match }}%</div>
+                
+                {% if r.missing %}
+                    <div class="missing-info">
+                        <strong>Missing:</strong>
+                        <span class="missing-tags">{{ r.missing|join(', ') }}</span>
+                    </div>
+                {% else %}
+                    <p class="match-badge perfect-match">✨ PERFECT COMBO!</p>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-container">
+            <h3 style="white-space: nowrap; font-size: 2.5rem; margin-bottom: 20px; color: #444;">No matches found! 😕</h3>
+            <p style="white-space: nowrap; color: #666; font-size: 1.2rem;">Try removing some ingredients to see more results.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; margin-bottom: 40px;">
+        <a href="/" class="btn-return">⬅ Back to Search</a>
+    </div>
+
+    <script>
+        function toggleSave(button) {
+            button.classList.toggle('saved');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const badges = document.querySelectorAll('.match-status');
+            badges.forEach(badge => {
+                const percent = parseInt(badge.getAttribute('data-percent'));
+                if (percent >= 80) {
+                    badge.classList.add('match-high');
+                } else if (percent >= 50) {
+                    badge.classList.add('match-mid');
+                } else {
+                    badge.classList.add('match-low');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
