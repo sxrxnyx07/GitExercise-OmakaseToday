@@ -30,22 +30,20 @@
 
     <!-- BOTTOM: RECIPES -->
     <div class="admin-section">
-
         <div class="section-header">
             <h2>Recent Recipes</h2>
             <a href="/admin/recipes" class="manage-btn">Manage Recipes</a>
         </div>
 
         <div class="card-grid">
-
             {% for r in recent_recipes %}
             <div class="mini-card">
-                <p><b>{{ r[0] }}</b></p>
+                <p><b>{{ r.name }}</b></p>
+                
+                <p style="font-size: 0.8rem; color: #666;">Rating: {{ r.rating }}</p>
             </div>
             {% endfor %}
-
         </div>
-
     </div>
 
 </div>

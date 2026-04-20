@@ -3,27 +3,48 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"
 
 # =======================
-# BASE PATH (IMPORTANT FIX)
+# 数据库路径配置
 # =======================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 DB_PATH = os.path.join(BASE_DIR, "users.db")
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'omakase.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# =======================
+# 食谱模型 (从朋友的代码复制)
+# =======================
+class Recipe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200)) # 对应 CSV 的 recipe_name
+    image = db.Column(db.String(500))
+    rating = db.Column(db.Float, default=0.0)
+    clean_ingredients = db.Column(db.Text) 
+    full_ingredients = db.Column(db.Text)  
+    directions = db.Column(db.Text)        
+    timing = db.Column(db.String(100))     
+    meal_category = db.Column(db.String(50))
+    flavor_type = db.Column(db.String(50))
+
+# =======================
+# 静态资源配置
+# =======================
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-
-# ---------------- DB ----------------
+# ---------------- 初始化用户数据库 (users.db) ----------------
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-
     c.execute("""
     CREATE TABLE IF NOT EXISTS users (
         email TEXT PRIMARY KEY,
@@ -34,19 +55,12 @@ def init_db():
         role TEXT DEFAULT 'user'
     )
     """)
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS recipes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL
-    )
-    """)
-
-
+    # 注意：这里的 recipes 表是 users.db 里的备份，
+    # 实际上管理员操作将通过 SQLAlchemy 访问 omakase.db 的 recipe 表
     conn.commit()
     conn.close()
 
 init_db()
-
 
 # ---------------- HOME ----------------
 @app.route("/")
@@ -280,23 +294,22 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("home"))
 # ---------------- ADMIN ----------------
+# ---------------- ADMIN ----------------
 @app.route("/admin")
 def admin():
     if session.get("role") != "admin":
         return "403 Forbidden"
 
+    # 1. 获取最近用户 (继续使用 sqlite3 访问 users.db)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-
-    # recent users
     c.execute("SELECT email, username, role FROM users ORDER BY rowid DESC LIMIT 5")
     recent_users = c.fetchall()
-
-    # recent recipes (如果你还没 table，我先给你结构)
-    c.execute("SELECT title FROM recipes ORDER BY rowid DESC LIMIT 5")
-    recent_recipes = c.fetchall()
-
     conn.close()
+
+    # 2. 获取最近食谱 (必须改为 SQLAlchemy 访问 omakase.db)
+    # 这样就不会报 "no such table: recipes" 的错了
+    recent_recipes = Recipe.query.order_by(Recipe.id.desc()).limit(5).all()
 
     return render_template(
         "admin.html",
@@ -358,13 +371,8 @@ def admin_recipes():
     if session.get("role") != "admin":
         return "403 Forbidden"
 
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-
-    c.execute("SELECT id, title FROM recipes ORDER BY id DESC")
-    recipes = c.fetchall()
-
-    conn.close()
+    recipes = Recipe.query.all()
+    
 
     return render_template("admin_recipes.html", recipes=recipes)
 
@@ -374,14 +382,9 @@ def add_recipe():
         return "403 Forbidden"
 
     title = request.form["title"]
-
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-
-    c.execute("INSERT INTO recipes (title) VALUES (?)", (title,))
-
-    conn.commit()
-    conn.close()
+    new_recipe = Recipe(name=title) 
+    db.session.add(new_recipe)
+    db.session.commit()
 
     return redirect(url_for("admin_recipes"))
 
@@ -390,36 +393,12 @@ def delete_recipe(id):
     if session.get("role") != "admin":
         return "403 Forbidden"
 
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-
-    c.execute("DELETE FROM recipes WHERE id = ?", (id,))
-
-    conn.commit()
-    conn.close()
+    recipe_to_delete = Recipe.query.get(id)
+    if recipe_to_delete:
+        db.session.delete(recipe_to_delete)
+        db.session.commit()
 
     return redirect(url_for("admin_recipes"))
-
-@app.route("/seed-recipes")
-def seed_recipes():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-
-    recipes = [
-        ("Nasi Lemak"),
-        ("Chicken Rice"),
-        ("Fried Noodles"),
-        ("Laksa"),
-        ("Roti Canai")
-    ]
-
-    c.executemany("INSERT INTO recipes (title) VALUES (?)",
-                  [(r,) for r in recipes])
-
-    conn.commit()
-    conn.close()
-
-    return "Recipes added!"
 
 
 if __name__ == "__main__":

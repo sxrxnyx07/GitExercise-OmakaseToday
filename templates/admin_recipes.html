@@ -5,49 +5,61 @@
 {% block content %}
 
 <div class="admin-recipes-wrapper">
-
     <h1 class="admin-title">Manage Recipes</h1>
 
-    <!-- ADD FORM -->
     <form action="/admin/recipes/add" method="POST" class="add-form">
-
         <input type="text" name="title" placeholder="Enter recipe name..." required>
-
         <button type="submit">Add Recipe</button>
-
     </form>
 
-    <!-- TABLE -->
     <table class="recipes-table">
-
         <thead>
             <tr>
+                <th>ACTION</th> 
                 <th>ID</th>
-                <th>Recipe Title</th>
-                <th>Action</th>
-            </tr>
+                <th>NAME</th>
+                <th>IMAGE</th>
+                <th>RATING</th>
+                <th>CLEAN_INGREDIENTS</th>
+                <th>FULL_INGREDIENTS</th>
+                <th>DIRECTIONS</th>
+                <th>TIMNG</th>
+                <th>MEAL_CATEGORY</th>
+                <th>FLAVOR_TYPE</th>
+                </tr>
         </thead>
 
         <tbody>
-
             {% for r in recipes %}
             <tr>
-                <td>{{ r[0] }}</td>
-                <td>{{ r[1] }}</td>
                 <td>
-                    <a href="/admin/recipes/delete/{{ r[0] }}"
+                    <a href="/admin/recipes/delete/{{ r.id }}"
                        class="delete-btn"
                        onclick="return confirm('Delete this recipe?')">
                         Delete
                     </a>
                 </td>
+
+                <td>{{ r.id }}</td>
+                <td>{{ r.name }}</td>
+                <td>
+                    {% if r.image %}
+                        <img src="{{ r.image }}" alt="thumb" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                    {% else %}
+                        No Image
+                    {% endif %}
+                </td>
+                <td>{{ r.rating }}</td>
+                <td>{{ r.clean_ingredients }}</td>
+                <td>{{ r.full_ingredients }}</td>
+                <td>{{ r.directions }}</td>
+                <td>{{ r.timing }}</td>
+                <td>{{ r.meal_category }}</td>
+                <td>{{ r.flavor_type }}</td>
             </tr>
             {% endfor %}
-
         </tbody>
-
     </table>
-
 </div>
 
 {% endblock %}
