@@ -978,33 +978,69 @@ LAST PAGE BUTTON
     margin: 50px auto;
     text-align: center;
 }
-
-/* ADD FORM */
-.add-form{
+/* 管理栏容器 */
+.admin-controls {
     margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
-.add-form input{
-    padding: 10px;
-    width: 250px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+/* 搜索输入框 */
+.search-input {
+    padding: 8px 12px;
+    width: 300px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
 }
 
-.add-form button{
-    padding: 10px 15px;
-    border: none;
-    background: black;
+.search-input:focus {
+    border-color: #2196F3; /* 聚焦时变成蓝色 */
+}
+.search-btn {
+    padding: 8px 15px;
+    background: #4CAF50;
     color: white;
-    border-radius: 8px;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
-    margin-left: 10px;
 }
 
-.add-form button:hover{
-    background: #d94f4f;
+.search-btn:hover {
+    background: #388E3C;
 }
 
+/* + Add New Recipe 按钮 */
+.add-recipe-btn {
+    background-color: #2196F3;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s, transform 0.1s;
+}
+
+.add-recipe-btn:hover {
+    background-color: #1976D2; /* 悬停时深蓝色 */
+}
+
+.add-recipe-btn:active {
+    transform: scale(0.98); /* 点击时轻微缩小的反馈 */
+}
+
+/* 表格内输入框的通用样式 (可选，让表格更整齐) */
+.recipes-table input[type="text"] {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    box-sizing: border-box; /* 确保 padding 不撑破单元格 */
+}
 /* TABLE */
 .recipes-table{
     width: 100%;
@@ -1191,4 +1227,30 @@ LAST PAGE BUTTON
 .feature-block.search-block > *{
     position: relative;
     z-index: 1;
+}
+.recipes-table input {
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 4px;
+    width: 90%;
+}
+
+.update-btn {
+    background-color: #4CAF50; 
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+.update-btn:hover {
+    background-color: #45a049;
+}
+.recipe-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
 }

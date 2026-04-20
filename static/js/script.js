@@ -255,3 +255,84 @@ function hideSidebar() {
         sidebar.style.display = "none"
     }
 }
+// =========================
+// ADD NEW ROW
+// =========================
+function addNewRow() {
+    let tbody = document.getElementById('recipeBody');
+
+    let newRow = document.createElement('tr');
+    newRow.className = "new-row-animation";
+
+    newRow.innerHTML = `
+        <td colspan="11">
+            <form action="/admin/recipes/add" method="POST" enctype="multipart/form-data" class="inline-form">
+
+                <button type="submit" class="update-btn">Create</button>
+                <button type="button" onclick="this.closest('tr').remove()" class="delete-btn">Cancel</button>
+
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="file" name="image_file">
+                <input type="text" name="rating" placeholder="0.0">
+                <input type="text" name="clean_ingredients" placeholder="...">
+                <input type="text" name="full_ingredients" placeholder="...">
+                <input type="text" name="directions" placeholder="...">
+                <input type="text" name="timing" placeholder="...">
+                <input type="text" name="meal_category" placeholder="...">
+                <input type="text" name="flavor_type" placeholder="...">
+
+            </form>
+        </td>
+    `;
+
+    tbody.insertBefore(newRow, tbody.firstChild);
+}
+
+
+// =========================
+// SEARCH FUNCTION
+// =========================
+function filterRecipes() {
+    const input = document.getElementById("recipeSearch").value.toLowerCase();
+    const rows = document.querySelectorAll("#recipeBody tr");
+
+    rows.forEach(row => {
+        const nameInput = row.querySelector("input[name='name']");
+        if (!nameInput) return;
+
+        const name = nameInput.value.toLowerCase();
+
+        if (name.includes(input)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+function addUserRow() {
+    let tbody = document.getElementById("userBody");
+
+    let row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td colspan="4">
+            <form action="/admin/users/add" method="POST" class="inline-form">
+
+                <button type="submit" class="update-btn">Create</button>
+                <button type="button" onclick="this.closest('tr').remove()" class="delete-btn">Cancel</button>
+
+                <input type="text" name="email" placeholder="Email" required>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+
+                <select name="role">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+            </form>
+        </td>
+    `;
+
+    tbody.prepend(row);
+}

@@ -293,7 +293,7 @@ def newpassword():
 def logout():
     session.pop("user", None)
     return redirect(url_for("home"))
-# ---------------- ADMIN ----------------
+
 # ---------------- ADMIN ----------------
 @app.route("/admin")
 def admin():
@@ -351,6 +351,61 @@ def admin_users():
     conn.close()
 
     return render_template("admin_users.html", users=users)
+
+@app.route("/admin/users/add", methods=["POST"])
+def add_user():
+    if session.get("role") != "admin":
+        return "403 Forbidden"
+
+    email = request.form.get("email")
+    username = request.form.get("username")
+    password = request.form.get("password")
+    role = request.form.get("role", "user")
+
+    if not email or not username or not password:
+        return redirect(url_for("admin_users"))
+
+    hashed_pw = generate_password_hash(password)
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    try:
+        c.execute("""
+            INSERT INTO users (email, username, password, bio, role)
+            VALUES (?, ?, ?, ?, ?)
+        """, (email, username, hashed_pw, "", role))
+
+        conn.commit()
+    except sqlite3.IntegrityError:
+        pass
+
+    conn.close()
+
+    return redirect(url_for("admin_users"))
+
+@app.route("/admin/users/update/<email>", methods=["POST"])
+def update_user(email):
+    if session.get("role") != "admin":
+        return "403 Forbidden"
+
+    username = request.form.get("username")
+    role = request.form.get("role")
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        UPDATE users
+        SET username = ?, role = ?
+        WHERE email = ?
+    """, (username, role, email))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("admin_users"))
+
 @app.route("/admin/delete/<email>")
 def delete_user(email):
     if session.get("role") != "admin":
@@ -378,15 +433,31 @@ def admin_recipes():
 
 @app.route("/admin/recipes/add", methods=["POST"])
 def add_recipe():
-    if session.get("role") != "admin":
-        return "403 Forbidden"
+    name = request.form.get("name")
+    rating = request.form.get("rating")
 
-    title = request.form["title"]
-    new_recipe = Recipe(name=title) 
+    file = request.files.get("image_file")
+
+    image_url = None
+
+    if file and file.filename != "":
+        filename = secure_filename(file.filename)
+        upload_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(upload_path)
+        image_url = f"/static/uploads/{filename}"
+
+    new_recipe = Recipe(
+        name=name,
+        rating=rating,
+        image=image_url
+    )
+
     db.session.add(new_recipe)
     db.session.commit()
 
-    return redirect(url_for("admin_recipes"))
+    return redirect("/admin/recipes")
+
+
 
 @app.route("/admin/recipes/delete/<int:id>")
 def delete_recipe(id):
@@ -396,6 +467,36 @@ def delete_recipe(id):
     recipe_to_delete = Recipe.query.get(id)
     if recipe_to_delete:
         db.session.delete(recipe_to_delete)
+        db.session.commit()
+
+    return redirect(url_for("admin_recipes"))
+
+@app.route("/admin/recipes/update/<int:id>", methods=["POST"])
+def update_recipe(id):
+    if session.get("role") != "admin":
+        return "403 Forbidden"
+
+    recipe = Recipe.query.get(id)
+
+    if recipe:
+        recipe.name = request.form.get("name")
+        recipe.rating = request.form.get("rating")
+        recipe.clean_ingredients = request.form.get("clean_ingredients")
+        recipe.full_ingredients = request.form.get("full_ingredients")
+        recipe.directions = request.form.get("directions")
+        recipe.timing = request.form.get("timing")
+        recipe.meal_category = request.form.get("meal_category")
+        recipe.flavor_type = request.form.get("flavor_type")
+
+        file = request.files.get("image_file")
+
+        if file and file.filename != "":
+            filename = secure_filename(file.filename)
+            path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            file.save(path)
+
+            recipe.image = f"/static/uploads/{filename}"
+
         db.session.commit()
 
     return redirect(url_for("admin_recipes"))

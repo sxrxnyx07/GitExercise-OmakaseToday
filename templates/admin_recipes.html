@@ -7,10 +7,18 @@
 <div class="admin-recipes-wrapper">
     <h1 class="admin-title">Manage Recipes</h1>
 
-    <form action="/admin/recipes/add" method="POST" class="add-form">
-        <input type="text" name="title" placeholder="Enter recipe name..." required>
-        <button type="submit">Add Recipe</button>
-    </form>
+    <div class="admin-controls">
+        <input type="text" id="recipeSearch" class="search-input" 
+            placeholder="Search recipe name...">
+
+        <button onclick="filterRecipes()" class="search-btn">
+            Search
+        </button>
+
+        <button type="button" onclick="addNewRow()" class="add-recipe-btn">
+            + Add New Recipe
+        </button>
+    </div>
 
     <table class="recipes-table">
         <thead>
@@ -23,39 +31,42 @@
                 <th>CLEAN_INGREDIENTS</th>
                 <th>FULL_INGREDIENTS</th>
                 <th>DIRECTIONS</th>
-                <th>TIMNG</th>
+                <th>TIMING</th>
                 <th>MEAL_CATEGORY</th>
                 <th>FLAVOR_TYPE</th>
-                </tr>
+            </tr>
         </thead>
 
-        <tbody>
+        <tbody id="recipeBody">
             {% for r in recipes %}
             <tr>
                 <td>
-                    <a href="/admin/recipes/delete/{{ r.id }}"
-                       class="delete-btn"
-                       onclick="return confirm('Delete this recipe?')">
-                        Delete
-                    </a>
+                    <form action="/admin/recipes/update/{{ r.id }}" method="POST" enctype="multipart/form-data">
+                        <button type="submit" class="update-btn">Save</button>
+                        <a href="/admin/recipes/delete/{{ r.id }}" 
+                           class="delete-btn" 
+                           onclick="return confirm('Delete?')">Delete</a>
                 </td>
 
-                <td>{{ r.id }}</td>
-                <td>{{ r.name }}</td>
+                <td><input type="text" name="id" value="{{ r.id }}"></td>
+                <td><input type="text" name="name" value="{{ r.name }}"></td>
+
                 <td>
-                    {% if r.image %}
-                        <img src="{{ r.image }}" alt="thumb" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                    {% else %}
-                        No Image
-                    {% endif %}
+                    <label>
+                        <img src="{{ r.image }}" class="recipe-img">
+                        <input type="file" name="image_file" hidden>
+                    </label>
                 </td>
-                <td>{{ r.rating }}</td>
-                <td>{{ r.clean_ingredients }}</td>
-                <td>{{ r.full_ingredients }}</td>
-                <td>{{ r.directions }}</td>
-                <td>{{ r.timing }}</td>
-                <td>{{ r.meal_category }}</td>
-                <td>{{ r.flavor_type }}</td>
+
+                <td><input type="text" name="rating" value="{{ r.rating }}"></td>
+                <td><input type="text" name="clean_ingredients" value="{{ r.clean_ingredients }}"></td>
+                <td><input type="text" name="full_ingredients" value="{{ r.full_ingredients }}"></td>
+                <td><input type="text" name="directions" value="{{ r.directions }}"></td>
+                <td><input type="text" name="timing" value="{{ r.timing }}"></td>
+                <td><input type="text" name="meal_category" value="{{ r.meal_category }}"></td>
+                <td><input type="text" name="flavor_type" value="{{ r.flavor_type }}"></td>
+
+                    </form>
             </tr>
             {% endfor %}
         </tbody>
@@ -63,6 +74,3 @@
 </div>
 
 {% endblock %}
-
-
-
