@@ -77,31 +77,54 @@
     </div>
 
 </div>
-<div class="feature-section">
 
-    <div class="feature-card">
+<div class="feature-block">
+
+    <div class="feature-text">
+        <h2>Cook with What You Have 🍳</h2>
+        <p>Select your ingredients and discover recipes instantly.</p>
+
+        <div class="ingredient-tags">
+            <button class="tag">Chicken</button>
+            <button class="tag">Egg</button>
+            <button class="tag">Rice</button>
+            <button class="tag">Tomato</button>
+            <button class="tag">Cheese</button>
+            <button class="tag">Onion</button>
+            <button class="tag">Noodles</button>
+        </div>
+
+        <a href="#" class="feature-btn">Cook Now →</a>
+    </div>
+
+    <div class="feature-visual">
         <img src="{{ url_for('static', filename='css/picture/ingredients.jpg') }}">
-        <h3>Ingredients</h3>
-        <p>Find recipes based on what you have</p>
-        <a href="#">Try Now →</a>
-    </div>
-
-    <div class="feature-card">
-        <img src="{{ url_for('static', filename='css/picture/gacha.png') }}">
-        <h3>Spin</h3>
-        <p>Let us decide for you</p>
-        <a href="#">Spin Now →</a>
-    </div>
-
-    <div class="feature-card">
-        <img src="{{ url_for('static', filename='css/picture/search.jpg') }}">
-        <h3>Search</h3>
-        <p>Search for your favorite meals</p>
-        <a href="#">Explore →</a>
     </div>
 
 </div>
+<div class="feature-block block">
 
+    <div class="feature-visual">
+            <img src="{{ url_for('static', filename='css/picture/gacha.png') }}">
+    </div>
+    <div class="feature-text">
+        <h2>Can't Decide? 🎡</h2>
+        <p>Let our random spinner choose your meal.</p>
 
+        <p class="preview-note">Watch how it works 👇</p>
+
+        <a href="/spin" class="feature-btn">Try the Spinner →</a>
+    </div>
+</div>
+<div class="feature-block search-block">
+    <div class="feature-text">
+        <h2>Find Your Favorite Meal 🔍</h2>
+        <p>Search recipes by name or ingredients.</p>
+
+        <input type="text" class="search-box" placeholder="Search recipes...">
+
+        <a href="/search" class="feature-btn">Go to Search →</a>
+    </div>
+</div>
 {% endblock %}
 

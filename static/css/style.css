@@ -12,9 +12,10 @@ html{
 }
 
 body{
-  min-height: 100vh;
+  height: 100%;
   background-image: url(../css/picture/background.png);
   background-size: cover;
+  margin: 0;
 }
 
 
@@ -784,44 +785,7 @@ LAST PAGE BUTTON
     font-size: 12px;
     border-radius: 6px;
 }
-.feature-section {
-    margin: 40px auto 100px;
-    display: flex;
-    justify-content: center;
-    gap: 60px;
-    flex-wrap: wrap;
-}
 
-.feature-card {
-    width: 220px;
-    background: white;
-    border-radius: 15px;
-    padding: 20px 20px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: 0.3s;
-}
-.feature-card img{
-    max-width: 100px;
-    max-height: 100px;
-}
-.feature-card:hover {
-    transform: translateY(-5px);
-}
-
-.feature-card h3 {
-    margin-bottom: 10px;
-}
-
-.feature-card p {
-    font-size: 14px;
-    margin-bottom: 15px;
-}
-
-.feature-card a {
-    text-decoration: none;
-    font-weight: bold;
-}
 /* =========================
    ADMIN DASHBOARD LAYOUT
 ========================= */
@@ -1103,4 +1067,113 @@ LAST PAGE BUTTON
 .logout-btn:hover{
     background: red;
     transform: translateY(-2px);
+}
+.feature-block{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-image: url(../css/picture/background.png);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    margin: 60px 40px;
+    height: 600px;
+    padding-left: 100px;
+}
+/* TEXT */
+.feature-text{
+    flex: 1;
+}
+
+.feature-text h2{
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.feature-text p{
+    color: #343232;
+    margin-bottom: 20px;
+}
+
+/* BUTTON */
+.feature-btn{
+    display: inline-block;
+    padding: 12px 25px;
+    border-radius: 25px;
+    background: #ff7e5f;
+    color: white;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.feature-btn:hover{
+    background: #ff5e3a;
+}
+
+/* VISUAL */
+.feature-visual{
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.feature-visual img,
+.feature-visual video{
+    width: 100%;
+    max-width: 400px;
+    border-radius: 20px;
+}
+
+/* TAGS */
+.ingredient-tags{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tag{
+    padding: 10px 18px;
+    border-radius: 20px;
+    background: #aaa6a6;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.tag:hover{
+    background: #ffb347;
+    color: white;
+}
+
+/* SEARCH */
+.search-box{
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    width: 70%;
+    margin-bottom: 20px;
+}
+.feature-block.search-block{
+    position: relative;
+    background-image: url("../css/picture/dishes.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+.feature-block.search-block::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.5); 
+    border-radius: 20px;
+}
+.feature-block.search-block > *{
+    position: relative;
+    z-index: 1;
 }
