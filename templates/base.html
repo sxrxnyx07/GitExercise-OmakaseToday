@@ -13,20 +13,30 @@
 
 <nav>
     <ul class="sidebar">
-        <li onclick=hideSidebar()><a href="#">X</a></li>
+        <li onclick="hideSidebar()"><a href="#">X</a></li>
         <li><a href="{{ url_for('home') }}">HOME</a></li>
-        <li><a href="#">SEARCH</a></li>
+        <li><a href="{{ url_for('all_recipes') }}">SEARCH ALL</a></li>
+        <li><a href="{{ url_for('ingredient_index') }}">BY INGREDIENTS</a></li>
         <li><a href="#">SAVED RECIPE</a></li>
         <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
     </ul>
 
     <ul>
-        <li><a href="#">Omakase Today</a></li>
+        <li><a href="{{ url_for('home') }}">Omakase Today</a></li>
         <li class="hideOnMobile"><a href="{{ url_for('home') }}">HOME</a></li>
-        <li class="hideOnMobile"><a href="#">SEARCH</a></li>
+        
+        <li class="hideOnMobile dropdown">
+            <a href="javascript:void(0)" class="dropbtn">SEARCH ▾</a>
+            <div class="dropdown-content">
+                <a href="{{ url_for('all_recipes') }}">All Recipes</a>
+                <a href="{{ url_for('ingredient_index') }}">By Ingredient</a>
+                <a href="#">By Category</a>
+            </div>
+        </li>
+
         <li class="hideOnMobile"><a href="#">SAVED RECIPE</a></li>
         <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
-        <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
+        <li class="menu-button" onclick="showSidebar()"><a href="#">☰</a></li>
     </ul>
 </nav>
 {% block content %}{% endblock %}

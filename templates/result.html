@@ -1,13 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Result | Omakase Today</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&family=Montserrat:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+   
+
 
     <div class="page-header">
         <h1>🍳 Omakase Today</h1>
@@ -104,5 +106,4 @@
         });
     </script>
 
-</body>
-</html>
+{% endblock %}
