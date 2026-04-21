@@ -9,18 +9,17 @@ app = Flask(__name__)
 app.secret_key = "secretkey123"
 
 # =======================
-# 数据库路径配置
+# Database path
 # =======================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))     #Locate the current file path
+DB_PATH = os.path.join(BASE_DIR, "users.db")              #create the location for users.db
 
-DB_PATH = os.path.join(BASE_DIR, "users.db")
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'omakase.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'omakase.db') #store recipe table and name/image/rating...
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # =======================
-# 食谱模型 (从朋友的代码复制)
+# Recipe dataset (from Saranya)
 # =======================
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,13 +34,13 @@ class Recipe(db.Model):
     flavor_type = db.Column(db.String(50))
 
 # =======================
-# 静态资源配置
+# Static resource configuration
 # =======================
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")   #the img will store in static/uploads inside the folder
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)                     #auto createonce the file not exist
 
-# ---------------- 初始化用户数据库 (users.db) ----------------
+# ---------------- User table(users.db) ----------------
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -55,8 +54,6 @@ def init_db():
         role TEXT DEFAULT 'user'
     )
     """)
-    # 注意：这里的 recipes 表是 users.db 里的备份，
-    # 实际上管理员操作将通过 SQLAlchemy 访问 omakase.db 的 recipe 表
     conn.commit()
     conn.close()
 
@@ -101,8 +98,7 @@ def register():
 
     return render_template("register.html")
 
-
-# ---------------- CHECK EMAIL ----------------
+# ---------------- CHECK EMAIL ----------------(real-time validation using AJAX)
 @app.route("/check-email")
 def check_email():
     email = request.args.get("email")
@@ -117,7 +113,6 @@ def check_email():
 
     return {"exists": user is not None}
 
-
 # ---------------- LOGIN ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -129,11 +124,11 @@ def login():
         c = conn.cursor()
 
         c.execute("SELECT * FROM users WHERE email = ?", (email,))
-        user = c.fetchone()
+        user = c.fetchone()        #get a tuple, example:'test@email.com', 'anna', 'hashed_password', '', '', 'admin'
 
         conn.close()
 
-        if user and check_password_hash(user[2], password):
+        if user and check_password_hash(user[2], password):     #check id exist indb, check password
             session["user"] = email
             session["role"] = user[5]
             return redirect(url_for("profile"))
@@ -204,7 +199,7 @@ def upload_profile_pic():
         email = session["user"]
         ext = filename.rsplit(".", 1)[-1]
 
-        new_filename = f"{email}.{ext}"
+        new_filename = f"{email}.{ext}"             #rename the file to useremail
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], new_filename)
 
         file.save(filepath)
@@ -291,7 +286,7 @@ def newpassword():
 # ---------------- LOGOUT ----------------
 @app.route("/logout")
 def logout():
-    session.pop("user", None)
+    session.pop("user", None)             #clean user status
     return redirect(url_for("home"))
 
 # ---------------- ADMIN ----------------
@@ -300,16 +295,16 @@ def admin():
     if session.get("role") != "admin":
         return "403 Forbidden"
 
-    # 1. 获取最近用户 (继续使用 sqlite3 访问 users.db)
+    # 1. Get recent users (continue using sqlite3 to access users.db)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT email, username, role FROM users ORDER BY rowid DESC LIMIT 5")
+    c.execute("SELECT email, username, role FROM users ORDER BY rowid DESC LIMIT 5")   #sqlite
     recent_users = c.fetchall()
     conn.close()
 
-    # 2. 获取最近食谱 (必须改为 SQLAlchemy 访问 omakase.db)
-    # 这样就不会报 "no such table: recipes" 的错了
-    recent_recipes = Recipe.query.order_by(Recipe.id.desc()).limit(5).all()
+    # 2. Gey recent recipes (continue using SQLAlchemy to access omakase.db)
+    # This will prevent the "no such table: recipes" error.
+    recent_recipes = Recipe.query.order_by(Recipe.id.desc()).limit(5).all()  #recipes(SQLAIchemy)
 
     return render_template(
         "admin.html",
@@ -426,7 +421,7 @@ def admin_recipes():
     if session.get("role") != "admin":
         return "403 Forbidden"
 
-    recipes = Recipe.query.all()
+    recipes = Recipe.query.all()      #get recipes's data from datbase(omakase.db)
     
 
     return render_template("admin_recipes.html", recipes=recipes)
