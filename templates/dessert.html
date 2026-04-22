@@ -53,6 +53,15 @@
 
     </div>
 
+    <div class="recipe-container">
+        {% for r in recipes %}
+            <div class="recipe-card">
+                <img src="{{ r['image'] }}" alt="{{ r['name'] }}">
+                <h3>{{ r['name'] }}</h3>
+            </div>
+        {% endfor %}
+    </div>
+
 </div>
 
 <script>
