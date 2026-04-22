@@ -53,14 +53,25 @@
 
     </div>
 
-    <div class="recipe-container">
-        {% for r in recipes %}
-            <div class="recipe-card">
-                <img src="{{ r['image'] }}" alt="{{ r['name'] }}">
-                <h3>{{ r['name'] }}</h3>
-            </div>
-        {% endfor %}
-    </div>
+<div class="recipe-container">
+    {% for r in recipes %}
+        <div class="recipe-card">
+
+            <img src="{{ r['image'] }}" alt="{{ r['name'] }}">
+
+            <h3>{{ r['name'] }}</h3>
+
+            <p><b>Ingredients:</b> {{ r['clean_ingredients'] }}</p>
+
+            <p><b>Instructions:</b> {{ r['directions'] }}</p>
+
+            <p><b>Time:</b> {{ r['timing'] }}</p>
+
+            <p><b>Flavor:</b> {{ r['flavor_type'] }}</p>
+
+        </div>
+    {% endfor %}
+</div>
 
 </div>
 

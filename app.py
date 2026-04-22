@@ -56,7 +56,7 @@ def lunch():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT name, image FROM recipe WHERE meal_category = ?",
+        "SELECT name, image, clean_ingredients, directions, timing, flavor_type FROM recipe WHERE meal_category = ?",
         ("Lunch",)
     ).fetchall()
 
@@ -68,7 +68,7 @@ def dinner():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT name, image FROM recipe WHERE meal_category = ?",
+        "SELECT name, image, clean_ingredients, directions, timing, flavor_type FROM recipe WHERE meal_category = ?",
         ("Dinner",)
     ).fetchall()
 
@@ -80,7 +80,7 @@ def dessert():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT name, image FROM recipe WHERE meal_category = ?",
+        "SELECT name, image, clean_ingredients, directions, timing, flavor_type FROM recipe WHERE meal_category = ?",
         ("Dessert",)
     ).fetchall()
 
@@ -92,7 +92,7 @@ def drinks():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT name, image FROM recipe WHERE meal_category = ?",
+        "SELECT name, image, clean_ingredients, directions, timing, flavor_type FROM recipe WHERE meal_category = ?",
         ("Drinks",)
     ).fetchall()
 
