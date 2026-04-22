@@ -40,15 +40,15 @@ def random_page():
 
 @app.route('/breakfast')
 def breakfast():
+
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT name, image FROM recipe WHERE meal_category = ?",
+        "SELECT name, image, clean_ingredients, directions, timing, flavor_type FROM recipe WHERE meal_category = ?",
         ("Breakfast",)
     ).fetchall()
 
     conn.close()
-
     return render_template('breakfast.html', recipes=recipes)
 
 @app.route('/lunch')
@@ -110,19 +110,28 @@ def get_random_recipe():
     conn = get_db_connection()
 
     recipe = conn.execute(
-        "SELECT name FROM recipes WHERE category = ? ORDER BY RANDOM() LIMIT 1",
+        """
+        SELECT name
+        FROM recipe
+        WHERE meal_category = ?
+        ORDER BY RANDOM()
+        LIMIT 1
+        """,
         (category,)
     ).fetchone()
 
     conn.close()
 
+    # fallback system (old prototype)
     if not recipe:
-        return jsonify({"recipe": "No recipe found"})
+        fallback = recipes.get(category, ["No recipe"])
+        return jsonify({
+            "recipe": random.choice(fallback)
+        })
 
-    return app.response_class(
-    response=json.dumps({"recipe": recipe["name"]}, ensure_ascii=False),
-    mimetype='application/json'
-)
+    return jsonify({
+        "recipe": recipe["name"]
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
