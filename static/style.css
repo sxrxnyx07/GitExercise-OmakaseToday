@@ -298,6 +298,10 @@ button:active {
     display: block;   
 }
 
+/* =========================
+   RECIPE GRID
+========================= */
+
 .recipe-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -307,20 +311,21 @@ button:active {
 }
 
 .recipe-card {
-    background: white;
-    border-radius: 15px;
+    background: #fffdf7;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     padding: 15px;
+    transition: 0.3s;
+}
 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-
-    text-align: center;
+.recipe-card:hover {
+    transform: translateY(-5px);
 }
 
 .recipe-card img {
     width: 100%;
     height: 150px;
     object-fit: cover;
-
     border-radius: 10px;
 }
 
@@ -329,47 +334,51 @@ button:active {
     font-size: 16px;
 }
 
-.recipe-card:hover {
-    transform: translateY(-5px);
-    transition: 0.2s;
-}
+/* =========================
+   DETAIL PAGE (FIXED STRUCTURE)
+========================= */
 
 .detail-page {
     display: flex;
     justify-content: center;
     margin-top: 30px;
+    padding: 40px 0;
 }
 
 .detail-box {
-    background: #f8f3e6; 
-    padding: 25px;
-    border-radius: 15px;
+    display: flex;
+    gap: 25px;
 
     width: 80%;
     max-width: 1000px;
 
-    display: flex;
-    gap: 30px;
+    padding: 30px;
 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(20px);
+
+    border-radius: 25px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
 }
 
+/* LEFT SIDE */
 .detail-left {
     flex: 0.4;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding-right: 10px;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
 }
 
 .detail-img {
     width: 100%;
     max-width: 320px;
-    height: auto;
     border-radius: 18px;
     object-fit: cover;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
+/* RIGHT SIDE */
 .detail-content {
     flex: 0.6;
     text-align: left;
@@ -381,44 +390,66 @@ button:active {
 .detail-title {
     font-size: 42px;
     font-weight: 800;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
-    text-align: left;
 }
 
+/* =========================
+   SECTION CARD
+========================= */
+
 .detail-section {
-    background: rgba(255,255,255,0.65);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.85);
+    border-radius: 15px;
+
+    padding: 15px 18px;
+    margin-bottom: 10px;
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     border-left: 4px solid #d9a441;
-    padding: 14px 18px;
-    margin-bottom: 15px;
-    border-radius: 10px;
+
+    transition: 0.2s;
+}
+
+.detail-section:hover {
+    transform: translateY(-3px);
 }
 
 .detail-section h3 {
+    margin-bottom: 10px;
     font-size: 18px;
-    font-weight: 700;
 }
 
 .detail-section p {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.8;
 }
+
+/* =========================
+   META
+========================= */
 
 .detail-meta {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .detail-meta span {
     background: #fff;
     padding: 6px 14px;
+
     border-radius: 20px;
     font-size: 13px;
+
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* optional：让标题更整齐 */
+/* =========================
+   LINK STYLE
+========================= */
+
 .recipe-title {
     margin-top: 10px;
 }
@@ -433,3 +464,27 @@ button:active {
     color: #ff7a00;
 }
 
+/* =========================
+   INGREDIENT ITEMS
+========================= */
+
+.ingredient-item {
+    background: white;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+
+    font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.ingredient-item:hover {
+    transform: translateX(5px);
+}
+
+.ingredient-item.full {
+    background: #fff7e6;
+}

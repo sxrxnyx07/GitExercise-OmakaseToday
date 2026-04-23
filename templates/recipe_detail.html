@@ -2,33 +2,58 @@
 
     <div class="detail-box">
 
-        <!-- 左边图片 -->
+        <!-- LEFT SIDE -->
         <div class="detail-left">
+
             <img src="{{ recipe['image'] }}" class="detail-img">
+
+            <!-- CLEAN INGREDIENTS -->
+            <div class="detail-section">
+                <h3>🍳 Ingredients</h3>
+
+                {% for item in recipe['clean_ingredients'].split(',') %}
+                    <div class="ingredient-item">
+                        {{ item.strip() }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- FULL INGREDIENTS -->
+            <div class="detail-section">
+                <h3>📏 Required Amount</h3>
+
+                {% for item in recipe['full_ingredients'].split(',') %}
+                    <div class="ingredient-item full">
+                        {{ item.strip() }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
         </div>
 
-        <!-- 右边内容 -->
+        <!-- RIGHT SIDE -->
         <div class="detail-content">
 
             <h1 class="detail-title">{{ recipe['name'] }}</h1>
 
             <div class="detail-section">
                 <h3>⭐ Why You’ll Like This Recipe</h3>
+                <p>Quick, flavorful and beginner-friendly recipe that is perfect for any day.</p>
+            </div>
+
+            <div class="detail-section">
+                <h3>📖 Directions</h3>
+
+                {% set steps = recipe['directions'].split('.') %}
+
                 <p>
-                    Quick, flavorful and beginner-friendly recipe that is perfect for any day.
+                {% for step in steps if step.strip() %}
+                    {{ loop.index }}. {{ step.strip() }}.<br>
+                {% endfor %}
                 </p>
-            </div>
 
-            <div class="detail-section">
-                <h3>🍳 Ingredients</h3>
-                <p>{{ recipe['clean_ingredients'] }}</p>
-            </div>
-
-            <div class="detail-section">
-                <h3>📖 Instructions</h3>
-                <p style="white-space: pre-line;">
-                    {{ recipe['directions'] }}
-                </p>
             </div>
 
             <div class="detail-meta">

@@ -56,7 +56,7 @@ def lunch():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT name, image, clean_ingredients, directions, timing, flavor_type FROM recipe WHERE meal_category = ?",
+        "SELECT name, image, clean_ingredients, full_ingredients, directions, timing, flavor_type FROM recipe WHERE meal_category = ?",
         ("Lunch",)
     ).fetchall()
 
