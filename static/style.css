@@ -328,3 +328,70 @@ button:active {
     margin-top: 10px;
     font-size: 16px;
 }
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+    transition: 0.2s;
+}
+
+.detail-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.detail-img {
+    width: 400px;
+    border-radius: 15px;
+    margin: 20px 0;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.detail-box {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    width: 70%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.detail-section {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.detail-section h3 {
+    margin-bottom: 8px;
+    color: #ff7a00;
+}
+
+.detail-section p {
+    color: #444;
+    line-height: 1.6;
+    white-space: pre-line;   /* 🔥 关键：让步骤换行 */
+}
+
+.detail-meta {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+}
+
+/* optional：让标题更整齐 */
+.recipe-title {
+    margin-top: 10px;
+}
+
+.recipe-title a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+}
+
+.recipe-title a:hover {
+    color: #ff7a00;
+}
+

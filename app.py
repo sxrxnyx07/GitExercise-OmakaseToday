@@ -44,7 +44,7 @@ def breakfast():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT name, image, clean_ingredients, directions, timing, flavor_type FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
         ("Breakfast",)
     ).fetchall()
 
@@ -132,6 +132,21 @@ def get_random_recipe():
     return jsonify({
         "recipe": recipe["name"]
     })
+
+@app.route('/recipe/<int:id>')
+def recipe_detail(id):
+
+    conn = get_db_connection()
+
+    recipe = conn.execute(
+        "SELECT * FROM recipe WHERE id = ?",
+        (id,)
+    ).fetchone()
+
+    conn.close()
+
+    return render_template('recipe_detail.html', recipe=recipe)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

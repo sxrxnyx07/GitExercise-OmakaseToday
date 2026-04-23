@@ -1,0 +1,26 @@
+<div class="container detail-page">
+
+    <h1 class="detail-title">{{ recipe['name'] }}</h1>
+
+    <img src="{{ recipe['image'] }}" class="detail-img">
+
+    <div class="detail-box">
+
+        <div class="detail-section">
+            <h3>🍳 Ingredients</h3>
+            <p>{{ recipe['clean_ingredients'] }}</p>
+        </div>
+
+        <div class="detail-section">
+            <h3>📖 Instructions</h3>
+            <p>{{ recipe['directions'] }}</p>
+        </div>
+
+        <div class="detail-meta">
+            <span>⏱ {{ recipe['timing'] }}</span>
+            <span>🌶 {{ recipe['flavor_type'] }}</span>
+        </div>
+
+    </div>
+
+</div>

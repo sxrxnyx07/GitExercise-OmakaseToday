@@ -59,15 +59,11 @@
 
             <img src="{{ r['image'] }}" alt="{{ r['name'] }}">
 
-            <h3>{{ r['name'] }}</h3>
-
-            <p><b>Ingredients:</b> {{ r['clean_ingredients'] }}</p>
-
-            <p><b>Instructions:</b> {{ r['directions'] }}</p>
-
-            <p><b>Time:</b> {{ r['timing'] }}</p>
-
-            <p><b>Flavor:</b> {{ r['flavor_type'] }}</p>
+            <h3 class="recipe-title">
+                <a href="/recipe/{{ r['id'] }}">
+                    {{ r['name'] }}
+                </a>
+            </h3>
 
         </div>
     {% endfor %}
