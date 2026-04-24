@@ -335,9 +335,10 @@ button:active {
 }
 
 .recipe-page {
-    max-width: 700px;
+    max-width: 900px;
     margin: auto;
-    padding: 40px 20px;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .recipe-bg-wrap {
@@ -396,17 +397,65 @@ button:active {
     background: #fffdf7;
     padding: 20px;
     border-radius: 18px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    margin-top: 20px;
 
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     transition: 0.2s;
+    box-sizing: border-box;
 }
 
+/* Why u will like card */
 .why-card {
-    padding: 30px;          /* 卡片变大 */
-    font-size: 16px;
-    min-height: 50px;      /* 高度变大 */
-    max-width: 500px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    background: #fff9f7;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    width: 600%;
+    max-width: 650px;
+
+    padding: 20px 24px;
+}
+
+.why-title {
+    display: inline-block;
+    background: #ffa42e;
+    color: white;
+
+    padding: 6px 14px;
+    border-radius: 20px;
+
+    font-size: 30px;
+    margin-top: -60px;
+    margin-bottom: 15px;
+}
+
+.why-list {
+    list-style: none;
+    padding: 0;
+}
+
+.why-list li {
+    margin-bottom: 8px;
+    font-size: 50px;
+}
+
+.ingredient-card,
+.required-card {
+    background: #fffdf7;
+    padding: 18px;
+    border-radius: 18px;
+
+    box-sizing: border-box;
+    overflow: hidden;   /* ⭐ 防止溢出 */
+}
+
+.ingredient-card h3,
+.required-card h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
 }
 
 .card:hover {
@@ -533,19 +582,36 @@ button:active {
 
 .mid-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
+    align-items: start;
+}
+
+.ingredient-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .ingredient-line {
     background: white;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-
+    padding: 10px 12px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 
-    font-size: 14px;
+    font-size: 15px;
+    line-height: 1.4;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+    white-space: normal;
+    word-break: normal;     /* ❌ 不要 keep-all */
+    overflow-wrap: normal;  /* ❌ 不要强制断词 */
+}
+
+.ingredient-line::before {
+    content: "• ";
+    color: #ff7a00;
+    font-weight: bold;
 }
 
 .ingredient-item:hover {
@@ -554,5 +620,10 @@ button:active {
 
 .ingredient-item.full {
     background: #fff7e6;
+}
+
+/* Directions 独立一整行 */
+.card.full {
+    grid-column: 1 / -1;
 }
 
