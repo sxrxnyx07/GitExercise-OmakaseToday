@@ -1,68 +1,82 @@
-<div class="detail-page">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recipe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
 
-    <div class="detail-box">
+<body class="recipe-bg">
 
-        <!-- LEFT SIDE -->
-        <div class="detail-left">
+<div class="recipe-bg-wrap">
 
-            <img src="{{ recipe['image'] }}" class="detail-img">
+<div class="recipe-page">
 
-            <!-- CLEAN INGREDIENTS -->
-            <div class="detail-section">
-                <h3>🍳 Ingredients</h3>
+    <!-- TITLE -->
+    <div class="hero">
+        <h1 class="hero-title">{{ recipe['name'].upper() }}</h1>
+        <p class="hero-sub">FAST AND DELICIOUS FOR WHOLE FAMILY</p>
+        <p class="hero-sub small">LET’S DO IT TOGETHER ✨</p>
+    </div>
 
-                {% for item in recipe['clean_ingredients'].split(',') %}
-                    <div class="ingredient-item">
-                        {{ item.strip() }}
-                    </div>
-                {% endfor %}
+    <!-- TOP GRID -->
+    <div class="top-grid">
 
-            </div>
-
-            <!-- FULL INGREDIENTS -->
-            <div class="detail-section">
-                <h3>📏 Required Amount</h3>
-
-                {% for item in recipe['full_ingredients'].split(',') %}
-                    <div class="ingredient-item full">
-                        {{ item.strip() }}
-                    </div>
-                {% endfor %}
-
-            </div>
-
+        <!-- IMAGE -->
+        <div class="image-box">
+            <img src="{{ recipe['image'] }}">
         </div>
 
-        <!-- RIGHT SIDE -->
-        <div class="detail-content">
-
-            <h1 class="detail-title">{{ recipe['name'] }}</h1>
-
-            <div class="detail-section">
-                <h3>⭐ Why You’ll Like This Recipe</h3>
-                <p>Quick, flavorful and beginner-friendly recipe that is perfect for any day.</p>
-            </div>
-
-            <div class="detail-section">
-                <h3>📖 Directions</h3>
-
-                {% set steps = recipe['directions'].split('.') %}
-
-                <p>
-                {% for step in steps if step.strip() %}
-                    {{ loop.index }}. {{ step.strip() }}.<br>
-                {% endfor %}
-                </p>
-
-            </div>
-
-            <div class="detail-meta">
-                <span>⏱ {{ recipe['timing'] }}</span>
-                <span>🌶 {{ recipe['flavor_type'] }}</span>
-            </div>
-
+        <!-- WHY -->
+        <div class="card why-card">
+            <h3>💛 Why You’ll Like This</h3>
+            <p>Quick, flavorful and beginner-friendly recipe that is perfect for any day.</p>
         </div>
 
     </div>
 
+    <!-- MIDDLE GRID -->
+    <div class="mid-grid">
+
+        <!-- INGREDIENTS -->
+        <div class="card">
+            <h3>🥕 Ingredients</h3>
+            {% for item in recipe['clean_ingredients'].split(',') %}
+                <div class="ingredient-line">{{ item.strip() }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- REQUIRED AMOUNT -->
+        <div class="card">
+            <h3>📏 Required Amount</h3>
+            {% for item in recipe['full_ingredients'].split(',') %}
+                <div class="ingredient-line">{{ item.strip() }}</div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <!-- DIRECTIONS FULL WIDTH -->
+    <div class="card full">
+        <h3>📖 Directions</h3>
+
+        {% set steps = recipe['directions'].split('.') %}
+        {% for step in steps if step.strip() %}
+            <div class="step">
+                <span class="step-num">{{ loop.index }}</span>
+                <span>{{ step.strip() }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- META -->
+    <div class="meta">
+        <span>⏱ {{ recipe['timing'] }}</span>
+        <span>🌶 {{ recipe['flavor_type'] }}</span>
+    </div>
+
 </div>
+
+</div>
+
+</body>
+</html>

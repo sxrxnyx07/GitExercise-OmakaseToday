@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #f4f6df, #f4f6df);
+    background: linear-gradient(135deg, #fffdc6, #f7fbce);
     margin: 0;
 }
 
@@ -334,40 +334,120 @@ button:active {
     font-size: 16px;
 }
 
-/* =========================
-   DETAIL PAGE (FIXED STRUCTURE)
-========================= */
-
-.detail-page {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
-    padding: 40px 0;
+.recipe-page {
+    max-width: 700px;
+    margin: auto;
+    padding: 40px 20px;
 }
 
-.detail-box {
-    display: flex;
-    gap: 25px;
+.recipe-bg-wrap {
+    background: #fdffe9;   /* 米黄色 */
+    padding: 50px 320px;
+    border-radius: 30px;
 
-    width: 80%;
-    max-width: 1000px;
+    max-width: 800px;
+    margin: 40px auto;
 
-    padding: 30px;
-
-    background: rgba(255,255,255,0.6);
-    backdrop-filter: blur(20px);
-
-    border-radius: 25px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.08);
 }
 
-/* LEFT SIDE */
-.detail-left {
-    flex: 0.4;
+/* 标题区 */
+.hero {
+    text-align: center;
+    margin-bottom: 25px;
+    margin-top: -20px;
+}
+
+.hero-title {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 20px;
+}
+
+.hero-sub {
+    font-size: 16px;
+    color: #777;
+}
+
+.hero-sub.small {
+    font-size: 14px;
+    color: #aaa;
+}
+
+/* 图片 */
+.top-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.image-box img {
+    width: 160%;
+    margin-left: -300px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+/* 卡片 */
+.card {
+    background: #fffdf7;
+    padding: 20px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.2s;
+}
+
+.why-card {
+    padding: 30px;          /* 卡片变大 */
+    font-size: 16px;
+    min-height: 50px;      /* 高度变大 */
+    max-width: 500px;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+/* tag */
+.tag {
+    display: inline-block;
+    background: #ffe8cc;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin: 5px;
+    font-size: 13px;
+}
+
+.tag.light {
+    background: #f1f1f1;
+}
+
+/* step */
+.step {
+    background: white;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.step-num {
+    background: #ff7a00;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+
     display: flex;
-    flex-direction: column;
-    gap: 15px;
     align-items: center;
+    justify-content: center;
+
+    margin-right: 10px;
 }
 
 .detail-img {
@@ -376,20 +456,6 @@ button:active {
     border-radius: 18px;
     object-fit: cover;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-}
-
-/* RIGHT SIDE */
-.detail-content {
-    flex: 0.6;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.detail-title {
-    font-size: 42px;
-    font-weight: 800;
 }
 
 /* =========================
@@ -430,20 +496,17 @@ button:active {
    META
 ========================= */
 
-.detail-meta {
+.meta {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    justify-content: center;
+    gap: 15px;
 }
 
-.detail-meta span {
-    background: #fff;
-    padding: 6px 14px;
-
+.meta span {
+    background: white;
+    padding: 8px 14px;
     border-radius: 20px;
-    font-size: 13px;
-
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 /* =========================
@@ -468,7 +531,13 @@ button:active {
    INGREDIENT ITEMS
 ========================= */
 
-.ingredient-item {
+.mid-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.ingredient-line {
     background: white;
     padding: 8px 12px;
     margin-bottom: 6px;
@@ -477,8 +546,6 @@ button:active {
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 
     font-size: 14px;
-
-    transition: 0.2s;
 }
 
 .ingredient-item:hover {
@@ -488,3 +555,4 @@ button:active {
 .ingredient-item.full {
     background: #fff7e6;
 }
+
