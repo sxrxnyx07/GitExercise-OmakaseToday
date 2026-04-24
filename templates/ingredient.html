@@ -1,17 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}By Ingredient | Omakase Today{% endblock %}
 
 {% block content %}
 
-    <title>Omakase Today</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     
 
-
-
-
-<h1>Find Recipes by Ingredients</h1>
+<h1>🍳 Find Recipes by Ingredients</h1>
+<p class="header-description">Pick your ingredients and let us suggest the perfect dish for you! ✨</p>
 
 {% if error %}
     <p style="color: #d32f2f; font-weight: bold;">{{ error }}</p>
@@ -19,21 +16,23 @@
 
 
 <form action="/search" method="POST" onsubmit="return validateForm()">
+    <div class="form-content-wrapper">
+        
+        <div class="search-container">
+            <input type="text" id="ingredientInput" class="search-box" onkeyup="filterSuggestions()" placeholder="Search ingredients (e.g. Chicken, Beef)...">
+            <button type="submit" class="search-icon-btn">🔍</button>
+            <div id="suggestions" class="suggestions-box"></div>
+        </div>
 
-    <div class="search-container">
-        <input type="text" id="ingredientInput" class="search-box" onkeyup="filterSuggestions()" placeholder="Search ingredients (e.g. Chicken, Beef)...">
-        <div id="suggestions" class="suggestions-box"></div>
+        <div id="selectedBox" class="selected-box">
+            <span style="color: #999; font-style: italic; font-size: 0.9rem;">No ingredients selected yet...</span>
+        </div>
+
     </div>
 
-    <div id="selectedBox" class="selected-box">
-        <span style="color: #999; font-style: italic;">No ingredients selected yet...</span>
-    </div>
-
-    
     <div id="limitReminder"></div>
-
     <input type="hidden" name="ingredients" id="hiddenInput">
-    <button class="btn" type="submit">Find Recipes</button>
+    <button class="btn-small" type="submit">Find Recipes</button>
 </form>
 
 
@@ -83,10 +82,19 @@
             const reminder = document.getElementById("limitReminder");
             reminder.innerText = "⚠️ You can only select up to 5 ingredients.";
             reminder.style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
             return;
         }
 
         selectedIngredients.push(item);
+        
+        // BLOCK THE TAG: Find the tag in the A-Z list and add 'blocked'
+        document.querySelectorAll('.tag').forEach(tag => {
+            if (tag.innerText.trim().toLowerCase() === item.toLowerCase()) {
+                tag.classList.add('blocked');
+            }
+        });
+
         updateUI();
         document.getElementById("ingredientInput").value = "";
 
@@ -95,8 +103,17 @@
         }
     }
 
+    // ONLY ONE VERSION OF THIS NOW
     function removeIngredient(item) {
         selectedIngredients = selectedIngredients.filter(i => i !== item);
+        
+        // UNBLOCK THE TAG: Find the tag in the A-Z list and remove 'blocked'
+        document.querySelectorAll('.tag').forEach(tag => {
+            if (tag.innerText.trim().toLowerCase() === item.toLowerCase()) {
+                tag.classList.remove('blocked');
+            }
+        });
+
         updateUI();
     }
 
@@ -112,12 +129,9 @@
             selectedIngredients.forEach(item => {
                 let div = document.createElement("div");
                 div.className = "selected-tag";
-
                 let displayName = item.charAt(0).toUpperCase() + item.slice(1);
-
                 div.innerHTML = displayName + " <span>✕</span>";
                 div.onclick = () => removeIngredient(item);
-
                 box.appendChild(div);
             });
         }
@@ -139,17 +153,14 @@
         filtered.forEach(item => {
             let div = document.createElement("div");
             div.innerHTML = item;
-
             div.onclick = function() {
                 addIngredient(item);
                 suggestionsBox.innerHTML = "";
                 inputElement.value = "";
             };
-
             suggestionsBox.appendChild(div);
         });
     }
-
 
     function validateForm() {
         if (selectedIngredients.length === 0) {
@@ -161,5 +172,145 @@
         return true;
     }
 </script>
+<style>
+    /* Lock the width for both boxes */
+.form-content-wrapper {
+    width: 100%;
+    max-width: 500px; /* Adjust this number to change the length of both */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between the two boxes */
+}
+
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    /* REMOVE THE LINE HERE */
+    border-bottom: none !important; 
+    box-shadow: none !important;
+}
+
+.search-box {
+    width: 100%;
+    padding: 12px 50px 12px 20px;
+    border-radius: 50px;
+    border: 2px solid #111; /* This keeps the outer ring but removes the bottom line */
+    font-size: 1rem;
+    outline: none;
+    box-sizing: border-box;
+    background: white;
+}
+
+
+
+/* Clickable Search Icon */
+.search-icon-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0;
+    color: #6b46c1;
+}
+
+/* Ingredient List Box matching search width */
+.selected-box {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px;
+    border: 2px dashed #f4c542;
+    border-radius: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box; /* Crucial to keep width exactly 100% */
+    background: white;
+}
+.btn-small {
+    display: block;
+    margin: 20px auto;
+    padding: 12px 35px;
+    background: #f4c542; /* The yellow color from your reference */
+    color: #111;
+    border: 2px solid #111; /* Thick black border */
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    /* This creates the heavy black shadow seen in your 'old' version */
+    box-shadow: 4px 4px 0px #111; 
+    transition: 0.2s;
+}
+
+.btn-small:hover {
+    /* Subtle movement when hovering */
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #111;
+}
+
+/* Styling for the blocked/selected ingredient in the list */
+/* Keep your original grey style */
+.tag.blocked {
+    background-color: #eee !important;
+    color: #bbb !important;
+    border: 2px solid #ccc !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+    position: relative; /* Needed to place the emoji inside */
+    pointer-events: auto !important; /* This allows the hover to work! */
+}
+
+/* Create the emoji but hide it normally */
+.tag.blocked::after {
+    content: "🚫";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    display: none; /* Hidden by default */
+    z-index: 10;
+}
+
+
+.header-description {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    color: #555;
+    font-size: 1.1rem;
+    margin-top: -10px; /* Pulls it closer to the heading */
+    margin-bottom: 30px;
+    font-weight: 500;
+}
+
+/* This targets each ingredient in your dropdown list */
+.suggestion-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #e0e0e0; /* The line below each ingredient */
+    transition: background-color 0.2s;
+}
+
+/* Remove the line from the very last ingredient so it looks cleaner */
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+/* Hover effect to make it feel interactive */
+.suggestion-item:hover {
+    background-color: #f1f3f5;
+    color: #2A5C5A; /* Using your Nori Teal for the text on hover */
+}
+</style>
+
 
 {% endblock %}

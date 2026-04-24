@@ -117,14 +117,46 @@ def search():
     if user_input:
         all_recipes = Recipe.query.all()
         for recipe in all_recipes:
-            clean_db_text = str(recipe.clean_ingredients).lower()
-            if all(item in clean_db_text for item in user_input):
-                clean_db_list = [i.strip() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
-                percent = int((len(user_input) / len(clean_db_list)) * 100) if clean_db_list else 0
-                missing = [i for i in clean_db_list if not any(u in i.lower() for u in user_input)]
+            recipe_ing_list = [i.strip().lower() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
+            total_count = len(recipe_ing_list)
+
+            if total_count == 0:
+                continue
+
+            # --- STRICT LOGIC START ---
+            is_valid_match = True
+            matched_in_recipe = []
+
+            for ui in user_input:
+                found_this_item = False
+                for ri in recipe_ing_list:
+                    if ui in ri:
+                        found_this_item = True
+                        if ri not in matched_in_recipe:
+                            matched_in_recipe.append(ri)
+                        break 
+                
+                if not found_this_item:
+                    is_valid_match = False
+                    break 
+            # --- STRICT LOGIC END ---
+
+            if is_valid_match:
+                have_count = len(user_input)
+                percent = int((have_count / total_count) * 100)
+                missing_ingredients = [ri for ri in recipe_ing_list if ri not in matched_in_recipe]
+                
+                display_missing = missing_ingredients[:3] 
+                extra_count = len(missing_ingredients) - len(display_missing)
+
                 results.append({
-                    "id": recipe.id, "name": recipe.name, "image": recipe.image,
-                    "rating": recipe.rating, "match": percent, "missing": missing[:5]
+                    "id": recipe.id,
+                    "name": recipe.name,
+                    "image": recipe.image,
+                    "rating": recipe.rating,
+                    "match": percent,
+                    "missing_names": display_missing,
+                    "extra_count": extra_count
                 })
 
     results = sorted(results, key=lambda x: x['match'], reverse=True)

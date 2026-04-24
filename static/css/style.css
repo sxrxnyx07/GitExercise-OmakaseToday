@@ -664,7 +664,7 @@ LAST PAGE BUTTON
 
         .suggestions-box {
             position: absolute;
-            background: white;
+            background: #F2F2F2;
             width: 100%;
             border: 2px solid #111;
             border-top: none;
@@ -683,8 +683,8 @@ LAST PAGE BUTTON
         }
 
         .suggestions-box div:hover {
-            background: #f4c542;
-            color: white;
+            background: #DCDBDB;
+            color: black;
         }
 
  
@@ -943,13 +943,14 @@ LAST PAGE BUTTON
         }
         
         .recipe-grid {
-             display: grid;
-             grid-template-columns: repeat(auto-fit, 350px); 
-             justify-content: center; 
-             gap: 30px;
-             padding: 40px 20px;
-             max-width: 1200px; 
-             margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+
         }
 
         .empty-container {
@@ -987,6 +988,7 @@ LAST PAGE BUTTON
             cursor: pointer;
             box-shadow: 8px 8px 0px #f4c542;
         }
+        
 
         .recipe-card:hover {
             
@@ -1133,11 +1135,12 @@ LAST PAGE BUTTON
             box-shadow: 8px 8px 0px #111;
         }
 
-        /* Container for the dropdown */
+/* Container for the dropdown */
 .dropdown {
     position: relative;
 }
 
+/* Hide the menu by default */
 /* Hide the menu by default */
 .dropdown-content {
     display: none;
@@ -1146,23 +1149,29 @@ LAST PAGE BUTTON
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1000;
-    border-radius: 4px;
-    top: 100%; /* Positions it directly under the navbar link */
+    
+    /* Change this to 0 or remove it entirely */
+    border-radius: 0; 
+    
+    top: 100%; 
+    overflow: hidden; 
 }
 
 /* Links inside the dropdown */
 .dropdown-content a {
-    color: #333 !important; /* Forces dark text on white background */
+    color: #333 !important; 
     padding: 12px 16px;
     text-decoration: none;
     display: block;
     text-align: left;
+    /* Ensure sizing is consistent */
+    box-sizing: border-box;
 }
 
 /* Hover effect for dropdown links */
 .dropdown-content a:hover {
-    background-color: #f1f1f1;
-    color: #d2691e !important; /* Changes text to your theme's orange */
+    background-color: hsla(340, 100%, 89%, 0.714);
+    color: black; 
 }
 
 /* Show the dropdown menu on hover */
