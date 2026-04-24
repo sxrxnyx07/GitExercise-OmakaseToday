@@ -147,6 +147,14 @@ def recipe_detail(id):
 
     return render_template('recipe_detail.html', recipe=recipe)
 
+@app.route('/test-foodtype')
+def test_foodtype():
+    conn = get_db_connection()
+    rows = conn.execute("SELECT name, food_type FROM recipe LIMIT 5").fetchall()
+    conn.close()
+
+    return jsonify([dict(row) for row in rows])
 
 if __name__ == '__main__':
     app.run(debug=True)
+
