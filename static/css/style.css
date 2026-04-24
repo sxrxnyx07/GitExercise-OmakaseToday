@@ -662,30 +662,43 @@ LAST PAGE BUTTON
             box-shadow: 0px 4px 0px #111;
         }
 
-        .suggestions-box {
-            position: absolute;
-            background: #F2F2F2;
-            width: 100%;
-            border: 2px solid #111;
-            border-top: none;
-            border-bottom-left-radius: 15px;
-            border-bottom-right-radius: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
+.suggestions-box {
+    position: absolute;
+    background: white;
+    width: 100%;
+    border: 2px solid #111;
+    border-top: none;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    max-height: 200px;
+    
+    /* CHANGE THIS PART */
+    overflow-y: auto; 
+    overflow-x: hidden;
+    
+    z-index: 1000;
+}
 
-        .suggestions-box div {
-            padding: 12px;
-            cursor: pointer;
-            text-align: left;
-            font-weight: bold;
-        }
+.suggestions-box div {
+    padding: 12px;
+    cursor: pointer;
+    text-align: left;
+    font-weight: bold;
+    /* This creates the line below each ingredient */
+    border-bottom: 2px solid #C5C4C4; 
 
-        .suggestions-box div:hover {
-            background: #DCDBDB;
-            color: black;
-        }
+    
+}
+
+/* This removes the line from the very last ingredient */
+.suggestions-box div:last-child {
+    border-bottom: none;
+}
+
+.suggestions-box div:hover {
+    background: #DCDBDB;
+    color: black;
+}
 
  
         .selected-box {

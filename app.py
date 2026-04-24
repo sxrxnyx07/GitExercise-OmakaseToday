@@ -46,27 +46,25 @@ init_db()
 
 
 
+from flask import Flask, render_template, request, jsonify
+# ... your other imports like Recipe ...
+
 @app.route('/all_recipes')
 def all_recipes():
-    # 1. Get parameters from URL
     search_query = request.args.get('search', '').strip()
-    active_flavor = request.args.get('flavor', 'ALL').strip() # Default to 'ALL'
+    active_flavor = request.args.get('flavor', 'ALL').strip()
     page = request.args.get('page', 1, type=int)
     per_page = 9
 
-    # 2. Start query
     query = Recipe.query
 
-    # 3. Filter by Flavor (if not ALL)
-    # Note: We capitalize the flavor to match 'Sour', 'Light', etc. in your DB
     if active_flavor != 'ALL':
         query = query.filter(Recipe.flavor_type == active_flavor.capitalize())
 
-    # 4. Filter by Search (Name)
     if search_query:
-        query = query.filter(Recipe.name.icontains(search_query))
+        # We use .ilike() with % wildcards to find the word ANYWHERE in the name
+        query = query.filter(Recipe.name.ilike(f"%{search_query}%"))
 
-    # 5. Execute Pagination
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
     return render_template(
@@ -74,9 +72,21 @@ def all_recipes():
         results=pagination.items,
         pagination=pagination,
         search_query=search_query,
-        active_flavor=active_flavor # Pass this to highlight the active button
+        active_flavor=active_flavor
     )
 
+# THIS IS THE NEW ROUTE FOR SUGGESTIONS
+@app.route('/get_suggestions')
+def get_suggestions():
+    q = request.args.get('q', '').strip()
+    if not q:
+        return jsonify([])
+
+    # Find recipes where name contains the query string
+    results = Recipe.query.filter(Recipe.name.ilike(f"%{q}%")).limit(5).all()
+    suggestion_list = [r.name for r in results]
+    
+    return jsonify(suggestion_list)
 # ---------------- YOUR INGREDIENT LOGIC ----------------
 
 @app.route("/ingredient-search")  # Renamed so Friend's HOME works

@@ -140,27 +140,7 @@
         hidden.value = selectedIngredients.join(",");
     }
 
-    function filterSuggestions() {
-        const inputElement = document.getElementById("ingredientInput");
-        let query = inputElement.value.toLowerCase();
-        let suggestionsBox = document.getElementById("suggestions");
-
-        suggestionsBox.innerHTML = "";
-        if (query === "") return;
-
-        const filtered = ingredients.filter(i => i.toLowerCase().startsWith(query));
-
-        filtered.forEach(item => {
-            let div = document.createElement("div");
-            div.innerHTML = item;
-            div.onclick = function() {
-                addIngredient(item);
-                suggestionsBox.innerHTML = "";
-                inputElement.value = "";
-            };
-            suggestionsBox.appendChild(div);
-        });
-    }
+ 
 
     function validateForm() {
         if (selectedIngredients.length === 0) {
@@ -171,8 +151,173 @@
         }
         return true;
     }
+    
+const searchInput = document.getElementById('ingredientInput');
+const suggestionsBox = document.getElementById('suggestions');
+
+function filterSuggestions() {
+    let query = searchInput.value.toLowerCase();
+    
+    // If box is empty, hide list
+    if (query === "") {
+        suggestionsBox.innerHTML = "";
+        suggestionsBox.style.display = "none";
+        return;
+    }
+
+    // Filter logic: Match alphabet AND exclude what is already in selectedIngredients
+    const filtered = ingredients.filter(i => 
+        i.toLowerCase().startsWith(query) && !selectedIngredients.includes(i)
+    );
+
+    // Clear old list and always show box when typing
+    suggestionsBox.innerHTML = ""; 
+    suggestionsBox.style.display = "block"; 
+
+    if (filtered.length > 0) {
+        filtered.forEach(item => {
+            let div = document.createElement("div");
+            div.className = "suggestion-item"; // For your lines
+            let matchingPart = item.slice(0, query.length); 
+            let remainingPart = item.slice(query.length);
+            div.innerHTML = `<strong>${matchingPart}</strong>${remainingPart}`;
+            
+            div.onclick = function(e) {
+                e.stopPropagation(); // Stop click from bubbling to document
+                addIngredient(item);
+                searchInput.value = ""; // Clear box
+                suggestionsBox.style.display = "none"; // Hide list
+            };
+            suggestionsBox.appendChild(div);
+        });
+    } else {
+        // MODIFIED THIS PART ONLY
+        let div = document.createElement("div");
+        div.className = "suggestion-item";
+        div.style.color = "#888";
+        div.style.fontStyle = "italic";
+        div.innerHTML = "No ingredient found...";
+        suggestionsBox.appendChild(div);
+    }
+}
+
+// 2. LISTEN FOR TYPING
+searchInput.addEventListener('input', filterSuggestions);
+
+// 3. LISTEN FOR CLICKING BACK INTO BOX
+searchInput.addEventListener('focus', filterSuggestions);
+
+// 4. THE "CLICK OUTSIDE" FIX
+document.addEventListener('click', function(event) {
+    // If the user clicks outside the search box AND outside the suggestion list
+    if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+        suggestionsBox.style.display = "none";
+    }
+});
+
+// Add this below your other event listeners
+searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault(); // Stop page from refreshing/submitting
+        
+        const query = this.value.toLowerCase().trim();
+        
+        // Find if there's a match in the ingredients that isn't already selected
+        const match = ingredients.find(i => 
+            i.toLowerCase() === query && !selectedIngredients.includes(i)
+        );
+
+        if (match) {
+            addIngredient(match); // Add it to the box
+            this.value = ""; // Clear search
+            suggestionsBox.style.display = "none"; // Hide suggestions
+        }
+    }
+});
+
 </script>
 <style>
+/* 1. The Main Wrapper - Centers and locks the width to 500px */
+.form-content-wrapper {
+    width: 100%;
+    max-width: 500px; 
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 2. The Search Input Box - Sleek and long */
+.input-sticker-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.search-box-bold {
+    width: 100%;
+    padding: 12px 55px 12px 25px;
+    border: 3px solid #111; 
+    border-radius: 50px;
+    font-size: 1.1rem;
+    outline: none;
+    background: white;
+    box-shadow: 4px 4px 0px #000; /* Neobrutalist shadow */
+}
+
+/* 3. The Search Icon */
+.bold-icon-btn {
+    position: absolute;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    color: #6c5ce7;
+}
+
+/* 4. The Dropdown - Now connects perfectly to the search bar */
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 3px solid #111;
+    border-top: none; /* Removes the double line between bar and list */
+    border-radius: 0 0 25px 25px; /* Rounds only the bottom */
+    z-index: 1000;
+    display: none;
+    box-shadow: 5px 5px 0px #000;
+    overflow: hidden;
+    margin-top: -5px; /* Tucks it slightly under the bar for a seamless look */
+}
+
+/* 5. The Suggestion Items - With the THICK lines you wanted */
+.suggestion-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    /* Thick 4px divider */
+    border-bottom: 2px solid #C1C7C7 !important; 
+    background: white;
+}
+
+/* Clean up the very last line */
+.suggestion-item:last-child {
+    border-bottom: none !important;
+}
+
+.suggestion-item:hover {
+    background: #f0f0f0;
+}
+
+.suggestion-item strong {
+    color: #6c5ce7; /* Highlights the matching letters */
+}
+
     /* Lock the width for both boxes */
 .form-content-wrapper {
     width: 100%;
@@ -292,24 +437,7 @@
     font-weight: 500;
 }
 
-/* This targets each ingredient in your dropdown list */
-.suggestion-item {
-    padding: 12px 15px;
-    cursor: pointer;
-    border-bottom: 1px solid #e0e0e0; /* The line below each ingredient */
-    transition: background-color 0.2s;
-}
 
-/* Remove the line from the very last ingredient so it looks cleaner */
-.suggestion-item:last-child {
-    border-bottom: none;
-}
-
-/* Hover effect to make it feel interactive */
-.suggestion-item:hover {
-    background-color: #f1f3f5;
-    color: #2A5C5A; /* Using your Nori Teal for the text on hover */
-}
 </style>
 
 

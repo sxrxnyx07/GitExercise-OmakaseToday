@@ -61,7 +61,7 @@
                     {% if r.missing_names %}
                         <div class="missing-info">
                             <strong style="color: #d9534f;">Missing:</strong>
-                            <span style="color: #666; font-weight: bold;">
+                            <span style="color: #666; font-weight: bold; text-transform: capitalize;">
                                 {{ r.missing_names|join(', ') }}
                             </span>
                             
@@ -76,7 +76,7 @@
                     {% endif %}
 
                     <div style="margin-top: 15px; text-align: left;">
-                         <a href="#" class="btn-view-recipe">View Recipe</a>
+                         <a href="#" class="btn-return" style="margin: 0; padding: 10px 25px; font-size: 1rem;">View Recipe</a>
                     </div>
                 </div>
             </div>
@@ -143,23 +143,7 @@
             margin-left: 5px;
         }
 
-        /* --- VIEW RECIPE BUTTON (TEAL, NO SHADOW) --- */
-        .btn-view-recipe {
-            background-color: #fbc02d;
-            color: black !important;
-            border: 2px solid #000;
-            padding: 10px 30px;
-            border-radius: 50px;
-            font-weight: 800;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s ease;
-            box-shadow: none;
-        }
-        .btn-view-recipe:hover {
-            background-color: #fbc02d;
-            transform: scale(1.05);
-        }
+        
 
         /* --- LOAD MORE / BACK BUTTONS --- */
         .btn-gray {
