@@ -122,11 +122,7 @@ button:active {
     transform: scale(0.95);
 }
 
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: grayscale(100%);
-}
+
 
 .shake {
     animation: shakeMachine 0.4s ease-in-out 3;
@@ -346,18 +342,16 @@ button:disabled {
 .recipe-page {
     max-width: 900px;
     margin: auto;
-    padding: 20px;
+    padding: 0;            /* 🔥 移除多余padding */
     box-sizing: border-box;
 }
 
 .recipe-bg-wrap {
     background: #fdffe9;   /* 米黄色 */
-    padding: 50px 320px;
+    padding: 40px 30px;    /* 🔥 缩小左右padding */
     border-radius: 30px;
-
-    max-width: 800px;
+    max-width: 950px;      /* 🔥 稍微放大容器 */
     margin: 40px auto;
-
     box-shadow: 0 20px 50px rgba(0,0,0,0.08);
 }
 
@@ -386,7 +380,7 @@ button:disabled {
     color: #aaa;
 }
 
-/* 图片 */
+/* 图片 - 🔥 已优化 */
 .top-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -395,10 +389,13 @@ button:disabled {
 }
 
 .image-box img {
-    width: 160%;
-    margin-left: -300px;
+    width: 100%;           /* 🔥 自适应宽度 */
+    height: 260px;         /* 🔥 缩小高度 */
+    object-fit: cover;
     border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    display: block;
+    margin: 0 auto;        /* 🔥 居中 */
 }
 
 /* 卡片 */
@@ -408,57 +405,117 @@ button:disabled {
     border-radius: 18px;
     margin-bottom: 30px;
     margin-top: 20px;
-
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     transition: 0.2s;
     box-sizing: border-box;
 }
 
-/* Why u will like card */
+/* Why卡片 - 🔥 已优化 */
 .why-card {
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     background: #fff9f7;
+    padding: 25px 20px;
+    height: 320px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-
-    width: 600%;
-    max-width: 650px;
-
-    padding: 20px 24px;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .why-title {
-    display: inline-block;
     background: #ffa42e;
     color: white;
-
-    padding: 6px 14px;
-    border-radius: 20px;
-
-    font-size: 30px;
-    margin-top: -60px;
-    margin-bottom: 15px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 24px;      /* 🔥 稍微小一点 */
+    margin-bottom: 20px;  /* 🔥 只有底部间距 */
+    font-weight: bold;
 }
 
 .why-list {
     list-style: none;
     padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .why-list li {
-    margin-bottom: 8px;
-    font-size: 50px;
+    font-size: 16px;      /* 🔥 正常大小 */
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 15px;
+    border-left: 4px solid #ffa42e;
 }
 
-.ingredient-card,
-.required-card {
+/* Ingredient highlight */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;            /* Ingredients和Highlights间距 */
+}
+
+.ingredient-highlight {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+    border-left: 5px solid #4caf50;
+    flex-shrink: 0;
+}
+
+.ingredient-highlight h4 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    color: #2e7d32;
+    font-weight: bold;
+    text-align: center;
+}
+
+.highlight-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.highlight-list li {
+    font-size: 14px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    color: #1b5e20;
+    font-weight: 500;
+}
+/* 🔥 Ingredients卡片向上对齐图片 */
+.ingredient-card {
     background: #fffdf7;
+    width: 90%;           /* 100% = 填满左侧 */
+    max-width: 500px;      /* 🔥 限制最大宽度 */
     padding: 18px;
     border-radius: 18px;
-
     box-sizing: border-box;
-    overflow: hidden;   /* ⭐ 防止溢出 */
+    overflow: hidden;
+    align-self: start;      /* 🔥 向上对齐 */
+    margin-top: -45px;      /* 🔥 再向上微调 */
+}
+
+/* 🔥 Required Amount卡片向下对齐Why卡片底部 */
+.required-card {
+    background: #fffdf7;
+    width: 100%;           /* 100% = 填满左侧 */
+    max-width: 500px;      /* 🔥 限制最大宽度 */
+    padding: 18px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    overflow: hidden;
+    align-self: end;        /* 🔥 向下对齐 */
 }
 
 .ingredient-card h3,
@@ -488,9 +545,13 @@ button:disabled {
 /* step */
 .step {
     background: white;
-    padding: 10px 14px;
+    padding: 16px 24px;    /* 🔥 让文字区域更宽 */
     border-radius: 12px;
-    margin-bottom: 10px;
+    margin: 0 auto 10px;   /* 🔥 完美居中 */
+    max-width: 750px;      /* 🔥 文字更胖 */
+    display: flex;
+    align-items: center;   /* 🔥 垂直对齐 */
+    gap: 20px;             /* 🔥 数字和文字间距 */
 }
 
 .step-num {
@@ -500,12 +561,11 @@ button:disabled {
     border-radius: 50%;
     width: 25px;
     height: 25px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     margin-right: 10px;
+    flex-shrink: 0;        /* 🔥 不压缩 */
 }
 
 .detail-img {
@@ -519,20 +579,16 @@ button:disabled {
 /* =========================
    SECTION CARD
 ========================= */
-
 .detail-section {
     width: 100%;
     display: flex;
     flex-direction: column;
     background: rgba(255,255,255,0.85);
     border-radius: 15px;
-
     padding: 15px 18px;
     margin-bottom: 10px;
-
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     border-left: 4px solid #d9a441;
-
     transition: 0.2s;
 }
 
@@ -553,7 +609,6 @@ button:disabled {
 /* =========================
    META
 ========================= */
-
 .meta {
     display: flex;
     justify-content: center;
@@ -570,7 +625,6 @@ button:disabled {
 /* =========================
    LINK STYLE
 ========================= */
-
 .recipe-title {
     margin-top: 10px;
 }
@@ -586,35 +640,36 @@ button:disabled {
 }
 
 /* =========================
-   INGREDIENT ITEMS
+   INGREDIENT ITEMS - 🔥 已优化
 ========================= */
-
 .mid-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 15px 0 35px 0;  /* 🔥 Ingredients上移，Required Amount下移 */
     align-items: start;
 }
 
 .ingredient-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(2, 1fr);  /* 🔥 改成2列，更宽松 */
+    gap: 15px;             /* 🔥 增加间距 */
+    min-height: 300px;     /* 🔥 统一高度 */
 }
 
 .ingredient-line {
     background: white;
-    padding: 10px 12px;
+    padding: 14px 16px;    /* 🔥 稍微放大 */
     border-radius: 10px;
-
     font-size: 15px;
     line-height: 1.4;
-
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-
     white-space: normal;
-    word-break: normal;     /* ❌ 不要 keep-all */
-    overflow-wrap: normal;  /* ❌ 不要强制断词 */
+    word-break: normal;
+    overflow-wrap: normal;
+    min-height: 60px;      /* 🔥 统一高度 */
+    display: flex;
+    align-items: center;   /* 🔥 垂直居中 */
 }
 
 .ingredient-line::before {
@@ -631,9 +686,33 @@ button:disabled {
     background: #fff7e6;
 }
 
-/* Directions 独立一整行 */
+/* Directions 独立一整行 - 🔥 已优化 */
 .card.full {
     grid-column: 1 / -1;
+    max-width: 850px;      /* 🔥 限制宽度，让文字胖一点 */
+    margin: 40px auto;     /* 🔥 完美居中 */
+    padding: 30px;         /* 🔥 增加内边距 */
+}
+
+/* 🔥 5. 响应式（手机适配） */
+@media (max-width: 900px) {
+    .top-grid, .mid-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+    
+    .image-box img, .why-card {
+        height: 240px;
+    }
+    
+    .ingredient-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .recipe-bg-wrap {
+        padding: 30px 20px;
+        margin: 20px 10px;
+    }
 }
 
             /* ___________For recipe card show after result come out____________*/

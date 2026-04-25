@@ -41,29 +41,42 @@
     </div>
 
 <!-- MIDDLE GRID -->
+<!-- MIDDLE GRID -->
 <div class="mid-grid">
 
-    <div class="card ingredient-card">
-        <h3>🥕 Ingredients</h3>
-
-        <div class="ingredient-grid">
-        {% for item in recipe['clean_ingredients'].split(',') %}
-            <div class="ingredient-line">{{ item.strip() }}</div>
-        {% endfor %}
+    <!-- 🔥 左侧：Ingredients + Highlights -->
+    <div class="left-column">
+        <div class="card ingredient-card">
+            <h3>🥕 Ingredients</h3>
+            <div class="ingredient-grid">
+                {% for item in recipe['clean_ingredients'].split(',') %}
+                    <div class="ingredient-line">{{ item.strip() }}</div>
+                {% endfor %}
+            </div>
         </div>
-
+        
+        <!-- 🔥 Ingredients Highlights（左侧下方） -->
+        <div class="ingredient-highlight">
+            <h4>✨ Ingredients Highlights</h4>
+            <ul class="highlight-list">
+                <li>🥑 Fresh & Natural</li>
+                <li>🍃 Nutrient-Rich</li>
+                <li>🔥 Easy to Find</li>
+            </ul>
+        </div>
     </div>
 
+    <!-- 🔥 右侧：Required Amount（不变） -->
     <div class="card required-card">
         <h3>📏 Required Amount</h3>
-
         <div class="ingredient-grid">
-        {% for item in recipe['full_ingredients'].split(',') %}
-            <div class="ingredient-line">{{ item.strip() }}</div>
-        {% endfor %}
+            {% for item in recipe['full_ingredients'].split(',') %}
+                <div class="ingredient-line">{{ item.strip() }}</div>
+            {% endfor %}
         </div>
-
     </div>
+
+</div>
 
 </div>
 
