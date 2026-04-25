@@ -576,7 +576,15 @@ LAST PAGE BUTTON
     align-items: center;
     margin-bottom: 20px;
 }
-
+.rituals-header h2::after{
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    margin-top: 6px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #ff6b6b, #ffb88c);
+}
 .rituals-header h2{
     font-size: 2rem;
     font-weight: 700;
@@ -588,6 +596,7 @@ LAST PAGE BUTTON
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     transition: 0.3s ease;
     width: 200px;
+    margin: 20px auto;
 }
 
 .ritual-card:hover{
@@ -610,23 +619,40 @@ LAST PAGE BUTTON
     background: rgba(255,255,255,0.15);
     backdrop-filter: blur(10px);
 }
-
-/* Header */
 .suggested-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
 }
 
 .suggested-header h3{
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #000000;
+    position: relative;
+    margin-bottom: 4px;
 }
-
+.suggested-header h3::after{
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    margin-top: 6px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #ff6b6b, #ffb88c);
+}
 .suggested-sub{
     font-size: 13px;
-    opacity: 0.7;
+    font-weight: 400;
+    letter-spacing: 0.8px;
+    color: rgba(0, 0, 0, 0.75);
+    margin-top: 2px;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(6px);
 }
 
 /* Grid */
@@ -638,16 +664,14 @@ LAST PAGE BUTTON
 
 /* Card */
 .suggest-card{
-    background: rgb(255, 255, 255);
-    border-radius: 18px;
+    background: white;
+    border-radius: 20px;
     overflow: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    display: flex;           
-    flex-direction: column;   
-    height: 300px;             
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.3s ease;
+    width: 200px;
+    margin: 20px auto;           
 }
-
 
 /* Hover effect */
 .suggest-card:hover{
@@ -662,15 +686,19 @@ LAST PAGE BUTTON
     object-fit: cover;
 }
 
-/* Info */
 .suggest-info{
     padding: 12px;
     text-align: center;
+    display: flex;            
+    flex-direction: column;     
+    justify-content: space-between; 
+    flex-grow: 1;           
 }
 
 .suggest-info h4{
     font-size: 15px;
-    margin-bottom: 10px;
+    height: 40px;        
+    overflow: hidden;   
 }
 
 .ritual-card h4{
@@ -710,7 +738,7 @@ LAST PAGE BUTTON
 /* GRID */
 .rituals-grid{
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
 }
 
@@ -735,9 +763,13 @@ LAST PAGE BUTTON
 }
 
 .ritual-card h3{
+    font-size: 15px;
     padding: 10px;
-    font-size: 1rem;
+    height: 40px;        
+    overflow: hidden;
+    text-align: center;
 }
+
 
 /* =========================
    HOME PAGE
@@ -1368,15 +1400,11 @@ LAST PAGE BUTTON
     object-fit: cover;
     border-radius: 5px;
 }
-.empty-layout{
-    display: flex;              /* ⭐ 关键：横排 */
-    align-items: flex-start;
-    justify-content: center;
-    gap: 60px;
-    margin-top: 40px;
+.empty-wrapper{
+    grid-column: 1 / -1;  
+    display: flex;
 }
 .empty-state-card{
-    width: 380px;
     padding: 45px 30px;
     border-radius: 25px;
     text-align: center;
@@ -1384,6 +1412,7 @@ LAST PAGE BUTTON
     backdrop-filter: blur(12px);
     box-shadow: 0 15px 40px rgba(0,0,0,0.08);
     animation: fadeUp 0.5s ease;
+    width: 600px;
 }
 
 .empty-icon{
