@@ -12,59 +12,48 @@ let emailExists = false
 // SUBMIT
 // =========================
 if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener("submit", (e) => {
 
-        let errors = []
+        let errors = [];
 
+        // REGISTER
         if (page === "register") {
-            errors = getSignupFormErrors(
-                username_input?.value,
-                email_input?.value,
-                password_input?.value,
-                repeat_password_input?.value,
-                emailExists
-            )
+            if (!username_input?.value) errors.push("Username required");
+            if (!email_input?.value) errors.push("Email required");
+            if (!password_input?.value) errors.push("Password required");
+
+            if (password_input?.value !== repeat_password_input?.value) {
+                errors.push("Passwords do not match");
+            }
         }
 
+        // RESET
         else if (page === "reset") {
-            errors = getResetErrors(
-                username_input?.value,
-                email_input?.value
-            )
+            if (!email_input?.value) errors.push("Email required");
         }
 
+        // NEW PASSWORD
         else if (page === "newpassword") {
-            errors = getNewPasswordErrors(
-                password_input?.value,
-                repeat_password_input?.value
-            )
+            if (!password_input?.value) errors.push("Password required");
+
+            if (password_input?.value !== repeat_password_input?.value) {
+                errors.push("Passwords do not match");
+            }
         }
 
+        // LOGIN
         else if (page === "login") {
-            errors = getLoginFormErrors(
-                email_input?.value,
-                password_input?.value
-            )
+            if (!email_input?.value) errors.push("Email required");
+            if (!password_input?.value) errors.push("Password required");
         }
 
         if (errors.length > 0) {
-            e.preventDefault()
-            error_message.innerText = errors.join("\n")
+            e.preventDefault();
+            error_message.innerText = errors.join("\n");
         }
-    })
+    });
 }
 
-// =========================
-// RESET STEP 1
-// =========================
-function getResetErrors(username, email) {
-    let errors = []
-
-    if (!username) errors.push("Username is required")
-    if (!email) errors.push("Email is required")
-
-    return errors
-}
 
 // =========================
 // NEW PASSWORD

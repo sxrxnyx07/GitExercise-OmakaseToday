@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="saved-recipes-page">
+    <h2>Saved Recipes</h2>
+
+    <div class="rituals-grid">
+
+        {% for recipe in saved_recipes %}
+        <div class="ritual-card">
+
+            <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
+
+            <h3>{{ recipe.name }}</h3>
+            <a href="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}" class="unsave-btn">
+                Remove
+            </a>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

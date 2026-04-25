@@ -85,28 +85,84 @@
     <!-- Header -->
     <div class="rituals-header">
         <h2>Saved Rituals</h2>
-        <a href="#" class="view-all">View all</a>
+        <a href="{{ url_for('saved_recipes') }}" class="view-all">View all</a>
     </div>
 
     <!-- Grid -->
     <div class="rituals-grid">
 
-        <div class="ritual-card">
-            <img src="{{ url_for('static', filename='css/picture/f1.jpg') }}">
-            <h3>Sweet Apples Squares</h3>
+        {% if saved_recipes and saved_recipes|length > 0 %}
+
+            {% for recipe in saved_recipes %}
+            <div class="ritual-card">
+
+                <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
+
+                <h3>{{ recipe.name }}</h3>
+
+            </div>
+            {% endfor %}
+
+        {% else %}
+
+        <div class="empty-layout">  
+
+            <div class="empty-state-card">
+
+                <div class="empty-icon">🍽️</div>
+
+                <h2>No Saved Rituals Yet</h2>
+
+                <p>
+                    Start exploring delicious recipes and build your personal collection.
+                </p>
+
+                <a href="/" class="explore-btn">
+                    Explore Recipes
+                </a>
+
+            </div>
+
         </div>
 
-        <div class="ritual-card">
-            <img src="{{ url_for('static', filename='css/picture/f2.jpg') }}">
-            <h3>Chicken Adobo</h3>
+
         </div>
 
-        <div class="ritual-card">
-            <img src="{{ url_for('static', filename='css/picture/f3.jpg') }}">
-            <h3>Cinanamon Chicken Curry</h3>
+        {% endif %}
+
+
+
+    </div>
+
+    <div class="suggested-section">
+
+        <div class="suggested-header">
+            <h3>You might like</h3>
+            <span class="suggested-sub">Based on your taste</span>
+        </div>
+
+        <div class="suggested-recipes">
+            {% for recipe in suggested_recipes %}
+            <div class="suggest-card">
+
+                <div class="suggest-img">
+                    <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
+                </div>
+
+                <div class="suggest-info">
+                    <h4>{{ recipe.name }}</h4>
+
+                    <a href="{{ url_for('save_recipe', recipe_id=recipe.id) }}" class="save-btn">
+                        ❤️ Save
+                    </a>
+                </div>
+
+            </div>
+            {% endfor %}
         </div>
 
     </div>
+
 
 </section>
 

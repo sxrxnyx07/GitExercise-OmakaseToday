@@ -4,10 +4,36 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
+from itsdangerous import URLSafeTimedSerializer
+from flask_mail import Mail, Message
+import secrets
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"
 
+# =======================
+# EMAIL CONFIG
+# =======================
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'xinfeic195@gmail.com'
+app.config['MAIL_PASSWORD'] = 'jloc xdjj rcfe hufe'
+
+mail = Mail(app)
+
+# Token serializer
+s = URLSafeTimedSerializer(app.secret_key)
+
+def generate_token(email):
+    return s.dumps(email, salt='password-reset')
+
+def verify_token(token):
+    try:
+        email = s.loads(token, salt='password-reset', max_age=300)
+        return email
+    except:
+        return None
 # =======================
 # Database path
 # =======================
@@ -54,11 +80,41 @@ def init_db():
         role TEXT DEFAULT 'user'
     )
     """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS saved_recipes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,    
+        user_email TEXT,
+        recipe_id INTEGER
+    )
+    """)
+    #id = the save record number (system-generated log ID)
+    #user_email = who saved it
+    #recipe_id = what recipe was saved
+    conn.commit()
+    conn.close()
+init_db()
+
+def add_reset_columns():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN reset_token TEXT")
+    except:
+        pass
+
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN reset_used INTEGER DEFAULT 0")
+    except:
+        pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN reset_viewed INTEGER DEFAULT 0")
+    except:
+        pass
     conn.commit()
     conn.close()
 
-init_db()
-
+add_reset_columns()
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
@@ -141,6 +197,7 @@ def login():
 # ---------------- PROFILE ----------------
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
+
     if "user" not in session:
         return redirect(url_for("login"))
 
@@ -149,40 +206,49 @@ def profile():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
+    # ---------------- UPDATE PROFILE ----------------
     if request.method == "POST":
         username = request.form["username"]
         bio = request.form["bio"]
 
         c.execute("""
             UPDATE users
-            SET username = ?, bio = ?
-            WHERE email = ?
+            SET username=?, bio=?
+            WHERE email=?
         """, (username, bio, email))
 
         conn.commit()
 
+    # ---------------- GET USER ----------------
     c.execute("""
-    SELECT username, email, bio, profile_pic
-    FROM users
-    WHERE email = ?
+        SELECT username, email, bio, profile_pic
+        FROM users
+        WHERE email = ?
     """, (email,))
 
     user = c.fetchone()
+
+    # ---------------- GET SAVED RECIPES ----------------
+    c.execute("""
+        SELECT recipe_id FROM saved_recipes
+        WHERE user_email = ?
+    """, (email,))
+
+    saved_ids = [row[0] for row in c.fetchall()]
     conn.close()
 
-    if not user:
-        session.pop("user", None)
-        return redirect(url_for("login"))
-
+    saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all()
+    suggested_recipes = Recipe.query.limit(3).all()
     return render_template(
-        "profile.html",
-        username=user[0],
-        email=user[1],
-        bio=user[2],
-        profile_pic=user[3],
-        role=session.get("role")
-    )
-
+    "profile.html",
+    username=user[0],
+    email=user[1],
+    bio=user[2],
+    profile_pic=user[3],
+    saved_recipes=saved_recipes,
+    suggested_recipes=suggested_recipes, 
+    role=session.get("role")
+)
 
 
 # ---------------- UPLOAD PROFILE PIC ----------------
@@ -219,69 +285,112 @@ def upload_profile_pic():
     return redirect(url_for("profile"))
 
 
-# ---------------- RESET STEP 1 ----------------
+# ---------------- RESET ----------------
 @app.route("/resetpassword", methods=["GET", "POST"])
 def resetpassword():
     if request.method == "POST":
-        username = request.form["username"]
         email = request.form["email"]
 
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
 
-        c.execute("""
-            SELECT * FROM users
-            WHERE email=? AND username=?
-        """, (email, username))
-
+        c.execute("SELECT * FROM users WHERE email=?", (email,))
         user = c.fetchone()
-        conn.close()
 
         if user:
-            session["reset_user"] = email
-            return redirect(url_for("newpassword"))
-        else:
-            return render_template("resetpassword.html", error="Invalid username or email")
+            #generate token
+            token = generate_token(email)
+            # store in database
+            c.execute("""
+                UPDATE users
+                SET reset_token=?, reset_used=0
+                WHERE email=?
+            """, (token, email))
+            conn.commit()
+
+            reset_link = url_for("reset_with_token", token=token, _external=True)
+
+            msg = Message(
+                "Password Reset",
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[email]
+            )
+            msg.body = f"Click to reset password:\n{reset_link}"
+            mail.send(msg)
+
+        conn.close()
+
+        return render_template("resetpassword.html", error="If email exists, link sent.")
 
     return render_template("resetpassword.html")
 
+@app.route("/reset/<token>", methods=["GET", "POST"])
+def reset_with_token(token):
 
-# ---------------- RESET STEP 2 ----------------
-@app.route("/newpassword", methods=["GET", "POST"])
-def newpassword():
-    if "reset_user" not in session:
-        return redirect(url_for("login"))
+    # 1. check expiry (token validity + time limit)
+    email_from_token = verify_token(token)
+    if not email_from_token:
+        return "Link expired (5 minutes)"
 
-    if request.method == "POST":
-        password = request.form["password"]
-        repeat = request.form["repeat-password"]
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
 
-        if not password:
-            return render_template("newpassword.html", error="Password is required")
+    # 2. check token in database
+    c.execute("""
+        SELECT email, reset_used
+        FROM users
+        WHERE reset_token=?
+    """, (token,))
 
-        if len(password) < 8:
-            return render_template("newpassword.html", error="Password must be at least 8 characters")
+    row = c.fetchone()
 
-        if password != repeat:
-            return render_template("newpassword.html", error="Passwords do not match")
-
-        hashed_pw = generate_password_hash(password)
-        email = session["reset_user"]
-
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-
-        c.execute("UPDATE users SET password=? WHERE email=?", (hashed_pw, email))
-
-        conn.commit()
+    if not row:
         conn.close()
+        return "Invalid link"
 
-        session.pop("reset_user", None)
+    email, used = row
 
-        return redirect(url_for("login"))
+    # 🔥 3. check single-use FIRST (important fix)
+    if used == 1:
+        conn.close()
+        return "This link has already been used"
 
-    return render_template("newpassword.html")
+    # 4. security check (token must match email)
+    if email != email_from_token:
+        conn.close()
+        return "Invalid link"
 
+    # ---------------- GET ----------------
+    if request.method == "GET":
+        conn.close()
+        return render_template("newpassword.html")
+
+    # ---------------- POST ----------------
+    password = request.form["password"]
+    repeat = request.form["repeat-password"]
+
+    if not password:
+        return render_template("newpassword.html", error="Password required")
+
+    if len(password) < 8:
+        return render_template("newpassword.html", error="Min 8 characters")
+
+    if password != repeat:
+        return render_template("newpassword.html", error="Passwords do not match")
+
+    hashed_pw = generate_password_hash(password)
+
+    # update password + mark token used
+    c.execute("""
+        UPDATE users
+        SET password=?, reset_used=1, reset_token=NULL
+        WHERE email=?
+    """, (hashed_pw, email))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("login"))
 
 # ---------------- LOGOUT ----------------
 @app.route("/logout")
@@ -452,8 +561,6 @@ def add_recipe():
 
     return redirect("/admin/recipes")
 
-
-
 @app.route("/admin/recipes/delete/<int:id>")
 def delete_recipe(id):
     if session.get("role") != "admin":
@@ -496,6 +603,76 @@ def update_recipe(id):
 
     return redirect(url_for("admin_recipes"))
 
+@app.route("/save-recipe/<int:recipe_id>")
+def save_recipe(recipe_id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    email = session["user"]
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT 1 FROM saved_recipes
+        WHERE user_email=? AND recipe_id=?
+    """, (email, recipe_id))
+
+    exists = c.fetchone()
+
+    if not exists:
+        c.execute("""
+            INSERT INTO saved_recipes (user_email, recipe_id)
+            VALUES (?, ?)
+        """, (email, recipe_id))
+
+        conn.commit()
+
+    conn.close()
+
+    return redirect(request.referrer)
+
+@app.route("/unsave-recipe/<int:recipe_id>")
+def unsave_recipe(recipe_id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    email = session["user"]
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        DELETE FROM saved_recipes
+        WHERE user_email=? AND recipe_id=?
+    """, (email, recipe_id))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(request.referrer)
+
+@app.route("/saved-recipes")
+def saved_recipes():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    email = session["user"]
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT recipe_id FROM saved_recipes
+        WHERE user_email = ?
+    """, (email,))
+
+    saved_ids = [row[0] for row in c.fetchall()]
+    conn.close()
+
+    saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all() if saved_ids else []
+
+    return render_template("saved_recipes.html", saved_recipes=saved_recipes)
 
 if __name__ == "__main__":
     app.run(debug=True)

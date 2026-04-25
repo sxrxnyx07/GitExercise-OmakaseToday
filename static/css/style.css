@@ -581,6 +581,120 @@ LAST PAGE BUTTON
     font-size: 2rem;
     font-weight: 700;
 }
+.ritual-card{
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.3s ease;
+    width: 200px;
+}
+
+.ritual-card:hover{
+    transform: translateY(-8px) scale(1.03);
+}
+
+/* IMAGE */
+.ritual-card img{
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+
+/* SUGGESTED SECTION */
+.suggested-section{
+    margin-top: 40px;
+    padding: 20px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+}
+
+/* Header */
+.suggested-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.suggested-header h3{
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.suggested-sub{
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+/* Grid */
+.suggested-recipes{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+/* Card */
+.suggest-card{
+    background: rgb(255, 255, 255);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;           
+    flex-direction: column;   
+    height: 300px;             
+}
+
+
+/* Hover effect */
+.suggest-card:hover{
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* Image */
+.suggest-img img{
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+}
+
+/* Info */
+.suggest-info{
+    padding: 12px;
+    text-align: center;
+}
+
+.suggest-info h4{
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.ritual-card h4{
+    font-size: 14px;
+    margin: 8px 0 4px;
+}
+
+.save-btn{
+    display: inline-block;
+    margin: 10px auto 15px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #fff0f3;
+    color: #ff4d6d;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+.save-btn:hover{
+    background: #ff4d6d;
+    color: white;
+}
 
 .view-all{
     text-decoration: none;
@@ -1253,4 +1367,132 @@ LAST PAGE BUTTON
     height: 50px;
     object-fit: cover;
     border-radius: 5px;
+}
+.empty-layout{
+    display: flex;              /* ⭐ 关键：横排 */
+    align-items: flex-start;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 40px;
+}
+.empty-state-card{
+    width: 380px;
+    padding: 45px 30px;
+    border-radius: 25px;
+    text-align: center;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    animation: fadeUp 0.5s ease;
+}
+
+.empty-icon{
+    font-size: 55px;
+    margin-bottom: 12px;
+    animation: float 2s ease-in-out infinite;
+}
+
+.empty-state-card h2{
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: #222;
+}
+
+.empty-state-card p{
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+
+.explore-btn{
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 12px;
+
+    background: linear-gradient(135deg, #ff6b6b, #ff9f43);
+    color: white;
+    text-decoration: none;
+
+    transition: 0.25s ease;
+}
+
+.explore-btn:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(255,107,107,0.3);
+}
+
+/* animations */
+@keyframes fadeUp{
+    from{
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float{
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0); }
+}
+/* SUGGESTED TITLE */
+.suggested-section{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.suggested-title{
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #222;
+    position: relative;
+}
+
+.suggested-title::after{
+    content: "";
+    width: 40px;
+    height: 3px;
+    background: #ff6b6b;
+    display: block;
+    margin-top: 6px;
+    border-radius: 2px;
+}
+
+/* GRID */
+.suggested-recipes{
+    display: flex;
+    grid-template-columns: repeat(2, 220px);
+    gap: 25px;
+}
+.saved-recipes-page {
+    padding: 40px;
+    min-height: 100vh;
+    font-family: 'Fredoka', sans-serif;
+}
+.saved-recipes-page h2 {
+    font-size: 32px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+.unsave-btn {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    background: #ff4d4d;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 12px;
+    transition: 0.2s;
+}
+
+.unsave-btn:hover {
+    background: #e60000;
 }
