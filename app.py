@@ -5,13 +5,6 @@ import random
 
 app = Flask(__name__)
 
-recipes = {
-    "breakfast": ["🥐Toast🥪", "🥚Egg🍳", "🍚Congee🍲", "🥗Salad🥒", "🧇Pancake🥞"],
-    "lunch": ["🍛Rice🍚", "🍜Mihun🍜", "🍝Noodles🍝", "🍜Kuey Teow🍜", "🥟Wrap🌯"],
-    "dinner": ["🥩Protein🍖", "🍲Soup🍲", "🥕Vegetables🥦", "🥟Staple🍚"],
-    "dessert": ["🧁Cake🍰", "🍨Ice Cream🍦", "🍮Pudding🍮", "🍪Cookies🍪", "🥧Kuih🥮"],
-    "drinks": ["☕Caffeine Series☕", "🍵Tea Series🍵", "🍈Fresh Juice🍉", "🍋‍🟩Sparkling Drinks🍹", "❄️Blended Drinks🧊"]
-}
 
 def get_db_connection():
     conn = sqlite3.connect('omakase.db')
@@ -109,28 +102,23 @@ def get_random_recipe():
 
     conn = get_db_connection()
 
-    recipe = conn.execute(
-        """
-        SELECT name
+    recipe = conn.execute("""
+        SELECT id, name, image
         FROM recipe
-        WHERE meal_category = ?
+        WHERE LOWER(meal_category) = LOWER(?)
         ORDER BY RANDOM()
         LIMIT 1
-        """,
-        (category,)
-    ).fetchone()
+    """, (category,)).fetchone()
 
     conn.close()
 
-    # fallback system (old prototype)
     if not recipe:
-        fallback = recipes.get(category, ["No recipe"])
-        return jsonify({
-            "recipe": random.choice(fallback)
-        })
+        return jsonify({"recipe": "No recipe found"})
 
     return jsonify({
-        "recipe": recipe["name"]
+        "id": recipe["id"],
+        "name": recipe["name"],
+        "image": recipe["image"]
     })
 
 @app.route('/recipe/<int:id>')

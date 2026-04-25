@@ -184,7 +184,36 @@ function spin() {
 
                 isSpinning = false;
                 warningMsg.innerText = "";
-                resultBox.innerText = "You got: " + data.recipe;
+                resultBox.innerText = "You got: " + data.name;    // resultbox show recipe name
+
+                let container = document.querySelector(".recipe-container");
+
+                container.innerHTML = `
+                    <div class="recipe-card gacha-result" id="gachaCard">
+                        <img src="${data.image}">
+                        <h3 class="recipe-title">
+                            <a href="/recipe/${data.id}">
+                            ${data.name}
+                            </a>
+                        </h3>
+                    </div>
+                `;
+
+setTimeout(() => {
+    document.getElementById("gachaCard").classList.add("pop");
+}, 50);
+
+                document.querySelector(".recipe-container").innerHTML = `
+                    <div class="recipe-card gacha-result pop">
+                        <img src="${data.image}">
+                        <h3 class="recipe-title">
+                            <a href="/recipe/${data.id}">
+                            ${data.name}
+                            </a>
+                        </h3>
+                    </div>
+                `;
+
 
                 document.getElementById("resultHint").style.opacity = 1;
 

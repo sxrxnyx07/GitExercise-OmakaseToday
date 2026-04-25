@@ -9,23 +9,23 @@ def auto_food_type(name):
     #_____________BREAKFAST___________#
 
     # 🍞 Bread (Done)
-    if any(x in name for x in ["bread"]):
-        return "Toast"
+    if "bread" in name:
+        return "Bread"
     
     # 🥞 Crepes (Done)
-    if any(x in name for x in ["crepes"]):
+    if "crepes" in name:
         return "Crepes"
     
     # 🥞 Oats (Done)
-    if any(x in name for x in ["oats"]):
+    if "oats" in name:
         return "Oats"
     
     # 🥞 Smoothie (Done)
-    if any(x in name for x in ["smoothie"]):
+    if "smoothie" in name:
         return "Smoothie"
     
     #  Cocktail (Done)
-    if any(x in name for x in ["cranberry-pomegranate mimosa"]):
+    if "cranberry-pomegranate mimosa" in name:
         return "Cocktail"
     
     #_____________LUNCH___________#
@@ -43,7 +43,7 @@ def auto_food_type(name):
         return "Meat"
     
     #  Sides (Done)
-    if any(x in name for x in ["goat cheese"]):
+    if "goat cheese" in name:
         return "Sides"
     
     #  Jam (Done)
@@ -55,7 +55,7 @@ def auto_food_type(name):
         return "Beverage"
     
     #  Fruit (Done)
-    if any(x in name for x in ["fruit"]):
+    if "fruit" in name:
         return "Fruit"
     
     #_____________Dinner___________#
@@ -77,19 +77,19 @@ def auto_food_type(name):
         return "Main Dishes"
     
     #  Pizza (Done)
-    if any(x in name for x in ["pizza"]):
+    if "pizza" in name:
         return "Pizza"
     
     #  Tacos (Done)
-    if any(x in name for x in ["tacos"]):
+    if "tacos" in name:
         return "Tacos"
     
     #  Sauce (Done)
-    if any(x in name for x in ["sauce"]):
+    if "sauce" in name:
         return "Sauce"
     
     #  Fruit (Done)
-    if any(x in name for x in ["mission figs"]):
+    if "mission figs" in name:
         return "Fruit"
     
     #_____________Dessert___________#
@@ -113,20 +113,20 @@ def auto_food_type(name):
     #_____________Drinks___________#
 
     #  Cocktail (Done)
-    if any(x in name for x in ["cocktail"]):
+    if "cocktail" in name:
         return "Cocktail"
     
     #  Refreshing (Done)
-    if any(x in name for x in ["flavored water"]):
+    if "flavored water" in name:
         return "Refreshing"
     
     #  Juice (Done)
     if any(x in name for x in ["mango", "pineapple", "cherry"]):
         return "Soother"
     
-    #  Sparkling water (Done)
-    if any(x in name for x in ["sangria"]):
-        return "Sparkling Water"
+    #  Sparkling Drinks (Done)
+    if "sangria" in name:
+        return "Sparkling Drink"
     
 
     return "Other"
