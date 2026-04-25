@@ -139,13 +139,9 @@ function spin() {
 
     let colors = ["red","yellow","green","blue","purple"];
 
-    if (isSpinning) {
-        warningMsg.innerText = "⚠️ Please wait, the machine is spinning... ";
-        return;
-    }
-
-    isSpinning = true;
-    warningMsg.innerText = "";
+        isSpinning = true;
+    button.disabled = true;
+    warningMsg.innerText = "⚠️ Please wait, the machine is spinning... ";
 
     // ⭐ reset ONLY state 
     ball.className = "ball";
@@ -176,17 +172,25 @@ function spin() {
         ball.classList.add(randomColor);
         ball.classList.add("drop");
 
-        fetch('/random?category=drinks')
+        fetch('/random?category=breakfast')
         .then(res => res.json())
         .then(data => {
 
             setTimeout(() => {
 
                 isSpinning = false;
+                button.disabled = false;
                 warningMsg.innerText = "";
                 resultBox.innerText = "You got: " + data.name;    // resultbox show recipe name
 
                 let container = document.querySelector(".recipe-container");
+
+                container.style.opacity = 0;
+
+            setTimeout(() => {
+                container.innerHTML = newCardHTML;
+                container.style.opacity = 1;
+            }, 200);
 
                 container.innerHTML = `
                     <div class="recipe-card gacha-result" id="gachaCard">

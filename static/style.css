@@ -122,6 +122,12 @@ button:active {
     transform: scale(0.95);
 }
 
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
 .shake {
     animation: shakeMachine 0.4s ease-in-out 3;
 }
@@ -310,6 +316,7 @@ button:active {
     gap: 20px;
     margin-top: 30px;
     width: 90%;
+    transition: all 0.3s ease;
 }
 
 .recipe-card {

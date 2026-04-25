@@ -139,13 +139,9 @@ function spin() {
 
     let colors = ["red","yellow","green","blue","purple"];
 
-    if (isSpinning) {
-        warningMsg.innerText = "⚠️ Please wait, the machine is spinning... ";
-        return;
-    }
-
     isSpinning = true;
-    warningMsg.innerText = "";
+    button.disabled = true;
+    warningMsg.innerText = "⚠️ Please wait, the machine is spinning... ";
 
     // ⭐ reset ONLY state 
     ball.className = "ball";
@@ -183,6 +179,7 @@ function spin() {
             setTimeout(() => {
 
                 isSpinning = false;
+                button.disabled = false;
                 warningMsg.innerText = "";
                 resultBox.innerText = "You got: " + data.name;    // resultbox show recipe name
 
