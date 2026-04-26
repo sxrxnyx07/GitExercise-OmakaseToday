@@ -34,7 +34,7 @@
         {% for f in flavors %}
             <a href="{{ url_for('all_recipes', flavor=f, search=search_query) }}" 
                class="filter-pill {% if active_flavor == f %}active{% endif %}">
-               {{ f }}
+                {{ f }}
             </a>
         {% endfor %}
     </div>
@@ -44,7 +44,7 @@
     {% for r in results %}
     <div class="recipe-card">
         <div class="image-container">
-            <button class="heart-btn" onclick="event.stopPropagation(); toggleSave(this);">❤</button>
+            <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
             {% if r.image and r.image.startswith('http') %}
                 <img src="{{ r.image }}" alt="{{ r.name }}">
             {% else %}
@@ -71,8 +71,7 @@
     </div>
     {% else %}
     <div class="no-results-centered">
-        <h2 class="no-match-title">🙄 No Matches Found</h2>
-        <div class="title-underline"></div>
+        <h2 class="no-match-title">😕 No Matches Found</h2>
         <p>We couldn't find any <strong>{{ active_flavor if active_flavor != 'ALL' else '' }}</strong> recipes matching "<strong>{{ search_query }}</strong>".</p>
         <br>
         <a href="{{ url_for('all_recipes') }}" class="view-all-link">View All Recipes</a>
@@ -80,7 +79,7 @@
     {% endfor %}
 </div>
 
-{% if results %}
+{% if results and pagination.pages > 1 %}
 <div class="pagination">
     {% if pagination.has_prev %}
         <a href="{{ url_for('all_recipes', page=pagination.prev_num, search=search_query, flavor=active_flavor) }}">⬅ Prev</a>
@@ -93,7 +92,7 @@
                {{ page_num }}
             </a>
         {% else %}
-            <span>...</span>
+            <span class="dots">...</span>
         {% endif %}
     {% endfor %}
 
@@ -103,103 +102,106 @@
 </div>
 {% endif %}
 
-<style>
-/* --- HEADER & GAPS --- */
-.all-recipes-header-container {
-    text-align: center;
-    margin-top: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.page-header h1 { font-size: 2.8rem; margin: 0; padding-top: 5px; }
-.header-subtext { margin: 5px 0 10px 0; }
-
-/* --- SEARCH BOX --- */
-.search-container-bold { margin-bottom: 15px; }
-.input-sticker-wrapper { position: relative; display: flex; align-items: center; }
-.search-box-bold {
-    width: 380px; 
-    padding: 10px 55px 10px 20px;
-    border: 3px solid #111; 
-    border-radius: 50px;
-    font-size: 1.1rem;
-    outline: none;
-}
-.bold-icon-btn {
-    position: absolute;
-    right: 18px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.3rem;
-    color: #6c5ce7;
-}
-
-/* --- FLAVOR PILLS --- */
-.filter-container {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 35px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.filter-pill {
-    text-decoration: none;
-    color: #111;
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 6px 18px;
-    border: 2px solid #111;
-    border-radius: 50px;
-    background: white;
-    transition: 0.2s;
-}
-.filter-pill:hover { background: #f8f8f8; transform: translateY(-2px); }
-.filter-pill.active { background: #111; color: white; }
-
-/* --- FLEX GRID (Centers last row) --- */
-.all-recipes-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding-bottom: 40px;
-}
-.recipe-card { flex: 0 1 350px; max-width: 350px; }
-
-/* --- NO MATCHES & PAGINATION --- */
-.no-results-centered {
-    width: 100%;
-    text-align: center;
-    padding: 60px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.no-match-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 5px; }
-.title-underline { width: 280px; height: 4px; background-color: #f4c542; margin-bottom: 15px; }
-.view-all-link { color: #ff6b6b; font-weight: bold; text-decoration: underline; }
-
-.pagination { text-align: center; margin: 30px 0 60px 0; }
-.pagination a, .pagination span {
-    display: inline-block;
-    margin: 5px;
-    padding: 8px 15px;
-    border-radius: 8px;
-    text-decoration: none;
-    background: #f0f0f0;
-    color: #333;
-    font-weight: 600;
-}
-.pagination a.active { background: #ff6b6b; color: white; }
-</style>
-
 <script>
-function toggleSave(button) {
+function toggleSave(recipeId, button) {
+    if (!button || button === undefined) {
+        return;
+    }
+
     button.classList.toggle('saved');
+
+    fetch('/toggle-save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe_id: recipeId })
+    })
+    .then(response => {
+        if (!response.ok) {
+            button.classList.toggle('saved');
+            alert("Please login to save recipes!");
+            return;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data) console.log("Success:", data.message);
+    })
+    .catch(error => {
+        console.error('Fetch Error:', error);
+        button.classList.toggle('saved');
+    });
 }
+
+(function() {
+    const searchInput = document.querySelector('.search-box-bold');
+    const wrapper = document.querySelector('.input-sticker-wrapper');
+
+    if (wrapper && searchInput) {
+        const suggestionsBox = document.createElement('div');
+        suggestionsBox.className = 'suggestions-dropdown';
+        wrapper.appendChild(suggestionsBox);
+
+        searchInput.addEventListener('input', async function() {
+            const query = this.value.trim();
+            if (query.length < 1) {
+                suggestionsBox.innerHTML = "";
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/get_suggestions?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                suggestionsBox.innerHTML = "";
+                suggestionsBox.style.display = "block";
+
+                if (data && data.length > 0) {
+                    data.forEach(name => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        const regex = new RegExp(`(${query})`, 'gi');
+                        div.innerHTML = name.replace(regex, "<strong>$1</strong>");
+                        div.onclick = function() {
+                            searchInput.value = name;
+                            suggestionsBox.style.display = "none";
+                            searchInput.closest('form').submit();
+                        };
+                        suggestionsBox.appendChild(div);
+                    });
+                } else {
+                    const noResult = document.createElement('div');
+                    noResult.className = 'suggestion-item';
+                    noResult.style.color = "#888";
+                    noResult.style.fontStyle = "italic";
+                    noResult.innerText = "No recipe found...";
+                    suggestionsBox.appendChild(noResult);
+                }
+            } catch (err) {
+                console.error("Suggestion Error:", err);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) {
+                suggestionsBox.style.display = "none";
+            }
+        });
+    }
+})();
+
+window.addEventListener('pageshow', function(event) {
+    const searchInput = document.querySelector('.search-box-bold');
+    const sBox = document.querySelector('.suggestions-dropdown');
+    
+    if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+        if (searchInput) searchInput.value = "";
+        if (sBox) {
+            sBox.style.display = "none";
+            sBox.innerHTML = "";
+        }
+    }
+});
 </script>
+
 {% endblock %}

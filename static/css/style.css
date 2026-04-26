@@ -662,30 +662,43 @@ LAST PAGE BUTTON
             box-shadow: 0px 4px 0px #111;
         }
 
-        .suggestions-box {
-            position: absolute;
-            background: white;
-            width: 100%;
-            border: 2px solid #111;
-            border-top: none;
-            border-bottom-left-radius: 15px;
-            border-bottom-right-radius: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
+.suggestions-box {
+    position: absolute;
+    background: white;
+    width: 100%;
+    border: 2px solid #111;
+    border-top: none;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    max-height: 200px;
+    
+    /* CHANGE THIS PART */
+    overflow-y: auto; 
+    overflow-x: hidden;
+    
+    z-index: 1000;
+}
 
-        .suggestions-box div {
-            padding: 12px;
-            cursor: pointer;
-            text-align: left;
-            font-weight: bold;
-        }
+.suggestions-box div {
+    padding: 12px;
+    cursor: pointer;
+    text-align: left;
+    font-weight: bold;
+    /* This creates the line below each ingredient */
+    border-bottom: 2px solid #C5C4C4; 
 
-        .suggestions-box div:hover {
-            background: #f4c542;
-            color: white;
-        }
+    
+}
+
+/* This removes the line from the very last ingredient */
+.suggestions-box div:last-child {
+    border-bottom: none;
+}
+
+.suggestions-box div:hover {
+    background: #DCDBDB;
+    color: black;
+}
 
  
         .selected-box {
@@ -943,13 +956,14 @@ LAST PAGE BUTTON
         }
         
         .recipe-grid {
-             display: grid;
-             grid-template-columns: repeat(auto-fit, 350px); 
-             justify-content: center; 
-             gap: 30px;
-             padding: 40px 20px;
-             max-width: 1200px; 
-             margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+
         }
 
         .empty-container {
@@ -987,6 +1001,7 @@ LAST PAGE BUTTON
             cursor: pointer;
             box-shadow: 8px 8px 0px #f4c542;
         }
+        
 
         .recipe-card:hover {
             
@@ -1133,12 +1148,12 @@ LAST PAGE BUTTON
             box-shadow: 8px 8px 0px #111;
         }
 
-        /* Container for the dropdown */
+
 .dropdown {
     position: relative;
 }
 
-/* Hide the menu by default */
+
 .dropdown-content {
     display: none;
     position: absolute;
@@ -1146,26 +1161,469 @@ LAST PAGE BUTTON
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1000;
-    border-radius: 4px;
-    top: 100%; /* Positions it directly under the navbar link */
+    border-radius: 0;  
+    top: 100%; 
+    overflow: hidden; 
 }
 
-/* Links inside the dropdown */
+
 .dropdown-content a {
-    color: #333 !important; /* Forces dark text on white background */
+    color: #333 !important; 
     padding: 12px 16px;
     text-decoration: none;
     display: block;
     text-align: left;
+    box-sizing: border-box;
 }
 
-/* Hover effect for dropdown links */
+
 .dropdown-content a:hover {
-    background-color: #f1f1f1;
-    color: #d2691e !important; /* Changes text to your theme's orange */
+    background-color: hsla(340, 100%, 89%, 0.714);
+    color: black; 
 }
 
-/* Show the dropdown menu on hover */
+
 .dropdown:hover .dropdown-content {
     display: block;
+}
+
+    .suggestion-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    border-bottom: 2px solid #C1C7C7; 
+    background: white;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+    .all-recipes-grid {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.recipe-card {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+
+.suggestion-item:hover {
+    background: #f0f0f0;
+}
+
+.suggestion-item strong {
+    color: #6c5ce7; 
+}
+
+.no-result {
+    color: #888;
+    font-style: italic;
+    cursor: default;
+}
+
+
+.all-recipes-header-container {
+    text-align: center;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.page-header h1 { font-size: 2.8rem; margin: 0; padding-top: 5px; }
+.header-subtext { margin: 5px 0 10px 0; }
+
+
+.input-sticker-wrapper {
+    position: relative;
+    display: flex; 
+    align-items: center; 
+    width: 500px; 
+    margin: 0 auto 20px auto; 
+}
+
+.search-box-bold {
+    width: 100%; 
+    padding: 12px 55px 12px 25px; 
+    border: 3px solid #111; 
+    border-radius: 50px; 
+    font-size: 1.1rem;
+    outline: none;
+    background: white;
+    box-shadow: 4px 4px 0px #000; 
+}
+
+
+.bold-icon-btn {
+    position: absolute;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    color: #6c5ce7;
+}
+
+
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%; 
+    background: white;
+    border: 3px solid #111;
+    border-top: none; 
+    border-radius: 0 0 25px 25px;
+    z-index: 1000;
+    display: none;
+    box-shadow: 5px 5px 0px #000;
+    overflow: hidden;
+    margin-top: -5px; 
+}
+
+.filter-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 35px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.filter-pill {
+    text-decoration: none;
+    color: #111;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 6px 18px;
+    border: 2px solid #111;
+    border-radius: 50px;
+    background: white;
+    transition: 0.2s;
+}
+.filter-pill:hover { background: #f8f8f8; transform: translateY(-2px); }
+.filter-pill.active { background: #111; color: white; }
+
+
+.all-recipes-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+.recipe-card { flex: 0 1 350px; max-width: 350px; }
+
+
+.no-results-centered {
+    width: 100%;
+    text-align: center;
+    padding: 80px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.no-match-title { 
+    font-size: 2.5rem; 
+    font-weight: 800; 
+    margin-bottom: 15px; 
+    border: none !important; 
+    padding-bottom: 0 !important;
+}
+
+.view-all-link { color: #ff6b6b; font-weight: bold; text-decoration: underline; }
+
+
+.pagination { 
+    margin: 40px 0 80px 0; 
+    display: flex; 
+    justify-content: center; 
+    gap: 10px; 
+}
+
+.pagination a, .pagination .dots {
+    background: white;
+    border: 2px solid #000;
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+
+.pagination .active {
+    background: #000 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    transform: translate(2px, 2px) !important;
+    cursor: default;
+}
+
+
+.pagination a:not(.active):hover {
+    background: #f0f0f0;
+    transform: translateY(-3px);
+    box-shadow: 2px 2px 0px #000;
+}
+
+
+        .match-badge {
+            padding: 5px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+        .match-high { background-color: #e8f5e9; color: #2e7d32; } 
+        .match-mid  { background-color: #fff3e0; color: #ef6c00; } 
+        .match-low  { background-color: #fce4ec; color: #ad1457; } 
+
+  
+        .missing-info {
+            background: #fff5f5;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ffe3e3;
+            font-size: 0.9em;
+        }
+        .extra-count {
+            color: #e67e22;
+            font-style: italic;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        
+
+
+        .btn-gray {
+            background-color: #f1f3f5;
+            color: #2d3436;
+            border: 2px solid #000000;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .btn-gray:hover {
+            background-color: #BAC4CE;
+            transform: translate(2px, 2px);
+        }
+
+
+        .recipe-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        
+.form-content-wrapper {
+    width: 100%;
+    max-width: 500px; 
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+
+.input-sticker-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.search-box-bold {
+    width: 100%;
+    padding: 12px 55px 12px 25px;
+    border: 3px solid #111; 
+    border-radius: 50px;
+    font-size: 1.1rem;
+    outline: none;
+    background: white;
+    box-shadow: 4px 4px 0px #000; 
+}
+
+
+.bold-icon-btn {
+    position: absolute;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    color: #6c5ce7;
+}
+
+
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 3px solid #111;
+    border-top: none; 
+    border-radius: 0 0 25px 25px; 
+    z-index: 1000;
+    display: none;
+    box-shadow: 5px 5px 0px #000;
+    overflow: hidden;
+    margin-top: -5px; 
+}
+
+
+.suggestion-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    border-bottom: 2px solid #C1C7C7 !important; 
+    background: white;
+}
+
+
+.suggestion-item:last-child {
+    border-bottom: none !important;
+}
+
+.suggestion-item:hover {
+    background: #f0f0f0;
+}
+
+.suggestion-item strong {
+    color: #6c5ce7;
+}
+
+   
+.form-content-wrapper {
+    width: 100%;
+    max-width: 500px; 
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+}
+
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-bottom: none !important; 
+    box-shadow: none !important;
+}
+
+.search-box {
+    width: 100%;
+    padding: 12px 50px 12px 20px;
+    border-radius: 50px;
+    border: 2px solid #111; 
+    font-size: 1rem;
+    outline: none;
+    box-sizing: border-box;
+    background: white;
+}
+
+.search-icon-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0;
+    color: #6b46c1;
+}
+
+
+.selected-box {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px;
+    border: 2px dashed #f4c542;
+    border-radius: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box; 
+    background: white;
+}
+.btn-small {
+    display: block;
+    margin: 20px auto;
+    padding: 12px 35px;
+    background: #f4c542; 
+    color: #111;
+    border: 2px solid #111; 
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 0px #111; 
+    transition: 0.2s;
+}
+
+.btn-small:hover {
+
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #111;
+}
+
+
+.tag.blocked {
+    background-color: #eee !important;
+    color: #bbb !important;
+    border: 2px solid #ccc !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+    position: relative; 
+    pointer-events: auto !important; 
+}
+
+
+.tag.blocked::after {
+    content: "🚫";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    display: none; 
+    z-index: 10;
+}
+
+
+.header-description {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    color: #555;
+    font-size: 1.1rem;
+    margin-top: -10px; 
+    margin-bottom: 30px;
+    font-weight: 500;
 }

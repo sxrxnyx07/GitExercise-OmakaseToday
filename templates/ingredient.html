@@ -1,17 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}By Ingredient | Omakase Today{% endblock %}
 
 {% block content %}
 
-    <title>Omakase Today</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     
 
-
-
-
-<h1>Find Recipes by Ingredients</h1>
+<h1>🍳 Find Recipes by Ingredients</h1>
+<p class="header-description">Pick your ingredients and let us suggest the perfect dish for you! ✨</p>
 
 {% if error %}
     <p style="color: #d32f2f; font-weight: bold;">{{ error }}</p>
@@ -19,21 +16,23 @@
 
 
 <form action="/search" method="POST" onsubmit="return validateForm()">
+    <div class="form-content-wrapper">
+        
+        <div class="search-container">
+            <input type="text" id="ingredientInput" class="search-box" onkeyup="filterSuggestions()" placeholder="Search ingredients (e.g. Chicken, Beef)...">
+            <button type="submit" class="search-icon-btn">🔍</button>
+            <div id="suggestions" class="suggestions-box"></div>
+        </div>
 
-    <div class="search-container">
-        <input type="text" id="ingredientInput" class="search-box" onkeyup="filterSuggestions()" placeholder="Search ingredients (e.g. Chicken, Beef)...">
-        <div id="suggestions" class="suggestions-box"></div>
+        <div id="selectedBox" class="selected-box">
+            <span style="color: #999; font-style: italic; font-size: 0.9rem;">No ingredients selected yet...</span>
+        </div>
+
     </div>
 
-    <div id="selectedBox" class="selected-box">
-        <span style="color: #999; font-style: italic;">No ingredients selected yet...</span>
-    </div>
-
-    
     <div id="limitReminder"></div>
-
     <input type="hidden" name="ingredients" id="hiddenInput">
-    <button class="btn" type="submit">Find Recipes</button>
+    <button class="btn-small" type="submit">Find Recipes</button>
 </form>
 
 
@@ -83,10 +82,19 @@
             const reminder = document.getElementById("limitReminder");
             reminder.innerText = "⚠️ You can only select up to 5 ingredients.";
             reminder.style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
             return;
         }
 
         selectedIngredients.push(item);
+        
+
+        document.querySelectorAll('.tag').forEach(tag => {
+            if (tag.innerText.trim().toLowerCase() === item.toLowerCase()) {
+                tag.classList.add('blocked');
+            }
+        });
+
         updateUI();
         document.getElementById("ingredientInput").value = "";
 
@@ -95,8 +103,17 @@
         }
     }
 
+
     function removeIngredient(item) {
         selectedIngredients = selectedIngredients.filter(i => i !== item);
+        
+  
+        document.querySelectorAll('.tag').forEach(tag => {
+            if (tag.innerText.trim().toLowerCase() === item.toLowerCase()) {
+                tag.classList.remove('blocked');
+            }
+        });
+
         updateUI();
     }
 
@@ -112,12 +129,9 @@
             selectedIngredients.forEach(item => {
                 let div = document.createElement("div");
                 div.className = "selected-tag";
-
                 let displayName = item.charAt(0).toUpperCase() + item.slice(1);
-
                 div.innerHTML = displayName + " <span>✕</span>";
                 div.onclick = () => removeIngredient(item);
-
                 box.appendChild(div);
             });
         }
@@ -126,30 +140,7 @@
         hidden.value = selectedIngredients.join(",");
     }
 
-    function filterSuggestions() {
-        const inputElement = document.getElementById("ingredientInput");
-        let query = inputElement.value.toLowerCase();
-        let suggestionsBox = document.getElementById("suggestions");
-
-        suggestionsBox.innerHTML = "";
-        if (query === "") return;
-
-        const filtered = ingredients.filter(i => i.toLowerCase().startsWith(query));
-
-        filtered.forEach(item => {
-            let div = document.createElement("div");
-            div.innerHTML = item;
-
-            div.onclick = function() {
-                addIngredient(item);
-                suggestionsBox.innerHTML = "";
-                inputElement.value = "";
-            };
-
-            suggestionsBox.appendChild(div);
-        });
-    }
-
+ 
 
     function validateForm() {
         if (selectedIngredients.length === 0) {
@@ -160,6 +151,90 @@
         }
         return true;
     }
+    
+const searchInput = document.getElementById('ingredientInput');
+const suggestionsBox = document.getElementById('suggestions');
+
+function filterSuggestions() {
+    let query = searchInput.value.toLowerCase();
+    
+
+    if (query === "") {
+        suggestionsBox.innerHTML = "";
+        suggestionsBox.style.display = "none";
+        return;
+    }
+
+
+    const filtered = ingredients.filter(i => 
+        i.toLowerCase().startsWith(query) && !selectedIngredients.includes(i)
+    );
+
+
+    suggestionsBox.innerHTML = ""; 
+    suggestionsBox.style.display = "block"; 
+
+    if (filtered.length > 0) {
+        filtered.forEach(item => {
+            let div = document.createElement("div");
+            div.className = "suggestion-item"; 
+            let matchingPart = item.slice(0, query.length); 
+            let remainingPart = item.slice(query.length);
+            div.innerHTML = `<strong>${matchingPart}</strong>${remainingPart}`;
+            
+            div.onclick = function(e) {
+                e.stopPropagation(); 
+                addIngredient(item);
+                searchInput.value = ""; 
+                suggestionsBox.style.display = "none"; 
+            };
+            suggestionsBox.appendChild(div);
+        });
+    } else {
+       
+        let div = document.createElement("div");
+        div.className = "suggestion-item";
+        div.style.color = "#888";
+        div.style.fontStyle = "italic";
+        div.innerHTML = "No ingredient found...";
+        suggestionsBox.appendChild(div);
+    }
+}
+
+
+searchInput.addEventListener('input', filterSuggestions);
+
+
+searchInput.addEventListener('focus', filterSuggestions);
+
+
+document.addEventListener('click', function(event) {
+   
+    if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+        suggestionsBox.style.display = "none";
+    }
+});
+
+
+searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault(); 
+        
+        const query = this.value.toLowerCase().trim();
+        
+
+        const match = ingredients.find(i => 
+            i.toLowerCase() === query && !selectedIngredients.includes(i)
+        );
+
+        if (match) {
+            addIngredient(match); 
+            this.value = ""; 
+            suggestionsBox.style.display = "none"; 
+        }
+    }
+});
+
 </script>
 
 {% endblock %}

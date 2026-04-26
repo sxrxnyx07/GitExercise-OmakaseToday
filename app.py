@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "secretkey123"
 
-# ---------------- DATABASE CONFIG (Recipe DB) ----------------
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'omakase.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -26,6 +26,33 @@ class Recipe(db.Model):
     timing = db.Column(db.String(100))     
     meal_category = db.Column(db.String(50))
     flavor_type = db.Column(db.String(50))
+
+class SavedRecipe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(120), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    recipe = db.relationship('Recipe', backref='saved_by')
+
+@app.route('/toggle-save', methods=['POST'])
+def toggle_save():
+    user_email = session.get('email')
+    if not user_email:
+        return jsonify({"error": "Login required"}), 401
+    
+    data = request.get_json()
+    recipe_id = data.get('recipe_id')
+    
+    existing_save = SavedRecipe.query.filter_by(user_email=user_email, recipe_id=recipe_id).first()
+    
+    if existing_save:
+        db.session.delete(existing_save)
+        db.session.commit()
+        return jsonify({"status": "unfilled", "message": "Removed"})
+    else:
+        new_save = SavedRecipe(user_email=user_email, recipe_id=recipe_id)
+        db.session.add(new_save)
+        db.session.commit()
+        return jsonify({"status": "filled", "message": "Saved"})
 
 # ---------------- DATABASE INIT (User DB) ----------------
 def init_db():
@@ -46,27 +73,24 @@ init_db()
 
 
 
+from flask import Flask, render_template, request, jsonify
+
 @app.route('/all_recipes')
 def all_recipes():
-    # 1. Get parameters from URL
     search_query = request.args.get('search', '').strip()
-    active_flavor = request.args.get('flavor', 'ALL').strip() # Default to 'ALL'
+    active_flavor = request.args.get('flavor', 'ALL').strip()
     page = request.args.get('page', 1, type=int)
     per_page = 9
 
-    # 2. Start query
     query = Recipe.query
 
-    # 3. Filter by Flavor (if not ALL)
-    # Note: We capitalize the flavor to match 'Sour', 'Light', etc. in your DB
     if active_flavor != 'ALL':
         query = query.filter(Recipe.flavor_type == active_flavor.capitalize())
 
-    # 4. Filter by Search (Name)
     if search_query:
-        query = query.filter(Recipe.name.icontains(search_query))
+        
+        query = query.filter(Recipe.name.ilike(f"%{search_query}%"))
 
-    # 5. Execute Pagination
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
     return render_template(
@@ -74,12 +98,24 @@ def all_recipes():
         results=pagination.items,
         pagination=pagination,
         search_query=search_query,
-        active_flavor=active_flavor # Pass this to highlight the active button
+        active_flavor=active_flavor
     )
 
+
+@app.route('/get_suggestions')
+def get_suggestions():
+    q = request.args.get('q', '').strip()
+    if not q:
+        return jsonify([])
+
+
+    results = Recipe.query.filter(Recipe.name.ilike(f"%{q}%")).limit(5).all()
+    suggestion_list = [r.name for r in results]
+    
+    return jsonify(suggestion_list)
 # ---------------- YOUR INGREDIENT LOGIC ----------------
 
-@app.route("/ingredient-search")  # Renamed so Friend's HOME works
+@app.route("/ingredient-search")  
 def ingredient_index():
     all_recipes = Recipe.query.all()
     ingredients_dict = {char: [] for char in string.ascii_uppercase}
@@ -117,20 +153,52 @@ def search():
     if user_input:
         all_recipes = Recipe.query.all()
         for recipe in all_recipes:
-            clean_db_text = str(recipe.clean_ingredients).lower()
-            if all(item in clean_db_text for item in user_input):
-                clean_db_list = [i.strip() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
-                percent = int((len(user_input) / len(clean_db_list)) * 100) if clean_db_list else 0
-                missing = [i for i in clean_db_list if not any(u in i.lower() for u in user_input)]
+            recipe_ing_list = [i.strip().lower() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
+            total_count = len(recipe_ing_list)
+
+            if total_count == 0:
+                continue
+
+            
+            is_valid_match = True
+            matched_in_recipe = []
+
+            for ui in user_input:
+                found_this_item = False
+                for ri in recipe_ing_list:
+                    if ui in ri:
+                        found_this_item = True
+                        if ri not in matched_in_recipe:
+                            matched_in_recipe.append(ri)
+                        break 
+                
+                if not found_this_item:
+                    is_valid_match = False
+                    break 
+            
+
+            if is_valid_match:
+                have_count = len(user_input)
+                percent = int((have_count / total_count) * 100)
+                missing_ingredients = [ri for ri in recipe_ing_list if ri not in matched_in_recipe]
+                
+                display_missing = missing_ingredients[:3] 
+                extra_count = len(missing_ingredients) - len(display_missing)
+
                 results.append({
-                    "id": recipe.id, "name": recipe.name, "image": recipe.image,
-                    "rating": recipe.rating, "match": percent, "missing": missing[:5]
+                    "id": recipe.id,
+                    "name": recipe.name,
+                    "image": recipe.image,
+                    "rating": recipe.rating,
+                    "match": percent,
+                    "missing_names": display_missing,
+                    "extra_count": extra_count
                 })
 
     results = sorted(results, key=lambda x: x['match'], reverse=True)
     return render_template('result.html', results=results, selected=user_input)
 
-# ---------------- FRIEND'S AUTH LOGIC ----------------
+
 
 @app.route("/")
 def home():
@@ -232,6 +300,6 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("home"))
 
-# ---------------- RUN APP ----------------
+
 if __name__ == "__main__":
     app.run(debug=True)
