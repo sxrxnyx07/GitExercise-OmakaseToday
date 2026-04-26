@@ -172,7 +172,7 @@ function spin() {
         ball.classList.add(randomColor);
         ball.classList.add("drop");
 
-        fetch('/random?category=breakfast')
+        fetch('/random?category=dessert')
         .then(res => res.json())
         .then(data => {
 
