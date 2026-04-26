@@ -586,31 +586,49 @@ LAST PAGE BUTTON
     background: linear-gradient(90deg, #ff6b6b, #ffb88c);
 }
 .rituals-header h2{
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 600;
+    color: #222;
 }
-.ritual-card{
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    transition: 0.3s ease;
-    width: 200px;
-    margin: 20px auto;
+.rituals-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 25px;
+    padding: 20px;
 }
 
-.ritual-card:hover{
-    transform: translateY(-8px) scale(1.03);
+/* ===== CARD ===== */
+.ritual-card {
+    width: 260px;
+    background: #ffffff;
+    border: 2px solid #000;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 6px 6px 0 #fbc02d;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.ritual-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0 #fbc02d;
 }
 
 /* IMAGE */
 .ritual-card img{
     width: 100%;
-    height: 140px;
+    height: 200px;
     object-fit: cover;
 }
-
-
+.ritual-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #000000;
+    position: relative;
+    margin-bottom: 4px;
+}
 /* SUGGESTED SECTION */
 .suggested-section{
     margin-top: 40px;
@@ -657,120 +675,164 @@ LAST PAGE BUTTON
 
 /* Grid */
 .suggested-recipes{
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    display: flex;
     gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-/* Card */
-.suggest-card{
-    background: white;
-    border-radius: 20px;
+/* IMAGE CONTAINER */
+.image-container {
+    position: relative;
+    height: 170px;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    transition: 0.3s ease;
-    width: 200px;
-    margin: 20px auto;           
 }
 
-/* Hover effect */
-.suggest-card:hover{
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-}
-
-/* Image */
-.suggest-img img{
+.image-container img {
     width: 100%;
-    height: 190px;
+    height: 100%;
     object-fit: cover;
 }
 
-.suggest-info{
-    padding: 12px;
-    text-align: center;
-    display: flex;            
-    flex-direction: column;     
-    justify-content: space-between; 
-    flex-grow: 1;           
+.heart-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid black;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: 0.2s ease;
 }
 
-.suggest-info h4{
-    font-size: 15px;
-    height: 40px;        
-    overflow: hidden;   
+.heart-btn:hover {
+    transform: scale(1.1);
 }
 
-.ritual-card h4{
-    font-size: 14px;
-    margin: 8px 0 4px;
-}
-
-.save-btn{
-    display: inline-block;
-    margin: 10px auto 15px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: #fff0f3;
-    color: #ff4d6d;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: 0.25s;
-}
-
-.save-btn:hover{
+.heart-btn.saved {
     background: #ff4d6d;
     color: white;
+    border: 2px solid #ff4d6d;
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
-.view-all{
+.view-all {
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: #111;
+    color: white;
     text-decoration: none;
-    color: #d94f4f;
-    font-weight: 600;
-    transition: 0.3s;
+    font-size: 14px;
+    transition: 0.3s ease;
 }
 
-.view-all:hover{
-    text-decoration: underline;
+.view-all:hover {
+    background: #333;
+    transform: translateY(-2px);
 }
 
-/* GRID */
-.rituals-grid{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+/* ===== GRID ===== */
+.recipe-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    padding: 20px;
 }
 
-/* CARD */
-.ritual-card{
-    background: white;
-    border-radius: 15px;
+/* ===== CARD ===== */
+.recipe-card {
+    width: 260px;
+    background: #ffffff;
+    border: 2px solid #000;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: 0.3s;
-    text-align: center;
+    box-shadow: 6px 6px 0 #fbc02d;
+    transition: all 0.25s ease;
+    cursor: pointer;
 }
 
-.ritual-card:hover{
-    transform: translateY(-5px);
+.recipe-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0 #fbc02d;
 }
 
-.ritual-card img{
+/* ===== IMAGE ===== */
+.image-container {
     width: 100%;
-    height: 200px;
+    height: 170px;
+    overflow: hidden;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
-.ritual-card h3{
-    font-size: 15px;
-    padding: 10px;
-    height: 40px;        
-    overflow: hidden;
-    text-align: center;
+/* ===== CONTENT ===== */
+.card-meta {
+    padding: 15px;
+    text-align: left;
 }
 
+/* CATEGORY */
+.meal-category {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    color: #999;
+    margin-bottom: 5px;
+}
 
+/* TITLE */
+.recipe-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #222;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* ===== RATING ===== */
+.rating-stars {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+/* ===== BUTTON ===== */
+.unsave-btn {
+    background-color: #f1f3f5;
+    color: #2d3436;
+    border: 2px solid black;
+    box-shadow: 3px 3px 0 black;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.unsave-btn:hover {
+    background-color: #BAC4CE;
+    transform: translate(2px, 2px);
+}
+.star-filled {
+    color: #ffc107;
+}
+
+.star-empty {
+    color: #e4e5e9;
+}
 /* =========================
    HOME PAGE
 ========================= */
@@ -1498,30 +1560,268 @@ LAST PAGE BUTTON
     grid-template-columns: repeat(2, 220px);
     gap: 25px;
 }
-.saved-recipes-page {
-    padding: 40px;
+/* =========================
+   SAVED PAGE MODERN UI
+========================= */
+
+.saved-page{
+    padding: 60px 40px;
     min-height: 100vh;
-    font-family: 'Fredoka', sans-serif;
 }
-.saved-recipes-page h2 {
-    font-size: 32px;
+
+.saved-header {
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 16px;
+    width: 90%;    
+    margin: 0 0 50px 10px; 
+    text-align: left; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.saved-header h2 {
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+.saved-header p {
+    opacity: 0.7;
+    margin: 0;
+}
+
+.saved-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 25px;
+    padding: 20px;
+}
+
+/* ===== CARD ===== */
+.saved-card {
+    width: 260px;
+    background: #ffffff;
+    border: 2px solid #000;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 6px 6px 0 #fbc02d;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.saved-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0 #fbc02d;
+}
+
+/* IMAGE */
+.saved-card img{
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+.saved-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #000000;
+    position: relative;
+    margin-bottom: 4px;
+}
+
+.saved-card:hover img{
+    transform: scale(1.05);
+}
+
+/* TEXT */
+.saved-content{
+    padding: 15px;
+    text-align: left;
+}
+
+.saved-content h3{
+    font-size: 16px;
+    font-weight: 700;
+    color: #222;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 28px;
+    width: 480px;
+    border-radius: 16px;
+    box-shadow: 
+        0 20px 40px rgba(0,0,0,0.15),
+        0 8px 16px rgba(0,0,0,0.1);
+
+    max-height: 85vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    border: 1px solid rgba(255,255,255,0.4);
+    animation: modalFade 0.3s ease;
+}
+@keyframes modalFade {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+
+.modal-content h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
     font-weight: 600;
-    text-align: center;
-    margin-bottom: 30px;
     color: #333;
 }
-.unsave-btn {
-    display: inline-block;
+
+.form-group {
     margin-bottom: 12px;
-    padding: 6px 12px;
-    background: #ff4d4d;
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
     font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #444;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.modal h2 {
+    margin-bottom: 15px;
+}
+
+.modal h4 {
+    margin-top: 10px;
+    margin-bottom: 8px;
+    color: #666;
+}
+.full-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #ff9f43, #ff7f50);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
     transition: 0.2s;
 }
 
-.unsave-btn:hover {
-    background: #e60000;
+.full-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255,127,80,0.3);
+}
+
+.close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+.preview-img {
+    height: 150px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+.tab-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tab-btn {
+    padding: 8px 12px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.tab-btn.active {
+    background: #333;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+input, textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+
+    border-radius: 10px;
+    border: 1px solid #ddd;
+
+    font-size: 14px;
+
+    transition: all 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #ff9f43;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,159,67,0.2);
+}
+.saved-search {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: -40px 0 20px 10px;
+    gap: 10px;
+}
+
+
+.saved-search input {
+    width: 320px;
+    padding: 12px 16px;
+    border-radius: 30px;
+    border: none;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.saved-search input:focus {
+    outline: none;
+    width: 380px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }

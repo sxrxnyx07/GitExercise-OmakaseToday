@@ -245,40 +245,6 @@ function hideSidebar() {
     }
 }
 // =========================
-// ADD NEW ROW
-// =========================
-function addNewRow() {
-    let tbody = document.getElementById('recipeBody');
-
-    let newRow = document.createElement('tr');
-    newRow.className = "new-row-animation";
-
-    newRow.innerHTML = `
-        <td colspan="11">
-            <form action="/admin/recipes/add" method="POST" enctype="multipart/form-data" class="inline-form">
-
-                <button type="submit" class="update-btn">Create</button>
-                <button type="button" onclick="this.closest('tr').remove()" class="delete-btn">Cancel</button>
-
-                <input type="text" name="name" placeholder="Name" required>
-                <input type="file" name="image_file">
-                <input type="text" name="rating" placeholder="0.0">
-                <input type="text" name="clean_ingredients" placeholder="...">
-                <input type="text" name="full_ingredients" placeholder="...">
-                <input type="text" name="directions" placeholder="...">
-                <input type="text" name="timing" placeholder="...">
-                <input type="text" name="meal_category" placeholder="...">
-                <input type="text" name="flavor_type" placeholder="...">
-
-            </form>
-        </td>
-    `;
-
-    tbody.insertBefore(newRow, tbody.firstChild);
-}
-
-
-// =========================
 // SEARCH FUNCTION
 // =========================
 function filterRecipes() {
@@ -298,30 +264,248 @@ function filterRecipes() {
         }
     });
 }
-function addUserRow() {
-    let tbody = document.getElementById("userBody");
+const recipeSearchInput = document.getElementById("recipeSearch");
 
-    let row = document.createElement("tr");
+if (recipeSearchInput) {
+    recipeSearchInput.addEventListener("input", filterRecipes);
+}
 
-    row.innerHTML = `
-        <td colspan="4">
-            <form action="/admin/users/add" method="POST" class="inline-form">
+function filterUsers() {
+    const input = document.getElementById("userSearch").value.toLowerCase();
+    const rows = document.querySelectorAll("#userBody tr");
 
-                <button type="submit" class="update-btn">Create</button>
-                <button type="button" onclick="this.closest('tr').remove()" class="delete-btn">Cancel</button>
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
 
-                <input type="text" name="email" placeholder="Email" required>
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
+        if (cells.length < 2) return;
 
-                <select name="role">
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
+        const email = cells[1].textContent.toLowerCase();
 
-            </form>
-        </td>
-    `;
+        if (email.includes(input)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+const userSearchInput = document.getElementById("userSearch");
+if (userSearchInput) {
+    userSearchInput.addEventListener("input", filterUsers);
+}
 
-    tbody.prepend(row);
+async function toggleSave(button) {
+
+    const recipeId = button.dataset.id;
+    const isSaved = button.classList.contains("saved");
+
+    button.disabled = true;
+
+    const url = isSaved
+        ? `/unsave-recipe/${recipeId}`
+        : `/save-recipe/${recipeId}`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+        button.disabled = false;
+        return;
+    }
+
+    button.classList.toggle("saved");
+
+    const savedGrid = document.getElementById("savedGrid");
+    const emptyState = document.getElementById("emptyState");
+
+    // =========================
+    // SAVE ACTION
+    // =========================
+    if (!isSaved) {
+
+        // remove empty state
+        if (emptyState) emptyState.remove();
+
+        // create new card (you can enhance styling later)
+        const card = document.createElement("div");
+        card.className = "ritual-card";
+        card.id = `card-${recipeId}`;
+
+        card.innerHTML = `
+            <img src="${button.dataset.image}">
+            <h3>${button.dataset.name}</h3>
+        `;
+
+        savedGrid.appendChild(card);
+    }
+
+    // =========================
+    // UNSAVE ACTION
+    // =========================
+    else {
+
+        const card = document.getElementById(`card-${recipeId}`);
+        if (card) card.remove();
+
+        // if empty → show empty state again
+        if (savedGrid.children.length === 0) {
+
+            const empty = document.createElement("div");
+            empty.className = "empty-wrapper";
+            empty.id = "emptyState";
+
+            empty.innerHTML = `
+                <div class="empty-state-card">
+                    <div class="empty-icon">🍽️</div>
+                    <h2>No Saved Rituals Yet</h2>
+                    <p>Start exploring delicious recipes and build your collection.</p>
+                    <a href="/" class="explore-btn">Explore Recipes</a>
+                </div>
+            `;
+
+            savedGrid.appendChild(empty);
+        }
+    }
+
+    button.disabled = false;
+}
+function enableEditRow(btn) {
+    const row = btn.closest("tr");
+
+    // hide text
+    row.querySelectorAll(".view").forEach(el => el.style.display = "none");
+
+    // show inputs
+    row.querySelectorAll(".edit").forEach(el => el.hidden = false);
+
+    // toggle buttons
+    btn.style.display = "none";
+    row.querySelector(".save-btn").hidden = false;
+}
+function openAddModal() {
+
+    document.getElementById("editModal").style.display = "block";
+    document.getElementById("editForm").action = "/admin/recipes/add";
+    document.querySelector(".modal-content h2").innerText = "Add New Recipe";
+    // clear all fields
+    document.getElementById("edit-name").value = "";
+    document.getElementById("edit-rating").value = "";
+    document.getElementById("edit-clean").value = "";
+    document.getElementById("edit-full").value = "";
+    document.getElementById("edit-directions").value = "";
+    document.getElementById("edit-timing").value = "";
+    document.getElementById("edit-category").value = "";
+    document.getElementById("edit-flavor").value = "";
+    const preview = document.getElementById("imagePreview");
+    if (preview) {
+        preview.src = "";
+        preview.style.display = "none";
+    }
+}
+
+function openEditModal(id, name, rating, clean, full, directions, timing, category, flavor) {
+
+    document.getElementById("editModal").style.display = "block";
+    document.getElementById("editForm").action = `/admin/recipes/update/${id}`;
+    document.querySelector(".modal-content h2").innerText = "Edit Recipe";
+    document.getElementById("edit-mode").value = "edit";
+    document.getElementById("edit-name").value = name;
+    document.getElementById("edit-rating").value = rating;
+    document.getElementById("edit-clean").value = clean;
+    document.getElementById("edit-full").value = full;
+    document.getElementById("edit-directions").value = directions;
+    document.getElementById("edit-timing").value = timing;
+    document.getElementById("edit-category").value = category;
+    document.getElementById("edit-flavor").value = flavor;
+}
+
+
+function closeModal() {
+    document.getElementById("editModal").style.display = "none";
+}
+
+// 点击外面关闭
+window.onclick = function(event) {
+    const modal = document.getElementById("editModal");
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+document.addEventListener("DOMContentLoaded", function () {
+
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("imagePreview");
+
+    if (imageInput) {
+        imageInput.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+});
+function openTab(tabName) {
+
+    // hide all tabs
+    document.querySelectorAll(".tab-content").forEach(tab => {
+        tab.classList.remove("active");
+    });
+
+    // remove active button
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+    });
+
+    // show selected tab
+    document.getElementById("tab-" + tabName).classList.add("active");
+
+    // highlight button
+    event.target.classList.add("active");
+}
+function filterSavedRecipes() {
+    const input = document.getElementById("savedSearch").value.toLowerCase();
+    const cards = document.querySelectorAll(".recipe-card");
+
+    cards.forEach(card => {
+        const title = card.querySelector(".recipe-title").innerText.toLowerCase();
+
+        if (title.includes(input)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+// live search
+const savedSearchInput = document.getElementById("savedSearch");
+if (savedSearchInput) {
+    savedSearchInput.addEventListener("input", filterSavedRecipes);
+}
+const grid = document.querySelector(".saved-grid");
+
+let visibleCount = 0;
+
+cards.forEach(card => {
+    const title = card.querySelector(".recipe-title").innerText.toLowerCase();
+
+    if (title.includes(input)) {
+        card.style.display = "block";
+        visibleCount++;
+    } else {
+        card.style.display = "none";
+    }
+});
+
+if (visibleCount === 0) {
+    grid.innerHTML = "<p style='text-align:center;'>No matching recipes 😢</p>";
 }

@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-
 {% block title %}Manage Recipes{% endblock %}
-
 {% block content %}
 <div class="admin-users-wrapper">
-
     <h1 class="admin-title">Manage Users</h1>
+    <div class="admin-controls">
+        <input type="text" id="userSearch" class="search-input"
+            placeholder="Search user email...">
 
-    <button onclick="addUserRow()" class="add-recipe-btn">
-        + Add User
-    </button>
-
+        <button onclick="filterUsers()" class="search-btn">
+            Search
+        </button>
+    </div>
     <table class="users-table">
         <thead>
             <tr>
@@ -20,43 +20,31 @@
                 <th>ROLE</th>
             </tr>
         </thead>
-
         <tbody id="userBody">
 
             {% for u in users %}
             <tr>
-
-            <form action="/admin/users/update/{{ u[0] }}" method="POST">
-
                 <td>
-                    <button type="submit" class="update-btn">Save</button>
-                    <a href="/admin/delete/{{ u[0] }}" 
-                       class="delete-btn"
-                       onclick="return confirm('Delete?')">
-                       Delete
-                    </a>
+                    <form action="/admin/users/update/{{ u[0] }}" method="POST">
+                        <button type="submit" class="update-btn">Save</button>
+                        <a href="/admin/delete/{{ u[0] }}" 
+                        class="delete-btn"
+                        onclick="return confirm('Delete?')">
+                        Delete
+                        </a>
                 </td>
-
-                <td>{{ u[0] }}</td>
-
-                <td>
-                    <input type="text" name="username" value="{{ u[1] }}">
-                </td>
-
+                <td>{{ u[0] }}</td>  
+                <td>{{ u[1] }}</td>
                 <td>
                     <select name="role">
                         <option value="user" {% if u[2]=='user' %}selected{% endif %}>User</option>
                         <option value="admin" {% if u[2]=='admin' %}selected{% endif %}>Admin</option>
                     </select>
+                    </form>
                 </td>
-
-            </form>
-
             </tr>
             {% endfor %}
-
         </tbody>
     </table>
-
 </div>
 {% endblock %}

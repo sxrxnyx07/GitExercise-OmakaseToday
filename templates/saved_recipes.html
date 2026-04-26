@@ -1,23 +1,94 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="saved-recipes-page">
-    <h2>Saved Recipes</h2>
 
-    <div class="rituals-grid">
+<div class="saved-page">
+
+    <!-- HEADER -->
+    <div class="saved-header">
+        <h2>Saved Recipes</h2>
+        <p>Your personal collection 🍽️</p>
+    </div>
+    <div class="saved-search">
+        <input 
+            type="text" 
+            id="savedSearch"
+            placeholder="Search saved recipes..."
+        >
+    </div>
+
+    {% if saved_recipes and saved_recipes|length > 0 %}
+
+    <div class="saved-grid">
 
         {% for recipe in saved_recipes %}
-        <div class="ritual-card">
+        <div class="recipe-card">
 
-            <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
+            <!-- IMAGE -->
+            <div class="image-container">
 
-            <h3>{{ recipe.name }}</h3>
-            <a href="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}" class="unsave-btn">
-                Remove
-            </a>
+                <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
+                     alt="{{ recipe.name }}">
+
+            </div>
+
+            <!-- CONTENT -->
+            <div class="card-meta">
+
+                <div class="meal-category">
+                    {{ recipe.meal_category }}
+                </div>
+
+                <span class="recipe-title">
+                    {{ recipe.name }}
+                </span>
+
+                <!-- ⭐ RATING -->
+                {% if recipe.rating %}
+                <div class="rating-stars">
+                    {% for i in range(5) %}
+                        <span class="{% if i < recipe.rating %}star-filled{% else %}star-empty{% endif %}">
+                            ★
+                        </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- ❌ REMOVE BUTTON -->
+                <a href="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}"
+                   class="unsave-btn">
+                    Remove
+                </a>
+
+            </div>
+
         </div>
         {% endfor %}
 
     </div>
+
+    {% else %}
+
+    <!-- EMPTY STATE -->
+    <div class="empty-wrapper">
+
+        <div class="empty-state-card">
+
+            <div class="empty-icon">🍽️</div>
+
+            <h2>No Saved Recipes Yet</h2>
+            <p>Start saving recipes you love and build your collection.</p>
+
+            <a href="/" class="explore-btn">
+                Explore Recipes
+            </a>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
 </div>
+
 {% endblock %}

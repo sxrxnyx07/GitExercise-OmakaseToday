@@ -206,49 +206,36 @@ def profile():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # ---------------- UPDATE PROFILE ----------------
-    if request.method == "POST":
-        username = request.form["username"]
-        bio = request.form["bio"]
-
-        c.execute("""
-            UPDATE users
-            SET username=?, bio=?
-            WHERE email=?
-        """, (username, bio, email))
-
-        conn.commit()
-
-    # ---------------- GET USER ----------------
+    # user info
     c.execute("""
         SELECT username, email, bio, profile_pic
         FROM users
         WHERE email = ?
     """, (email,))
-
     user = c.fetchone()
 
-    # ---------------- GET SAVED RECIPES ----------------
+    # saved recipes
     c.execute("""
         SELECT recipe_id FROM saved_recipes
         WHERE user_email = ?
     """, (email,))
-
     saved_ids = [row[0] for row in c.fetchall()]
     conn.close()
 
-    saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all()
+    saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all() if saved_ids else []
     suggested_recipes = Recipe.query.limit(3).all()
+
     return render_template(
-    "profile.html",
-    username=user[0],
-    email=user[1],
-    bio=user[2],
-    profile_pic=user[3],
-    saved_recipes=saved_recipes,
-    suggested_recipes=suggested_recipes, 
-    role=session.get("role")
-)
+        "profile.html",
+        username=user[0],
+        email=user[1],
+        bio=user[2],
+        profile_pic=user[3],
+        saved_recipes=saved_recipes,
+        suggested_recipes=suggested_recipes,
+        saved_ids=saved_ids, 
+        role=session.get("role")
+    )
 
 
 # ---------------- UPLOAD PROFILE PIC ----------------
@@ -456,38 +443,6 @@ def admin_users():
 
     return render_template("admin_users.html", users=users)
 
-@app.route("/admin/users/add", methods=["POST"])
-def add_user():
-    if session.get("role") != "admin":
-        return "403 Forbidden"
-
-    email = request.form.get("email")
-    username = request.form.get("username")
-    password = request.form.get("password")
-    role = request.form.get("role", "user")
-
-    if not email or not username or not password:
-        return redirect(url_for("admin_users"))
-
-    hashed_pw = generate_password_hash(password)
-
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-
-    try:
-        c.execute("""
-            INSERT INTO users (email, username, password, bio, role)
-            VALUES (?, ?, ?, ?, ?)
-        """, (email, username, hashed_pw, "", role))
-
-        conn.commit()
-    except sqlite3.IntegrityError:
-        pass
-
-    conn.close()
-
-    return redirect(url_for("admin_users"))
-
 @app.route("/admin/users/update/<email>", methods=["POST"])
 def update_user(email):
     if session.get("role") != "admin":
@@ -529,16 +484,19 @@ def delete_user(email):
 def admin_recipes():
     if session.get("role") != "admin":
         return "403 Forbidden"
-
     recipes = Recipe.query.all()      #get recipes's data from datbase(omakase.db)
-    
-
     return render_template("admin_recipes.html", recipes=recipes)
 
 @app.route("/admin/recipes/add", methods=["POST"])
 def add_recipe():
     name = request.form.get("name")
     rating = request.form.get("rating")
+    clean = request.form.get("clean_ingredients")
+    full = request.form.get("full_ingredients")
+    directions = request.form.get("directions")
+    timing = request.form.get("timing")
+    category = request.form.get("meal_category")
+    flavor = request.form.get("flavor_type")
 
     file = request.files.get("image_file")
 
@@ -553,7 +511,13 @@ def add_recipe():
     new_recipe = Recipe(
         name=name,
         rating=rating,
-        image=image_url
+        image=image_url,
+        clean_ingredients=clean,
+        full_ingredients=full,
+        directions=directions,
+        timing=timing,
+        meal_category=category,
+        flavor_type=flavor
     )
 
     db.session.add(new_recipe)
@@ -608,44 +572,31 @@ def save_recipe(recipe_id):
     if "user" not in session:
         return redirect(url_for("login"))
 
-    email = session["user"]
-
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    c.execute("""
-        SELECT 1 FROM saved_recipes
-        WHERE user_email=? AND recipe_id=?
-    """, (email, recipe_id))
+    c.execute("SELECT 1 FROM saved_recipes WHERE user_email=? AND recipe_id=?",
+              (session["user"], recipe_id))
 
-    exists = c.fetchone()
+    if not c.fetchone():
+        c.execute("INSERT INTO saved_recipes (user_email, recipe_id) VALUES (?,?)",
+                  (session["user"], recipe_id))
 
-    if not exists:
-        c.execute("""
-            INSERT INTO saved_recipes (user_email, recipe_id)
-            VALUES (?, ?)
-        """, (email, recipe_id))
-
-        conn.commit()
-
+    conn.commit()
     conn.close()
+    return "OK"
 
-    return redirect(request.referrer)
 
 @app.route("/unsave-recipe/<int:recipe_id>")
 def unsave_recipe(recipe_id):
     if "user" not in session:
         return redirect(url_for("login"))
 
-    email = session["user"]
-
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    c.execute("""
-        DELETE FROM saved_recipes
-        WHERE user_email=? AND recipe_id=?
-    """, (email, recipe_id))
+    c.execute("DELETE FROM saved_recipes WHERE user_email=? AND recipe_id=?",
+              (session["user"], recipe_id))
 
     conn.commit()
     conn.close()

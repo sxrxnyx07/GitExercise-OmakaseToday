@@ -15,9 +15,10 @@
             Search
         </button>
 
-        <button type="button" onclick="addNewRow()" class="add-recipe-btn">
+        <button type="button" onclick="openAddModal()" class="add-recipe-btn">
             + Add New Recipe
         </button>
+
     </div>
 
     <table class="recipes-table">
@@ -28,10 +29,6 @@
                 <th>NAME</th>
                 <th>IMAGE</th>
                 <th>RATING</th>
-                <th>CLEAN_INGREDIENTS</th>
-                <th>FULL_INGREDIENTS</th>
-                <th>DIRECTIONS</th>
-                <th>TIMING</th>
                 <th>MEAL_CATEGORY</th>
                 <th>FLAVOR_TYPE</th>
             </tr>
@@ -40,37 +37,170 @@
         <tbody id="recipeBody">
             {% for r in recipes %}
             <tr>
+                <form action="/admin/recipes/update/{{ r.id }}" method="POST" enctype="multipart/form-data">
+
+                <!-- ACTION -->
                 <td>
-                    <form action="/admin/recipes/update/{{ r.id }}" method="POST" enctype="multipart/form-data">
-                        <button type="submit" class="update-btn">Save</button>
-                        <a href="/admin/recipes/delete/{{ r.id }}" 
-                           class="delete-btn" 
-                           onclick="return confirm('Delete?')">Delete</a>
+                    <button type="button" class="update-btn"
+                        onclick="openEditModal(
+                            '{{ r.id }}',
+                            `{{ r.name }}`,
+                            `{{ r.rating }}`,
+                            `{{ r.clean_ingredients }}`,
+                            `{{ r.full_ingredients }}`,
+                            `{{ r.directions }}`,
+                            `{{ r.timing }}`,
+                            `{{ r.meal_category }}`,
+                            `{{ r.flavor_type }}`
+                        )">
+                        Edit
+                    </button>
+
+
+                    <a href="/admin/recipes/delete/{{ r.id }}" 
+                    class="delete-btn" 
+                    onclick="return confirm('Delete?')">Delete</a>
                 </td>
 
-                <td><input type="text" name="id" value="{{ r.id }}"></td>
-                <td><input type="text" name="name" value="{{ r.name }}"></td>
-
+                <!-- ID -->
                 <td>
-                    <label>
-                        <img src="{{ r.image }}" class="recipe-img">
-                        <input type="file" name="image_file" hidden>
-                    </label>
+                    <span class="view">{{ r.id }}</span>
+                    <input class="edit" type="text" name="id" value="{{ r.id }}" hidden>
                 </td>
 
-                <td><input type="text" name="rating" value="{{ r.rating }}"></td>
-                <td><input type="text" name="clean_ingredients" value="{{ r.clean_ingredients }}"></td>
-                <td><input type="text" name="full_ingredients" value="{{ r.full_ingredients }}"></td>
-                <td><input type="text" name="directions" value="{{ r.directions }}"></td>
-                <td><input type="text" name="timing" value="{{ r.timing }}"></td>
-                <td><input type="text" name="meal_category" value="{{ r.meal_category }}"></td>
-                <td><input type="text" name="flavor_type" value="{{ r.flavor_type }}"></td>
+                <!-- NAME -->
+                <td>
+                    <span class="view">{{ r.name }}</span>
+                    <input class="edit" type="text" name="name" value="{{ r.name }}" hidden>
+                </td>
 
-                    </form>
+                <!-- IMAGE -->
+                <td>
+                    <img src="{{ r.image }}" class="recipe-img view">
+
+                    <input class="edit" type="file" name="image_file" hidden>
+                </td>
+
+                <!-- RATING -->
+                <td>
+                    <span class="view">{{ r.rating }}</span>
+                    <input class="edit" type="text" name="rating" value="{{ r.rating }}" hidden>
+                </td>
+
+                <!-- MEAL CATEGORY -->
+                <td>
+                    <span class="view">{{ r.meal_category }}</span>
+                    <input class="edit" type="text" name="meal_category" value="{{ r.meal_category }}" hidden>
+                </td>
+
+                <!-- FLAVOR -->
+                <td>
+                    <span class="view">{{ r.flavor_type }}</span>
+                    <input class="edit" type="text" name="flavor_type" value="{{ r.flavor_type }}" hidden>
+                </td>
+
+                </form>
             </tr>
             {% endfor %}
         </tbody>
+
     </table>
+</div>
+<!-- =========================
+     EDIT MODAL (IMPROVED UI)
+========================= -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+
+        <span class="close" onclick="closeModal()">&times;</span>
+
+        <h2>Edit Recipe</h2>
+
+        <form id="editForm" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="mode" id="edit-mode">
+            <!-- ================= TAB BUTTONS ================= -->
+            <div class="tab-buttons">
+                <button type="button" class="tab-btn active" onclick="openTab('basic')">Basic</button>
+                <button type="button" class="tab-btn" onclick="openTab('ingredients')">Ingredients</button>
+                <button type="button" class="tab-btn" onclick="openTab('details')">Details</button>
+            </div>
+
+            <!-- ================= BASIC ================= -->
+            <div class="tab-content active" id="tab-basic">
+
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" id="edit-name">
+                </div>
+
+                <div class="form-group">
+                    <label>Rating</label>
+                    <input type="text" name="rating" id="edit-rating">
+                </div>
+
+                <div class="form-group">
+                    <label>Image</label>
+                    <img id="imagePreview" class="preview-img" style="display:none; max-width:100%; margin-bottom:10px;">
+                    <input type="file" name="image_file" id="imageInput">
+                </div>
+
+            </div>
+
+            <!-- ================= INGREDIENTS ================= -->
+            <div class="tab-content" id="tab-ingredients">
+
+                <div class="form-group">
+                    <label>Clean Ingredients</label>
+                    <textarea name="clean_ingredients" id="edit-clean"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Full Ingredients</label>
+                    <textarea name="full_ingredients" id="edit-full"></textarea>
+                </div>
+            </div>
+
+            <!-- ================= DETAILS ================= -->
+            <div class="tab-content" id="tab-details">
+
+                <div class="form-group">
+                    <label>Directions</label>
+                    <textarea name="directions" id="edit-directions"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Timing</label>
+                    <textarea name="timing" id="edit-timing"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Meal Category</label>
+                    <select name="meal_category" id="edit-category">
+                        <option value="Breakfast">Breakfast</option>
+                        <option value="Lunch">Lunch</option>
+                        <option value="Dinner">Dinner</option>
+                        <option value="Snack">Snack</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Flavor Type</label>
+                    <select name="flavor_type" id="edit-flavor">
+                        <option value="Sweet">Sweet</option>
+                        <option value="Savory">Savory</option>
+                        <option value="Spicy">Spicy</option>
+                        <option value="Sour">Sour</option>
+                        <option value="Umami">Umami</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- SAVE -->
+            <button type="submit" class="update-btn full-btn">
+                Save Changes
+            </button>
+
+        </form>
+    </div>
 </div>
 
 {% endblock %}
