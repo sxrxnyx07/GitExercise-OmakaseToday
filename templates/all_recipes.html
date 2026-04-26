@@ -44,7 +44,7 @@
     {% for r in results %}
     <div class="recipe-card">
         <div class="image-container">
-            <button class="heart-btn" onclick="event.stopPropagation(); toggleSave(this);">❤</button>
+            <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
             {% if r.image and r.image.startswith('http') %}
                 <img src="{{ r.image }}" alt="{{ r.name }}">
             {% else %}
@@ -103,288 +103,105 @@
 {% endif %}
 
 <script>
-const searchInput = document.querySelector('.search-box-bold');
-const wrapper = document.querySelector('.input-sticker-wrapper');
-
-const suggestionsBox = document.createElement('div');
-suggestionsBox.className = 'suggestions-dropdown';
-wrapper.appendChild(suggestionsBox);
-
-searchInput.addEventListener('input', async function() {
-    const query = this.value.trim();
-
-    if (query.length < 1) {
-        suggestionsBox.innerHTML = "";
-        suggestionsBox.style.display = "none";
+function toggleSave(recipeId, button) {
+    if (!button || button === undefined) {
         return;
     }
 
-    try {
-        const response = await fetch(`/get_suggestions?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-
-        suggestionsBox.innerHTML = "";
-        suggestionsBox.style.display = "block";
-
-        if (data.length > 0) {
-            data.forEach(name => {
-                const div = document.createElement('div');
-                div.className = 'suggestion-item';
-                
-                const regex = new RegExp(`(${query})`, 'gi');
-                div.innerHTML = name.replace(regex, "<strong>$1</strong>");
-
-                div.onclick = function() {
-                    searchInput.value = name;
-                    suggestionsBox.style.display = "none";
-                    searchInput.closest('form').submit();
-                };
-                suggestionsBox.appendChild(div);
-            });
-        } else {
-            // SHOW THIS IF DATABASE RETURNED NOTHING
-            const noResult = document.createElement('div');
-            noResult.className = 'suggestion-item';
-            noResult.style.color = "#888";
-            noResult.style.fontStyle = "italic";
-            noResult.style.cursor = "default";
-            noResult.innerText = "No recipe found...";
-            suggestionsBox.appendChild(noResult);
-        }
-    } catch (err) {
-        console.error("Fetch error:", err);
-    }
-});
-
-document.addEventListener('click', (e) => {
-    if (!wrapper.contains(e.target)) {
-        suggestionsBox.style.display = "none";
-    }
-});
-
-
-// This part fixes the "Back Button" issue
-window.addEventListener('pageshow', function(event) {
-    // If the page was loaded from the browser cache (Back button)
-    if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
-        
-        // 1. Clear the search input so it's fresh
-        if (searchInput) {
-            searchInput.value = "";
-        }
-
-        // 2. Hide the suggestion box
-        if (suggestionsBox) {
-            suggestionsBox.style.display = "none";
-            suggestionsBox.innerHTML = "";
-        }
-        
-        // Optional: If you want the page to fully reload its data from the server:
-        // window.location.reload(); 
-    }
-});
-
-
-</script>
-
-<style>
-    .suggestion-item {
-    padding: 12px 20px;
-    cursor: pointer;
-    text-align: left;
-    font-family: 'Montserrat', sans-serif;
-    /* Changed from #eee to #111 (same as your main borders) */
-    border-bottom: 2px solid #C1C7C7; 
-    background: white;
-}
-
-/* Make sure the last item doesn't have a line so it doesn't clash with the rounded corner */
-.suggestion-item:last-child {
-    border-bottom: none;
-}
-
-    .all-recipes-grid {
-    transition: opacity 0.3s ease-in-out;
-}
-
-.recipe-card {
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-
-
-
-.suggestion-item:hover {
-    background: #f0f0f0;
-}
-
-.suggestion-item strong {
-    color: #6c5ce7; /* Highlights the matching letter */
-}
-
-.no-result {
-    color: #888;
-    font-style: italic;
-    cursor: default;
-}
-
-
-/* --- HEADER & GAPS --- */
-.all-recipes-header-container {
-    text-align: center;
-    margin-top: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.page-header h1 { font-size: 2.8rem; margin: 0; padding-top: 5px; }
-.header-subtext { margin: 5px 0 10px 0; }
-
-/* Container - Balanced width for the Ingredient Page */
-.input-sticker-wrapper {
-    position: relative;
-    display: flex; 
-    align-items: center; 
-    width: 500px; /* Reduced from 600px to be 'just right' */
-    margin: 0 auto 20px auto; 
-}
-
-.search-box-bold {
-    width: 100%; 
-    padding: 12px 55px 12px 25px; /* Clean, balanced padding */
-    border: 3px solid #111; 
-    border-radius: 50px; /* Perfect pill shape */
-    font-size: 1.1rem;
-    outline: none;
-    background: white;
-    box-shadow: 4px 4px 0px #000; /* Neobrutalist pop */
-}
-
-/* Icon stays pinned to the right */
-.bold-icon-btn {
-    position: absolute;
-    right: 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.3rem;
-    color: #6c5ce7;
-}
-
-/* Dropdown matches the 500px width perfectly */
-.suggestions-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%; 
-    background: white;
-    border: 3px solid #111;
-    border-top: none; 
-    border-radius: 0 0 25px 25px;
-    z-index: 1000;
-    display: none;
-    box-shadow: 5px 5px 0px #000;
-    overflow: hidden;
-    margin-top: -5px; /* Connects it so it looks like one piece */
-}
-/* --- FLAVOR PILLS --- */
-.filter-container {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 35px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.filter-pill {
-    text-decoration: none;
-    color: #111;
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 6px 18px;
-    border: 2px solid #111;
-    border-radius: 50px;
-    background: white;
-    transition: 0.2s;
-}
-.filter-pill:hover { background: #f8f8f8; transform: translateY(-2px); }
-.filter-pill.active { background: #111; color: white; }
-
-/* --- FLEX GRID --- */
-.all-recipes-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding-bottom: 40px;
-}
-.recipe-card { flex: 0 1 350px; max-width: 350px; }
-
-/* --- NO MATCHES --- */
-.no-results-centered {
-    width: 100%;
-    text-align: center;
-    padding: 80px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.no-match-title { 
-    font-size: 2.5rem; 
-    font-weight: 800; 
-    margin-bottom: 15px; 
-    border: none !important; /* REMOVED THE LINE */
-    padding-bottom: 0 !important;
-}
-
-.view-all-link { color: #ff6b6b; font-weight: bold; text-decoration: underline; }
-
-/* --- PAGINATION --- */
-.pagination { 
-    margin: 40px 0 80px 0; 
-    display: flex; 
-    justify-content: center; 
-    gap: 10px; 
-}
-
-.pagination a, .pagination .dots {
-    background: white;
-    border: 2px solid #000;
-    border-radius: 8px;
-    padding: 8px 14px;
-    color: black;
-    font-weight: bold;
-    text-decoration: none;
-    transition: all 0.2s;
-    display: inline-block;
-}
-
-/* ACTIVE STATE - Now Black/White with no hover movement */
-.pagination .active {
-    background: #000 !important;
-    color: #fff !important;
-    box-shadow: none !important;
-    transform: translate(2px, 2px) !important;
-    cursor: default;
-}
-
-/* Only hover items that are NOT active */
-.pagination a:not(.active):hover {
-    background: #f0f0f0;
-    transform: translateY(-3px);
-    box-shadow: 2px 2px 0px #000;
-}
-</style>
-
-<script>
-function toggleSave(button) {
     button.classList.toggle('saved');
+
+    fetch('/toggle-save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe_id: recipeId })
+    })
+    .then(response => {
+        if (!response.ok) {
+            button.classList.toggle('saved');
+            alert("Please login to save recipes!");
+            return;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data) console.log("Success:", data.message);
+    })
+    .catch(error => {
+        console.error('Fetch Error:', error);
+        button.classList.toggle('saved');
+    });
 }
+
+(function() {
+    const searchInput = document.querySelector('.search-box-bold');
+    const wrapper = document.querySelector('.input-sticker-wrapper');
+
+    if (wrapper && searchInput) {
+        const suggestionsBox = document.createElement('div');
+        suggestionsBox.className = 'suggestions-dropdown';
+        wrapper.appendChild(suggestionsBox);
+
+        searchInput.addEventListener('input', async function() {
+            const query = this.value.trim();
+            if (query.length < 1) {
+                suggestionsBox.innerHTML = "";
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/get_suggestions?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                suggestionsBox.innerHTML = "";
+                suggestionsBox.style.display = "block";
+
+                if (data && data.length > 0) {
+                    data.forEach(name => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        const regex = new RegExp(`(${query})`, 'gi');
+                        div.innerHTML = name.replace(regex, "<strong>$1</strong>");
+                        div.onclick = function() {
+                            searchInput.value = name;
+                            suggestionsBox.style.display = "none";
+                            searchInput.closest('form').submit();
+                        };
+                        suggestionsBox.appendChild(div);
+                    });
+                } else {
+                    const noResult = document.createElement('div');
+                    noResult.className = 'suggestion-item';
+                    noResult.style.color = "#888";
+                    noResult.style.fontStyle = "italic";
+                    noResult.innerText = "No recipe found...";
+                    suggestionsBox.appendChild(noResult);
+                }
+            } catch (err) {
+                console.error("Suggestion Error:", err);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) {
+                suggestionsBox.style.display = "none";
+            }
+        });
+    }
+})();
+
+window.addEventListener('pageshow', function(event) {
+    const searchInput = document.querySelector('.search-box-bold');
+    const sBox = document.querySelector('.suggestions-dropdown');
+    
+    if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+        if (searchInput) searchInput.value = "";
+        if (sBox) {
+            sBox.style.display = "none";
+            sBox.innerHTML = "";
+        }
+    }
+});
 </script>
+
 {% endblock %}

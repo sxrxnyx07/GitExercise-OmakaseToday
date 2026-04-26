@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "secretkey123"
 
-# ---------------- DATABASE CONFIG (Recipe DB) ----------------
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'omakase.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -26,6 +26,33 @@ class Recipe(db.Model):
     timing = db.Column(db.String(100))     
     meal_category = db.Column(db.String(50))
     flavor_type = db.Column(db.String(50))
+
+class SavedRecipe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(120), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    recipe = db.relationship('Recipe', backref='saved_by')
+
+@app.route('/toggle-save', methods=['POST'])
+def toggle_save():
+    user_email = session.get('email')
+    if not user_email:
+        return jsonify({"error": "Login required"}), 401
+    
+    data = request.get_json()
+    recipe_id = data.get('recipe_id')
+    
+    existing_save = SavedRecipe.query.filter_by(user_email=user_email, recipe_id=recipe_id).first()
+    
+    if existing_save:
+        db.session.delete(existing_save)
+        db.session.commit()
+        return jsonify({"status": "unfilled", "message": "Removed"})
+    else:
+        new_save = SavedRecipe(user_email=user_email, recipe_id=recipe_id)
+        db.session.add(new_save)
+        db.session.commit()
+        return jsonify({"status": "filled", "message": "Saved"})
 
 # ---------------- DATABASE INIT (User DB) ----------------
 def init_db():
@@ -47,7 +74,6 @@ init_db()
 
 
 from flask import Flask, render_template, request, jsonify
-# ... your other imports like Recipe ...
 
 @app.route('/all_recipes')
 def all_recipes():
@@ -62,7 +88,7 @@ def all_recipes():
         query = query.filter(Recipe.flavor_type == active_flavor.capitalize())
 
     if search_query:
-        # We use .ilike() with % wildcards to find the word ANYWHERE in the name
+        
         query = query.filter(Recipe.name.ilike(f"%{search_query}%"))
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -75,21 +101,21 @@ def all_recipes():
         active_flavor=active_flavor
     )
 
-# THIS IS THE NEW ROUTE FOR SUGGESTIONS
+
 @app.route('/get_suggestions')
 def get_suggestions():
     q = request.args.get('q', '').strip()
     if not q:
         return jsonify([])
 
-    # Find recipes where name contains the query string
+
     results = Recipe.query.filter(Recipe.name.ilike(f"%{q}%")).limit(5).all()
     suggestion_list = [r.name for r in results]
     
     return jsonify(suggestion_list)
 # ---------------- YOUR INGREDIENT LOGIC ----------------
 
-@app.route("/ingredient-search")  # Renamed so Friend's HOME works
+@app.route("/ingredient-search")  
 def ingredient_index():
     all_recipes = Recipe.query.all()
     ingredients_dict = {char: [] for char in string.ascii_uppercase}
@@ -133,7 +159,7 @@ def search():
             if total_count == 0:
                 continue
 
-            # --- STRICT LOGIC START ---
+            
             is_valid_match = True
             matched_in_recipe = []
 
@@ -149,7 +175,7 @@ def search():
                 if not found_this_item:
                     is_valid_match = False
                     break 
-            # --- STRICT LOGIC END ---
+            
 
             if is_valid_match:
                 have_count = len(user_input)
@@ -172,7 +198,7 @@ def search():
     results = sorted(results, key=lambda x: x['match'], reverse=True)
     return render_template('result.html', results=results, selected=user_input)
 
-# ---------------- FRIEND'S AUTH LOGIC ----------------
+
 
 @app.route("/")
 def home():
@@ -274,6 +300,6 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("home"))
 
-# ---------------- RUN APP ----------------
+
 if __name__ == "__main__":
     app.run(debug=True)

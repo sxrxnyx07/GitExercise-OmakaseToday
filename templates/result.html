@@ -35,7 +35,7 @@
             <div class="recipe-card {% if loop.index > 6 %}hidden-card{% endif %}" 
                  style="{% if loop.index > 6 %}display: none;{% endif %}">
                 <div class="image-container">
-                    <button class="heart-btn" onclick="event.stopPropagation(); toggleSave(this);">❤</button>
+                    <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
                     <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
                 </div>
                 
@@ -98,79 +98,44 @@
         <a href="{{ url_for('ingredient_index') }}" class="btn-gray">⬅ Back to Ingredients</a>
     </div>
 
-    <script>
-        function toggleSave(button) { button.classList.toggle('saved'); }
+<script>
+    function toggleSave(recipeId, button) { 
+        button.classList.toggle('saved'); 
 
-        document.getElementById('loadMoreBtn')?.addEventListener('click', function() {
-            const hiddenCards = document.querySelectorAll('.hidden-card');
-            const batchSize = 6; 
-            for (let i = 0; i < batchSize && i < hiddenCards.length; i++) {
-                hiddenCards[i].style.display = 'block';
-                hiddenCards[i].classList.remove('hidden-card');
+        fetch('/toggle-save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ recipe_id: recipeId })
+        })
+        .then(response => {
+            if (!response.ok) {
+                button.classList.toggle('saved');
+                alert("Please login to save recipes!");
             }
-            if (document.querySelectorAll('.hidden-card').length === 0) {
-                document.getElementById('load-more-container').style.display = 'none';
-            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Database updated:", data.message);
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
-    </script>
+    }
 
-    <style>
-        /* --- MATCH BADGE COLORS --- */
-        .match-badge {
-            padding: 5px 12px;
-            border-radius: 4px;
-            display: inline-block;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-        }
-        .match-high { background-color: #e8f5e9; color: #2e7d32; } /* Green */
-        .match-mid  { background-color: #fff3e0; color: #ef6c00; } /* Orange */
-        .match-low  { background-color: #fce4ec; color: #ad1457; } /* Red/Pink */
 
-        /* --- MISSING INFO BOX --- */
-        .missing-info {
-            background: #fff5f5;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #ffe3e3;
-            font-size: 0.9em;
+    document.getElementById('loadMoreBtn')?.addEventListener('click', function() {
+        const hiddenCards = document.querySelectorAll('.hidden-card');
+        const batchSize = 6; 
+        for (let i = 0; i < batchSize && i < hiddenCards.length; i++) {
+            hiddenCards[i].style.display = 'block';
+            hiddenCards[i].classList.remove('hidden-card');
         }
-        .extra-count {
-            color: #e67e22;
-            font-style: italic;
-            font-weight: bold;
-            margin-left: 5px;
+        if (document.querySelectorAll('.hidden-card').length === 0) {
+            document.getElementById('load-more-container').style.display = 'none';
         }
+    });
+</script>
 
-        
-
-        /* --- LOAD MORE / BACK BUTTONS --- */
-        .btn-gray {
-            background-color: #f1f3f5;
-            color: #2d3436;
-            border: 2px solid #000000;
-            padding: 10px 22px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-block;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            outline: none;
-        }
-        .btn-gray:hover {
-            background-color: #BAC4CE;
-            transform: translate(2px, 2px);
-        }
-
-        /* GRID HELPERS */
-        .recipe-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-        }
-    </style>
 {% endblock %}

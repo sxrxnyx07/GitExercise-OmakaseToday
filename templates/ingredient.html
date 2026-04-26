@@ -88,7 +88,7 @@
 
         selectedIngredients.push(item);
         
-        // BLOCK THE TAG: Find the tag in the A-Z list and add 'blocked'
+
         document.querySelectorAll('.tag').forEach(tag => {
             if (tag.innerText.trim().toLowerCase() === item.toLowerCase()) {
                 tag.classList.add('blocked');
@@ -103,11 +103,11 @@
         }
     }
 
-    // ONLY ONE VERSION OF THIS NOW
+
     function removeIngredient(item) {
         selectedIngredients = selectedIngredients.filter(i => i !== item);
         
-        // UNBLOCK THE TAG: Find the tag in the A-Z list and remove 'blocked'
+  
         document.querySelectorAll('.tag').forEach(tag => {
             if (tag.innerText.trim().toLowerCase() === item.toLowerCase()) {
                 tag.classList.remove('blocked');
@@ -158,40 +158,40 @@ const suggestionsBox = document.getElementById('suggestions');
 function filterSuggestions() {
     let query = searchInput.value.toLowerCase();
     
-    // If box is empty, hide list
+
     if (query === "") {
         suggestionsBox.innerHTML = "";
         suggestionsBox.style.display = "none";
         return;
     }
 
-    // Filter logic: Match alphabet AND exclude what is already in selectedIngredients
+
     const filtered = ingredients.filter(i => 
         i.toLowerCase().startsWith(query) && !selectedIngredients.includes(i)
     );
 
-    // Clear old list and always show box when typing
+
     suggestionsBox.innerHTML = ""; 
     suggestionsBox.style.display = "block"; 
 
     if (filtered.length > 0) {
         filtered.forEach(item => {
             let div = document.createElement("div");
-            div.className = "suggestion-item"; // For your lines
+            div.className = "suggestion-item"; 
             let matchingPart = item.slice(0, query.length); 
             let remainingPart = item.slice(query.length);
             div.innerHTML = `<strong>${matchingPart}</strong>${remainingPart}`;
             
             div.onclick = function(e) {
-                e.stopPropagation(); // Stop click from bubbling to document
+                e.stopPropagation(); 
                 addIngredient(item);
-                searchInput.value = ""; // Clear box
-                suggestionsBox.style.display = "none"; // Hide list
+                searchInput.value = ""; 
+                suggestionsBox.style.display = "none"; 
             };
             suggestionsBox.appendChild(div);
         });
     } else {
-        // MODIFIED THIS PART ONLY
+       
         let div = document.createElement("div");
         div.className = "suggestion-item";
         div.style.color = "#888";
@@ -201,244 +201,40 @@ function filterSuggestions() {
     }
 }
 
-// 2. LISTEN FOR TYPING
+
 searchInput.addEventListener('input', filterSuggestions);
 
-// 3. LISTEN FOR CLICKING BACK INTO BOX
+
 searchInput.addEventListener('focus', filterSuggestions);
 
-// 4. THE "CLICK OUTSIDE" FIX
+
 document.addEventListener('click', function(event) {
-    // If the user clicks outside the search box AND outside the suggestion list
+   
     if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
         suggestionsBox.style.display = "none";
     }
 });
 
-// Add this below your other event listeners
+
 searchInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
-        e.preventDefault(); // Stop page from refreshing/submitting
+        e.preventDefault(); 
         
         const query = this.value.toLowerCase().trim();
         
-        // Find if there's a match in the ingredients that isn't already selected
+
         const match = ingredients.find(i => 
             i.toLowerCase() === query && !selectedIngredients.includes(i)
         );
 
         if (match) {
-            addIngredient(match); // Add it to the box
-            this.value = ""; // Clear search
-            suggestionsBox.style.display = "none"; // Hide suggestions
+            addIngredient(match); 
+            this.value = ""; 
+            suggestionsBox.style.display = "none"; 
         }
     }
 });
 
 </script>
-<style>
-/* 1. The Main Wrapper - Centers and locks the width to 500px */
-.form-content-wrapper {
-    width: 100%;
-    max-width: 500px; 
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* 2. The Search Input Box - Sleek and long */
-.input-sticker-wrapper {
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
-}
-
-.search-box-bold {
-    width: 100%;
-    padding: 12px 55px 12px 25px;
-    border: 3px solid #111; 
-    border-radius: 50px;
-    font-size: 1.1rem;
-    outline: none;
-    background: white;
-    box-shadow: 4px 4px 0px #000; /* Neobrutalist shadow */
-}
-
-/* 3. The Search Icon */
-.bold-icon-btn {
-    position: absolute;
-    right: 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.3rem;
-    color: #6c5ce7;
-}
-
-/* 4. The Dropdown - Now connects perfectly to the search bar */
-.suggestions-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: white;
-    border: 3px solid #111;
-    border-top: none; /* Removes the double line between bar and list */
-    border-radius: 0 0 25px 25px; /* Rounds only the bottom */
-    z-index: 1000;
-    display: none;
-    box-shadow: 5px 5px 0px #000;
-    overflow: hidden;
-    margin-top: -5px; /* Tucks it slightly under the bar for a seamless look */
-}
-
-/* 5. The Suggestion Items - With the THICK lines you wanted */
-.suggestion-item {
-    padding: 15px 20px;
-    cursor: pointer;
-    text-align: left;
-    font-family: 'Montserrat', sans-serif;
-    /* Thick 4px divider */
-    border-bottom: 2px solid #C1C7C7 !important; 
-    background: white;
-}
-
-/* Clean up the very last line */
-.suggestion-item:last-child {
-    border-bottom: none !important;
-}
-
-.suggestion-item:hover {
-    background: #f0f0f0;
-}
-
-.suggestion-item strong {
-    color: #6c5ce7; /* Highlights the matching letters */
-}
-
-    /* Lock the width for both boxes */
-.form-content-wrapper {
-    width: 100%;
-    max-width: 500px; /* Adjust this number to change the length of both */
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Space between the two boxes */
-}
-
-.search-container {
-    position: relative;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    /* REMOVE THE LINE HERE */
-    border-bottom: none !important; 
-    box-shadow: none !important;
-}
-
-.search-box {
-    width: 100%;
-    padding: 12px 50px 12px 20px;
-    border-radius: 50px;
-    border: 2px solid #111; /* This keeps the outer ring but removes the bottom line */
-    font-size: 1rem;
-    outline: none;
-    box-sizing: border-box;
-    background: white;
-}
-
-
-
-/* Clickable Search Icon */
-.search-icon-btn {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    padding: 0;
-    color: #6b46c1;
-}
-
-/* Ingredient List Box matching search width */
-.selected-box {
-    width: 100%;
-    min-height: 48px;
-    padding: 10px;
-    border: 2px dashed #f4c542;
-    border-radius: 15px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    box-sizing: border-box; /* Crucial to keep width exactly 100% */
-    background: white;
-}
-.btn-small {
-    display: block;
-    margin: 20px auto;
-    padding: 12px 35px;
-    background: #f4c542; /* The yellow color from your reference */
-    color: #111;
-    border: 2px solid #111; /* Thick black border */
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    /* This creates the heavy black shadow seen in your 'old' version */
-    box-shadow: 4px 4px 0px #111; 
-    transition: 0.2s;
-}
-
-.btn-small:hover {
-    /* Subtle movement when hovering */
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px #111;
-}
-
-/* Styling for the blocked/selected ingredient in the list */
-/* Keep your original grey style */
-.tag.blocked {
-    background-color: #eee !important;
-    color: #bbb !important;
-    border: 2px solid #ccc !important;
-    cursor: not-allowed !important;
-    box-shadow: none !important;
-    transform: none !important;
-    position: relative; /* Needed to place the emoji inside */
-    pointer-events: auto !important; /* This allows the hover to work! */
-}
-
-/* Create the emoji but hide it normally */
-.tag.blocked::after {
-    content: "🚫";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.5rem;
-    display: none; /* Hidden by default */
-    z-index: 10;
-}
-
-
-.header-description {
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
-    color: #555;
-    font-size: 1.1rem;
-    margin-top: -10px; /* Pulls it closer to the heading */
-    margin-bottom: 30px;
-    font-weight: 500;
-}
-
-
-</style>
-
 
 {% endblock %}
