@@ -53,8 +53,6 @@ if (form) {
         }
     });
 }
-
-
 // =========================
 // NEW PASSWORD
 // =========================
@@ -70,7 +68,6 @@ function getNewPasswordErrors(password, repeat) {
 
     return errors
 }
-
 // =========================
 // LOGIN
 // =========================
@@ -82,7 +79,6 @@ function getLoginFormErrors(email, password) {
 
     return errors
 }
-
 // =========================
 // REGISTER
 // =========================
@@ -97,7 +93,6 @@ function getSignupFormErrors(username, email, password, repeat, emailExists) {
 
     return errors
 }
-
 // =========================
 // EMAIL CHECK (ONLY UI WARNING)
 // =========================
@@ -134,7 +129,6 @@ if (page === "register" && email_input) {
         }, 300);
     });
 }
-
 // =========================
 // ONLY FRONTEND VALIDATION (NOT BLOCK SUBMIT)
 // =========================
@@ -171,7 +165,6 @@ function enableEdit() {
         saveBtn.style.display = "inline-block"
     }
 }
-
 // =========================
 // CLEAR STYLE
 // =========================
