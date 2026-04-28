@@ -172,44 +172,62 @@ function spin() {
         ball.classList.add(randomColor);
         ball.classList.add("drop");
 
-        fetch('/random?category=lunch')
-        .then(res => res.json())
-        .then(data => {
+        const category = "Lunch"; // ⭐ 每个页面改这里
+
+        Promise.all([
+            fetch('/random?category=' + category).then(res => res.json()),
+            fetch('/random-multiple?category=' + category).then(res => res.json())
+        ])
+        .then(([mainData, listData]) => {
 
             setTimeout(() => {
 
                 isSpinning = false;
                 button.disabled = false;
                 warningMsg.innerText = "";
-                resultBox.innerText = "You got: " + data.name;    // resultbox show recipe name
+
+                resultBox.innerText = "You got: " + mainData.name;
 
                 let container = document.querySelector(".recipe-container");
 
-                container.innerHTML = `
-                    <div class="recipe-card gacha-result" id="gachaCard">
-                        <img src="${data.image}">
-                        <h3 class="recipe-title">
-                            <a href="/recipe/${data.id}">
-                            ${data.name}
-                            </a>
-                        </h3>
-                    </div>
-                    `;
-
-            setTimeout(() => {
-                document.getElementById("gachaCard").classList.add("pop");
-                }, 50);
-
-                document.querySelector(".recipe-container").innerHTML = `
-                    <div class="recipe-card gacha-result pop">
-                        <img src="${data.image}">
-                        <h3 class="recipe-title">
-                            <a href="/recipe/${data.id}">
-                            ${data.name}
-                            </a>
-                        </h3>
+                // ⭐ 主结果（中间）
+                let mainCard = `
+                    <div class="main-result">
+                        <div class="recipe-card gacha-result pop">
+                            <img src="${mainData.image}">
+                            <h3 class="recipe-title">
+                                <a href="/recipe/${mainData.id}">
+                                    ${mainData.name}
+                                </a>
+                            </h3>
+                        </div>
                     </div>
                 `;
+
+                // ⭐ 5个推荐
+                let suggestionCards = listData.map(r => `
+                    <div class="recipe-card small-card">
+                        <img src="${r.image}">
+                        <h3 class="recipe-title">
+                            <a href="/recipe/${r.id}">
+                                ${r.name}
+                            </a>
+                        </h3>
+                    </div>
+                `).join('');
+
+                // ⭐ 最终结构
+                container.innerHTML = `
+                    ${mainCard}
+
+                    <div class="suggestion-section">
+                        <h3 class="suggestion-title">🍽️ You may also like</h3>
+                        <div class="suggestion-grid">
+                            ${suggestionCards}
+                        </div>
+                    </div>
+                `;
+                container.classList.add("result-mode");
 
                 document.getElementById("resultHint").style.opacity = 1;
 

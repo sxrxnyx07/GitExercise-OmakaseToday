@@ -307,7 +307,7 @@ button:disabled {
     display: block;   
 }
 
-               /* ___________For recipe page____________*/
+/* ___________________________________For recipe page_________________________________*/
 /* =========================
    RECIPE GRID
 ========================= */
@@ -721,7 +721,16 @@ button:disabled {
     }
 }
 
-            /* ___________For recipe card show after result come out____________*/
+/* ______________________________For recipe card show after result come out_______________________*/
+.main-result {
+    display: flex;
+    justify-content: center;
+}
+
+.result-mode {
+    display: block !important;
+}
+
 .gacha-result {
     width: 300px;
     margin: 30px auto;
@@ -760,4 +769,33 @@ button:disabled {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+/* Show another 5 recipe randomly */
+.suggestion-section {
+    margin-top: 30px;
+}
+
+.suggestion-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #8b4513;
+    letter-spacing: 3px;
+    font-family: 'Georgia', serif;
+    text-shadow: 
+        2px 2px 0px #fff,
+        3px 3px 0px rgba(139,69,19,0.3);
+}
+
+.suggestion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    width: 100%;
+}
+
+.small-card img {
+    height: 120px;
 }

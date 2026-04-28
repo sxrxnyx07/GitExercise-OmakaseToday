@@ -121,6 +121,25 @@ def get_random_recipe():
         "image": recipe["image"]
     })
 
+@app.route('/random-multiple')
+def get_multiple_recipes():
+
+    category = request.args.get('category')
+
+    conn = get_db_connection()
+
+    recipes = conn.execute("""
+        SELECT id, name, image
+        FROM recipe
+        WHERE LOWER(meal_category) = LOWER(?)
+        ORDER BY RANDOM()
+        LIMIT 5
+    """, (category,)).fetchall()
+
+    conn.close()
+
+    return jsonify([dict(r) for r in recipes])
+
 @app.route('/recipe/<int:id>')
 def recipe_detail(id):
 
