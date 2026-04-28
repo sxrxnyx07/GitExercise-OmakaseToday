@@ -3,127 +3,147 @@
 {% block title %}Recipe Result | Omakase Today{% endblock %}
 
 {% block content %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&family=Montserrat:wght@700&display=swap" rel="stylesheet">
-    
-    <div class="page-header" style="text-align: center;">
-        <h1>🍳 Omakase Today</h1>
-        <p style="font-weight: bold; font-size: 1.1rem; margin-top: 10px; color: #333;">
-            Turn your leftovers into a masterpiece! ✨
-        </p>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 
-        {% if selected %}
-            <div style="margin-top: 20px;">
-                <h3 style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; color: red; margin-bottom: 15px;">
-                    <span style="border-bottom: 2px solid red; padding-bottom: 5px;">IN YOUR KITCHEN</span>
-                </h3>
-                <div class="tag-container" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
-                    {% for item in selected %}
-                        <div class="ingredient-pop" style="background: white; padding: 8px 18px; border-radius: 25px; border: 1.5px solid black; font-weight: bold; color: #444;">
-                            <span style="color: #fbc02d;">★</span> {{ item }}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
+<div id="loginModal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-icon">🔒</div>
+        <h3>Login Required</h3>
+        <p>Login to save recipes.<br>Go to login page?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn yes" onclick="redirectToLogin()">Yes</button>
+            <button class="modal-btn no" onclick="closeModal()">No</button>
+        </div>
     </div>
+</div>
 
-    <div class="recipe-grid">
-        {% if results %}
-            {% for r in results %}
-            <div class="recipe-card {% if loop.index > 6 %}hidden-card{% endif %}" 
-                 style="{% if loop.index > 6 %}display: none;{% endif %}">
-                <div class="image-container">
-                    <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
-                    <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
+<div class="page-header" style="text-align: center;">
+    <h1>🍳 Omakase Today</h1>
+    <p style="font-weight: bold; font-size: 1.1rem; margin-top: 10px; color: #333;">
+        Turn your leftovers into a masterpiece! ✨
+    </p>
+
+    {% if selected %}
+        <div style="margin-top: 20px;">
+            <h3 style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; color: red; margin-bottom: 15px;">
+                <span style="border-bottom: 2px solid red; padding-bottom: 5px;">IN YOUR KITCHEN</span>
+            </h3>
+            <div class="tag-container" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                {% for item in selected %}
+                    <div class="ingredient-pop" style="background: white; padding: 8px 18px; border-radius: 25px; border: 1.5px solid black; font-weight: bold; color: #444;">
+                        <span style="color: #fbc02d;">★</span> {{ item }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="recipe-grid">
+    {% if results %}
+        {% for r in results %}
+        <div class="recipe-card {% if loop.index > 6 %}hidden-card{% endif %}" 
+             style="{% if loop.index > 6 %}display: none;{% endif %}">
+            <div class="image-container">
+                <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
+                <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
+            </div>
+            
+            <div class="card-meta">
+                <div class="meal-category">{{ r.meal_category|default('RECIPE') }}</div>
+                <span class="recipe-title" style="display: block; font-weight: bold; margin-bottom: 10px;">{{ r.name }}</span>
+                
+                <div class="rating-stars">
+                   {% set current_rating = r.rating|default(0)|int %}
+                   {% for i in range(5) %}
+                       <span style="color: {{ '#ffc107' if i < current_rating else '#e4e5e9' }};">★</span>
+                   {% endfor %}
+                   <span class="rating-count">({{ r.rating|default('0.0') }})</span>
+                </div>
+
+                <div class="match-badge 
+                    {% if r.match|int >= 80 %}match-high
+                    {% elif r.match|int >= 50 %}match-mid
+                    {% else %}match-low{% endif %}">
+                    Match: {{ r.match }}%
                 </div>
                 
-                <div class="card-meta">
-                    <div class="meal-category">{{ r.meal_category|default('RECIPE') }}</div>
-                    <span class="recipe-title" style="display: block; font-weight: bold; margin-bottom: 10px;">{{ r.name }}</span>
-                    
-                    <div class="rating-stars">
-                       {% set current_rating = r.rating|default(0)|int %}
-                       {% for i in range(5) %}
-                           <span style="color: {{ '#ffc107' if i < current_rating else '#e4e5e9' }};">★</span>
-                       {% endfor %}
-                       <span class="rating-count">({{ r.rating|default('0.0') }})</span>
-                    </div>
-
-                    <div class="match-badge 
-                        {% if r.match|int >= 80 %}match-high
-                        {% elif r.match|int >= 50 %}match-mid
-                        {% else %}match-low{% endif %}">
-                        Match: {{ r.match }}%
-                    </div>
-                    
-                    {% if r.missing_names %}
-                        <div class="missing-info">
-                            <strong style="color: #d9534f;">Missing:</strong>
-                            <span style="color: #666; font-weight: bold; text-transform: capitalize;">
-                                {{ r.missing_names|join(', ') }}
+                {% if r.missing_names %}
+                    <div class="missing-info">
+                        <strong style="color: #d9534f;">Missing:</strong>
+                        <span style="color: #666; font-weight: bold; text-transform: capitalize;">
+                            {{ r.missing_names|join(', ') }}
+                        </span>
+                        
+                        {% if r.extra_count > 0 %}
+                            <span class="extra-count">
+                                ... (+{{ r.extra_count }} more)
                             </span>
-                            
-                            {% if r.extra_count > 0 %}
-                                <span class="extra-count">
-                                    ... (+{{ r.extra_count }} more)
-                                </span>
-                            {% endif %}
-                        </div>
-                    {% else %}
-                        <p class="match-badge match-high" style="text-align: center; display: block;">✨ PERFECT MATCH</p>
-                    {% endif %}
-
-                    <div style="margin-top: 15px; text-align: left;">
-                         <a href="#" class="btn-return" style="margin: 0; padding: 10px 25px; font-size: 1rem;">View Recipe</a>
+                        {% endif %}
                     </div>
+                {% else %}
+                    <p class="match-badge match-high" style="text-align: center; display: block;">✨ PERFECT MATCH</p>
+                {% endif %}
+
+                <div style="margin-top: 15px; text-align: left;">
+                     <a href="/recipe/{{ r.id }}" class="btn-return" style="margin: 0; padding: 10px 25px; font-size: 1rem;">View Recipe</a>
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-container" style="text-align: center; margin-top: 50px; width: 100%;">
-                <h3 style="font-size: 2.5rem; color: #444;">No matches found! 😕</h3>
-            </div>
-        {% endif %}
-    </div>
-
-    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 40px 0;">
-        {% if results|length > 6 %}
-        <div id="load-more-container">
-            <button id="loadMoreBtn" class="btn-gray">Load More Recipes</button>
         </div>
-        {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="empty-container" style="text-align: center; margin-top: 50px; width: 100%;">
+            <h3 style="font-size: 2.5rem; color: #444;">No matches found! 😕</h3>
+        </div>
+    {% endif %}
+</div>
 
-        <a href="{{ url_for('ingredient_index') }}" class="btn-gray">⬅ Back to Ingredients</a>
+<div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 40px 0;">
+    {% if results|length > 6 %}
+    <div id="load-more-container">
+        <button id="loadMoreBtn" class="btn-gray">Load More Recipes</button>
     </div>
+    {% endif %}
+
+    <a href="{{ url_for('ingredient_index') }}" class="btn-gray">⬅ Back to Ingredients</a>
+</div>
 
 <script>
+    const loginModal = document.getElementById('loginModal');
+
+    function closeModal() {
+        loginModal.style.display = 'none';
+    }
+
+    function redirectToLogin() {
+        window.location.href = "{{ url_for('login') }}";
+    }
+
     function toggleSave(recipeId, button) { 
-        button.classList.toggle('saved'); 
+        if (!button) return;
 
         fetch('/toggle-save', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recipe_id: recipeId })
         })
         .then(response => {
-            if (!response.ok) {
-                button.classList.toggle('saved');
-                alert("Please login to save recipes!");
+            if (response.status === 401) {
+                
+                loginModal.style.display = 'block';
+                return;
             }
-            return response.json();
+            if (response.ok) {
+                button.classList.toggle('saved');
+            }
         })
-        .then(data => {
-            console.log("Database updated:", data.message);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+        .catch(error => console.error('Error:', error));
     }
 
+
+    window.onclick = function(event) {
+        if (event.target == loginModal) closeModal();
+    }
 
     document.getElementById('loadMoreBtn')?.addEventListener('click', function() {
         const hiddenCards = document.querySelectorAll('.hidden-card');
