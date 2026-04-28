@@ -299,10 +299,8 @@ async function toggleSave(button) {
 
     const res = await fetch(url);
 
-    if (!res.ok) {
-        button.disabled = false;
-        return;
-    }
+    if (!res.ok) return;
+    location.reload();
 
     button.classList.toggle("saved");
 
