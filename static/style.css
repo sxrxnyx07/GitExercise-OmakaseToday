@@ -684,6 +684,14 @@ button:disabled {
     font-weight: bold;
 }
 
+.ingredient-hint {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 12px;
+    text-align: center;
+    font-style: italic;
+}
+
 .ingredient-item:hover {
     transform: translateX(5px);
 }
@@ -711,6 +719,15 @@ button:disabled {
     transform: translateX(5px);
     background: #fff7e6;
     color: #ff7a00;
+}
+
+.ingredient-link::after {
+    content: " 🔍 Click to search";
+    display: none;
+}
+
+.ingredient-link:hover::after {
+    display: inline;
 }
 
 /* Directions 独立一整行 - 🔥 已优化 */
