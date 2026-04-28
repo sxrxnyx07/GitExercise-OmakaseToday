@@ -50,7 +50,11 @@
             <h3>🥕 Ingredients</h3>
             <div class="ingredient-grid">
                 {% for item in recipe['clean_ingredients'].split(',') %}
-                    <div class="ingredient-line">{{ item.strip() }}</div>
+                    <a class="ingredient-link"
+                        href="https://www.google.com/search?q={{ item.strip() }}"
+                        target="_blank">
+                        {{ item.strip() }}
+                    </a>
                 {% endfor %}
             </div>
         </div>

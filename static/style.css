@@ -692,6 +692,27 @@ button:disabled {
     background: #fff7e6;
 }
 
+.ingredient-link {
+    display: block;
+    padding: 10px 14px;
+    margin: 5px 0;
+
+    background: #fff;
+    border-radius: 10px;
+
+    text-decoration: none;
+    color: #333;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: 0.2s;
+}
+
+.ingredient-link:hover {
+    transform: translateX(5px);
+    background: #fff7e6;
+    color: #ff7a00;
+}
+
 /* Directions 独立一整行 - 🔥 已优化 */
 .card.full {
     grid-column: 1 / -1;
