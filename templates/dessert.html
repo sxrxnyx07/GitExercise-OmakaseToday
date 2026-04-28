@@ -53,19 +53,35 @@
 
     </div>
 
-<div class="recipe-container">
+<div class="recipe-container all-recipes">
     {% for r in recipes %}
-        <div class="recipe-card">
 
-            <img src="{{ r['image'] }}" alt="{{ r['name'] }}">
+<div class="recipe-card small-card">
 
-            <h3 class="recipe-title">
-                <a href="/recipe/{{ r['id'] }}">
-                    {{ r['name'] }}
-                </a>
-            </h3>
+    <div class="image-container">
+        <img src="{{ r['image'] }}">
+    </div>
 
+    <div class="card-meta">
+
+        <div class="meal-category">
+            {{ r['meal_category'] if r['meal_category'] else 'RECIPE' }}
         </div>
+
+        <h3 class="recipe-title">
+            <a href="/recipe/{{ r['id'] }}">
+                {{ r['name'] }}
+            </a>
+        </h3>
+
+        <div class="rating-stars">
+            ⭐⭐⭐⭐☆ <span>(4.0)</span>
+        </div>
+
+    </div>
+
+</div>
+
     {% endfor %}
 </div>
 
@@ -191,28 +207,48 @@ function spin() {
                 let container = document.querySelector(".recipe-container");
 
                 // ⭐ 主结果（中间）
-                let mainCard = `
-                    <div class="main-result">
-                        <div class="recipe-card gacha-result pop">
+            let mainCard = `
+                <div class="main-result">
+                    <div class="spin-winner-card pop">
+                        <div class="winner-badge">🎉 CONGRATS 🎉</div>
+                        <div class="detail-image">
                             <img src="${mainData.image}">
-                            <h3 class="recipe-title">
-                                <a href="/recipe/${mainData.id}">
-                                    ${mainData.name}
-                                </a>
-                            </h3>
+                        </div>
+                        <div class="detail-content">
+                            <h2 class="detail-title">${mainData.name}</h2>
+                            <div class="winner-rating">
+                                ⭐⭐⭐⭐⭐ <span>Perfect Match!</span>
+                            </div>
+                            <a href="/recipe/${mainData.id}" class="view-btn">View Recipe →</a>
                         </div>
                     </div>
-                `;
+                 </div>
+            `;
 
                 // ⭐ 5个推荐
                 let suggestionCards = listData.map(r => `
                     <div class="recipe-card small-card">
-                        <img src="${r.image}">
+
+                        <div class="image-container">
+                            <img src="${r.image}">
+                        </div>
+
+                        <div class="card-meta">
+
+                        <div class="meal-category">RECOMMENDED</div>
+
                         <h3 class="recipe-title">
                             <a href="/recipe/${r.id}">
                                 ${r.name}
                             </a>
                         </h3>
+
+                        <div class="rating-stars">
+                            ⭐⭐⭐⭐☆ <span>(4.0)</span>
+                        </div>
+
+                        </div>
+
                     </div>
                 `).join('');
 

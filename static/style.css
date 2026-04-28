@@ -684,7 +684,7 @@ button:disabled {
     font-weight: bold;
 }
 
-.ingredient-hint {
+.ingredient-hint {         /* let users know the ingredients can click and view in google */
     font-size: 13px;
     color: #888;
     margin-bottom: 12px;
@@ -759,26 +759,128 @@ button:disabled {
     }
 }
 
+/* Result recipe design */
+.main-result {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    padding: 30px 0;
+}
+
+.spin-winner-card {
+    width: 340px;                       /* 🔥 更大更豪华 */
+    background: linear-gradient(145deg, #fff, #fffdf7);
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 
+        0 25px 50px rgba(0,0,0,0.25),
+        0 0 0 8px rgba(255, 215, 0, 0.3);  /* 🔥 金色光环 */
+    position: relative;
+    animation: winnerBounce 0.6s ease;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+@keyframes winnerBounce {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.98); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* 🔥 顶部Congrats徽章 */
+.winner-badge {
+    position: absolute;
+    top: 230px;              /* 🔥 稍微下移 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #b8860b;
+    padding: 10px 28px;      /* 🔥 左右增加padding */
+    border-radius: 30px;     /* 🔥 更大圆角 */
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 3px;     /* 🔥 拉开字母间距 */
+    text-transform: uppercase;
+    white-space: nowrap;     /* 🔥 强制不换行 */
+    box-shadow: 0 6px 20px rgba(255,215,0,0.5);
+    z-index: 10;
+    min-width: fit-content;  /* 🔥 自适应文字宽度 */
+}
+
+.detail-image {
+    position: relative;
+    height: 240px;
+    overflow: hidden;
+}
+
+.detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.spin-winner-card:hover .detail-image img {
+    transform: scale(1.08);
+}
+
+.detail-content {
+    padding: 22px;
+    text-align: center;
+}
+
+.detail-title {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+}
+
+.winner-rating {
+    color: #ffd700;
+    font-size: 20px;
+    margin-bottom: 25px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.winner-rating span {
+    font-size: 14px;
+    font-weight: 700;
+    color: #666;
+}
+
+.view-btn {
+    display: inline-block;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: white;
+    padding: 14px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all 0.3s;
+    box-shadow: 0 8px 20px rgba(255,107,107,0.4);
+}
+
+.view-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(255,107,107,0.6);
+}
+
 /* ______________________________For recipe card show after result come out_______________________*/
 .main-result {
+    grid-column: 1 / -1;
     display: flex;
     justify-content: center;
 }
 
 .result-mode {
     display: block !important;
-}
-
-.gacha-result {
-    width: 300px;
-    margin: 30px auto;
-
-    border-radius: 15px;
-    padding: 12px;
-    background: white;
-
-    border: 2px solid gold;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
 }
 
 .gacha-result img {
@@ -836,4 +938,62 @@ button:disabled {
 
 .small-card img {
     height: 120px;
+}
+
+/* =========================
+   推荐卡片（Saranya风格）
+========================= */
+
+.recipe-card.small-card {
+    width: 100%;
+    max-width: 200px;
+    background: #fff;
+    border: 3px solid #111;
+    border-radius: 16px;
+    overflow: hidden;
+    text-align: left;
+    transition: 0.2s;
+    box-shadow: 6px 6px 0px #f4c542;
+}
+
+.recipe-card.small-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0px #f4c542;
+}
+
+.image-container {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    border-bottom: 3px solid #111;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-meta {
+    padding: 12px;
+}
+
+.meal-category {
+    font-size: 11px;
+    font-weight: 800;
+    color: #d32f2f;
+    letter-spacing: 2px;
+}
+
+.rating-stars {
+    color: #f4c542;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.all-recipes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 35px;   /* ⭐ 拉开距离 */
+    padding: 20px 10px;
 }
