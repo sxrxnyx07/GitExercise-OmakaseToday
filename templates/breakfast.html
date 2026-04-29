@@ -160,7 +160,7 @@ function spin() {
     let miniBalls = document.querySelectorAll(".mini-ball");
 
     let resultBox = document.getElementById("result");
-    let button = document.querySelector("button");
+    let button = document.querySelector(".machine-box button");
     let gachaImg = document.getElementById("gachaImg");
     let inside = document.querySelector(".balls-inside");
 
@@ -307,6 +307,12 @@ function backToAllRecipes() {
         "Click spin to get your recipe 🍽️";
 
     document.getElementById("resultHint").style.opacity = 0;
+
+    // reset ball
+    document.getElementById("ball").className = "ball";
+
+    // reset warning
+    document.getElementById("warningMsg").innerText = "";
 }
 
 </script>
