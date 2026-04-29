@@ -14,7 +14,7 @@ def get_db_connection():
 @app.route('/db-test')
 def db_test():
     conn = get_db_connection()
-    rows = conn.execute("SELECT name FROM recipes LIMIT 5").fetchall()
+    rows = conn.execute("SELECT id, name, rating FROM recipe LIMIT 10").fetchall()
     conn.close()
 
     return jsonify([dict(row) for row in rows])

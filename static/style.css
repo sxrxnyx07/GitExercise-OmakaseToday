@@ -759,7 +759,7 @@ button:disabled {
     }
 }
 
-/* Result recipe design */
+/*________________________ Result recipe design ___________________ */
 .main-result {
     grid-column: 1 / -1;
     display: flex;
