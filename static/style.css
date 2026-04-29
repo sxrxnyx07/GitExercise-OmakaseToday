@@ -307,6 +307,44 @@ button:disabled {
     display: block;   
 }
 
+/* ==============================
+   BUTTON TO REFRESH & BACK HOME
+============================== */
+/* ⭐ 導航區 */
+.nav-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.nav-actions {
+    display: none;  /* 默认隱藏Back按鈕 */
+}
+
+.nav-actions.show {
+    display: block;  /* result模式顯示 */
+}
+
+.home-btn {
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+}
+
+.home-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(78, 205, 196, 0.6);
+}
+
 /* ___________________________________For recipe page_________________________________*/
 /* =========================
    RECIPE GRID

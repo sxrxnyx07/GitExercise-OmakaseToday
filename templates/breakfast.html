@@ -53,6 +53,14 @@
 
     </div>
 
+<!-- ⭐ 導航按鈕區（Home一直顯示，Back只在result時） -->
+<div class="nav-section">
+    <a href="/" class="home-btn">🏠 Home</a>
+    <div class="nav-actions" id="backActions">
+        <button onclick="backToAllRecipes()">← Back to all recipe</button>
+    </div>
+</div>
+
 <div class="recipe-container all-recipes">
     {% for r in recipes %}
 
@@ -88,12 +96,15 @@
 </div>
 
 <script>
+    let originalHTML;
 
     let isSpinning = false;
     
     let balls = document.querySelectorAll(".mini-ball");
 
 window.onload = function () {
+
+    originalHTML = document.querySelector(".recipe-container").innerHTML;
 
     const wrapper = document.getElementById("ballsInside");
 
@@ -265,6 +276,8 @@ function spin() {
                 `;
                 container.classList.add("result-mode");
 
+                document.getElementById("backActions").classList.add("show");
+
                 document.getElementById("resultHint").style.opacity = 1;
 
                 gachaImg.classList.remove("shake");
@@ -276,6 +289,26 @@ function spin() {
 
     }, 1000);
 }
+
+function backToAllRecipes() {
+
+    let container = document.querySelector(".recipe-container");
+
+    // 恢復原本所有 recipes
+    container.innerHTML = originalHTML;
+
+    container.classList.remove("result-mode");
+
+    // 隱藏按鈕
+    document.getElementById("backActions").classList.remove("show");
+
+    // reset UI
+    document.getElementById("result").innerText =
+        "Click spin to get your recipe 🍽️";
+
+    document.getElementById("resultHint").style.opacity = 0;
+}
+
 </script>
 
 </body>
