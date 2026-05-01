@@ -64,6 +64,101 @@ nav li:first-child a{
     color: #d94f4f;
 }
 /* =========================
+   NOTIFICATION
+========================= */
+
+.notif-wrapper{
+    position: relative;
+}
+
+.notif-icon{
+    position: relative;
+    cursor: pointer;
+}
+
+/* red badge */
+.notif-badge{
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: red;
+    color: white;
+    font-size: 10px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.notif-badge.pop {
+    transform: scale(1.4);
+}
+/* dropdown box */
+.notif-dropdown{
+    position: absolute;
+    right: 0;
+    top: 60px;
+
+    width: 320px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+
+    display: none;
+    flex-direction: column;
+
+    overflow: hidden;
+    z-index: 999;
+}
+
+/* show */
+.notif-dropdown.show{
+    display: flex;
+}
+
+/* header */
+.notif-header{
+    padding: 12px;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    background: #fafafa;
+}
+
+/* items */
+.notif-item{
+    padding: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.notif-item:hover{
+    background: #f9f9f9;
+}
+
+/* unread style */
+.notif-item.unread{
+    background: #fff7e6;
+}
+
+.notif-item p{
+    margin: 0;
+    font-size: 13px;
+}
+
+.notif-item span{
+    font-size: 12px;
+    color: #666;
+}
+.notif-section{
+    font-size: 12px;
+    color: gray;
+    padding: 8px 15px;
+}
+/* =========================
    SIDEBAR
 ========================= */
 .sidebar{

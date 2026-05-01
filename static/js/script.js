@@ -496,7 +496,108 @@ cards.forEach(card => {
         card.style.display = "none";
     }
 });
+function toggleNotif(event){
+    event.preventDefault()
 
-if (visibleCount === 0) {
-    grid.innerHTML = "<p style='text-align:center;'>No matching recipes 😢</p>";
+    const dropdown = document.getElementById("notifDropdown")
+    dropdown.classList.toggle("show")
+
+    // 👉 只有打开时才 mark as read
+    if(dropdown.classList.contains("show")){
+        fetch("/mark-notifications-read").then(()=>{
+            const badge = document.querySelector(".notif-badge")
+            if(badge){
+                badge.style.display = "none"
+            }
+        })
+
+        loadNotifications() // 打开时刷新一次
+    }
 }
+
+// click outside to close
+document.addEventListener("click", function(event){
+    const box = document.getElementById("notifDropdown");
+    const icon = document.querySelector(".notif-icon");
+
+    if (!box || !icon) return
+
+    if (!box.contains(event.target) && !icon.contains(event.target)) {
+        box.classList.remove("show");
+    }
+})
+
+function loadNotifications(){
+    fetch("/get-notifications")
+    .then(res => res.json())
+    .then(data => {
+
+        const dropdown = document.getElementById("notifDropdown")
+        const badge = document.querySelector(".notif-badge")
+
+        if(!dropdown) return
+
+        // =========================
+        // 🔥 BADGE UPDATE + ANIMATION
+        // =========================
+        let oldCount = badge ? parseInt(badge.innerText || "0") : 0
+        let newCount = data.count
+
+        if(newCount > 0){
+            if(badge){
+                badge.innerText = newCount
+                badge.style.display = "inline"
+
+                // 👉 only animate when new notifications come in
+                if(newCount > oldCount){
+                    badge.classList.add("pop")
+                    setTimeout(() => {
+                        badge.classList.remove("pop")
+                    }, 300)
+                }
+            }
+        } else {
+            if(badge){
+                badge.style.display = "none"
+            }
+        }
+
+        // =========================
+        // dropdown only updates when opened
+        // =========================
+        if(!dropdown.classList.contains("show")){
+            return
+        }
+
+        // rebuild dropdown
+        dropdown.innerHTML = `
+            <div class="notif-header">Notifications</div>
+        `
+
+        if(data.notifications.length === 0){
+            dropdown.innerHTML += `
+                <div class="notif-item">
+                    <span>No notifications</span>
+                </div>
+            `
+            return
+        }
+
+        data.notifications.forEach(n => {
+            dropdown.innerHTML += `
+                <div class="notif-item ${n[1] == 0 ? "unread" : ""}">
+                    <span>${n[0]}</span>
+                </div>
+            `
+        })
+    })
+}
+// Correct initialization）
+document.addEventListener("DOMContentLoaded", () => {
+    loadNotifications()
+    setInterval(() => {
+        if (!document.hidden) {
+            loadNotifications()
+        }
+    }, 3000)
+})

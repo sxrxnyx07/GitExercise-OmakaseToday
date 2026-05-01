@@ -90,6 +90,15 @@ def init_db():
     #id = the save record number (system-generated log ID)
     #user_email = who saved it
     #recipe_id = what recipe was saved
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        message TEXT,
+        is_read INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     conn.commit()
     conn.close()
 init_db()
@@ -223,7 +232,7 @@ def profile():
     conn.close()
 
     saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all() if saved_ids else []
-    suggested_recipes = Recipe.query.limit(3).all()  #It automatically retrieves 3 recipes from the database to display
+    suggested_recipes = Recipe.query.limit(101).all()  #It automatically retrieves 3 recipes from the database to display
 
     return render_template(
         "profile.html",
@@ -534,12 +543,36 @@ def delete_recipe(id):
     if session.get("role") != "admin":
         return "403 Forbidden"
 
+    # Find all users who have saved this recipe
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT user_email FROM saved_recipes
+        WHERE recipe_id = ?
+    """, (id,))
+    users = c.fetchall()
+    # delete recipe（SQLAlchemy）
     recipe_to_delete = Recipe.query.get(id)
     if recipe_to_delete:
+        recipe_name = recipe_to_delete.name
         db.session.delete(recipe_to_delete)
         db.session.commit()
-
+        # send notification
+        for user in users:
+            c.execute("""
+                INSERT INTO notifications (user_email, message)
+                VALUES (?, ?)
+            """, (
+                user[0],
+                f'Your saved recipe "{recipe_name}" has been removed'
+            ))
+    #clear saved_recipes (to avoid remnants)
+    c.execute("DELETE FROM saved_recipes WHERE recipe_id = ?", (id,))
+    conn.commit()
+    conn.close()
     return redirect(url_for("admin_recipes"))
+
 
 @app.route("/admin/recipes/update/<int:id>", methods=["POST"])
 def update_recipe(id):
@@ -626,6 +659,97 @@ def saved_recipes():
     saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all() if saved_ids else []
 
     return render_template("saved_recipes.html", saved_recipes=saved_recipes)
+
+@app.context_processor
+def inject_notifications():
+    if "user" not in session:
+        return dict(
+            new_notifications=[],
+            old_notifications=[],
+            notif_count=0
+        )
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    # 取最近通知
+    c.execute("""
+        SELECT message, is_read, created_at
+        FROM notifications
+        WHERE user_email = ?
+        ORDER BY created_at DESC
+        LIMIT 5
+    """, (session["user"],))
+
+    rows = c.fetchall()
+
+    # 🔥 分组（重点）
+    new_notifs = [n for n in rows if n[1] == 0]  # 未读
+    old_notifs = [n for n in rows if n[1] == 1]  # 已读
+
+    # unread count（红点）
+    c.execute("""
+        SELECT COUNT(*) FROM notifications
+        WHERE user_email = ? AND is_read = 0
+    """, (session["user"],))
+    count = c.fetchone()[0]
+
+    conn.close()
+
+    return dict(
+        new_notifications=new_notifs,
+        old_notifications=old_notifs,
+        notif_count=count
+    )
+
+@app.route("/mark-notifications-read")
+def mark_notifications_read():
+    if "user" not in session:
+        return ""
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        UPDATE notifications
+        SET is_read = 1
+        WHERE user_email = ?
+    """, (session["user"],))
+
+    conn.commit()
+    conn.close()
+
+    return ""
+@app.route("/get-notifications")
+def get_notifications():
+    if "user" not in session:
+        return {"notifications": [], "count": 0}
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT message, is_read
+        FROM notifications
+        WHERE user_email = ?
+        ORDER BY created_at DESC
+        LIMIT 5
+    """, (session["user"],))
+
+    rows = c.fetchall()
+
+    c.execute("""
+        SELECT COUNT(*) FROM notifications
+        WHERE user_email = ? AND is_read = 0
+    """, (session["user"],))
+    count = c.fetchone()[0]
+
+    conn.close()
+
+    return {
+        "notifications": rows,
+        "count": count
+    }
 
 if __name__ == "__main__":
     app.run(debug=True)
