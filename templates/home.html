@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<div class="home-container">
+
+    <h1 class="home-title">
+        What should I eat <span>today?</span>
+    </h1>
+
+    <div class="home-image-wrapper">
+        <img id="foodImage" src="{{ url_for('static', filename='css/picture/dishclose.png') }}">
+        <button class="lid-btn" onclick="liftLid()">🍽 Lift the lid</button>
+    </div>
+
+    <a href="#" class="menu-btn">Access Menu →</a>
+
+</div>
+{% endblock %}
+
