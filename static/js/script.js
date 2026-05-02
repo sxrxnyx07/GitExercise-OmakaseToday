@@ -129,28 +129,6 @@ if (page === "register" && email_input) {
         }, 300);
     });
 }
-// =========================
-// ONLY FRONTEND VALIDATION (NOT BLOCK SUBMIT)
-// =========================
-if (form) {
-    form.addEventListener("submit", (e) => {
-
-        let errors = [];
-
-        if (!username_input.value) errors.push("Username required");
-        if (!email_input.value) errors.push("Email required");
-        if (!password_input.value) errors.push("Password required");
-
-        if (password_input.value !== repeat_password_input.value) {
-            errors.push("Passwords do not match");
-        }
-
-        if (errors.length > 0) {
-            e.preventDefault();
-            error_message.innerText = errors.join("\n");
-        }
-    });
-}
 function enableEdit() {
     const username = document.getElementById("username")
     const bio = document.getElementById("bio")
@@ -183,18 +161,19 @@ const pages = [
 let currentPage = 0;
 
 function nextPage(){
-    if (currentPage < pages.length){
+    if (currentPage < pages.length && pages[currentPage]) {
         pages[currentPage].classList.add("flipped")
         currentPage++
     }
 }
 
 function prevPage(){
-    if (currentPage > 0){
+    if (currentPage > 0 && pages[currentPage-1]) {
         currentPage--
         pages[currentPage].classList.remove("flipped")
     }
 }
+
 let autoFlip = setInterval(() => {
 
     if (currentPage < pages.length){
@@ -479,23 +458,33 @@ function filterSavedRecipes() {
 
 // live search
 const savedSearchInput = document.getElementById("savedSearch");
+
 if (savedSearchInput) {
-    savedSearchInput.addEventListener("input", filterSavedRecipes);
+
+    const cards = document.querySelectorAll(".recipe-card");
+
+    savedSearchInput.addEventListener("input", function () {
+
+        const input = this.value.toLowerCase();
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const titleEl = card.querySelector(".recipe-title");
+
+            if (!titleEl) return;
+
+            const title = titleEl.innerText.toLowerCase();
+
+            if (title.includes(input)) {
+                card.style.display = "block";
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+            }
+        });
+
+    });
 }
-const grid = document.querySelector(".saved-grid");
-
-let visibleCount = 0;
-
-cards.forEach(card => {
-    const title = card.querySelector(".recipe-title").innerText.toLowerCase();
-
-    if (title.includes(input)) {
-        card.style.display = "block";
-        visibleCount++;
-    } else {
-        card.style.display = "none";
-    }
-});
 function toggleNotif(event){
     event.preventDefault()
 
@@ -606,6 +595,7 @@ function openDeleteModal(){
     const modal = document.getElementById("deleteModal");
     if(modal){
         modal.classList.add("show");
+        modal.classList.remove("hidden");
     }
 }
 
@@ -613,6 +603,7 @@ function closeDeleteModal(){
     const modal = document.getElementById("deleteModal");
     if(modal){
         modal.classList.remove("show");
+        modal.classList.add("hidden");
     }
 }
 
@@ -638,5 +629,50 @@ document.addEventListener("click", function(e){
         closeDeleteModal();
     }
 });
+document.addEventListener("DOMContentLoaded", function () {
 
+    const passwordInput = document.querySelector("#deleteModal input[name='password']");
+    const passwordError = document.getElementById("passwordError");
+    const deleteBtn = document.getElementById("deleteBtn");
 
+    if (!passwordInput || !deleteBtn) return;
+
+    let timeout;
+
+    passwordInput.addEventListener("input", () => {
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(async () => {
+
+            const password = passwordInput.value;
+
+            if (!password) {
+                passwordError.innerText = "";
+                deleteBtn.disabled = true;
+                return;
+            }
+
+            const res = await fetch("/check-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ password })
+            });
+
+            const data = await res.json();
+
+            if (data.valid) {
+                passwordError.innerText = "";
+                deleteBtn.disabled = false;
+            } else {
+                passwordError.innerText = "Wrong password";
+                deleteBtn.disabled = true;
+            }
+
+        }, 300);
+
+    });
+
+});

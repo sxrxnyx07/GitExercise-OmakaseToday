@@ -831,6 +831,7 @@ def delete_my_account():
         # send email BEFORE delete
         msg = Message(
             subject="Your account has been deleted",
+            sender=app.config['MAIL_USERNAME'],   # ✅ 加这一行
             recipients=[email]
         )
         msg.body = f"""
@@ -857,6 +858,25 @@ If this was not you, please contact support.
 
     conn.close()
     return "Wrong password", 403
+@app.route("/check-password", methods=["POST"])
+def check_password():
+    if "user" not in session:
+        return {"valid": False}
+
+    password = request.json.get("password")
+    email = session["user"]
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("SELECT password FROM users WHERE email=?", (email,))
+    user = c.fetchone()
+    conn.close()
+
+    if user and check_password_hash(user[0], password):
+        return {"valid": True}
+    else:
+        return {"valid": False}
 
 if __name__ == "__main__":
     app.run(debug=True)
