@@ -1,5 +1,6 @@
-<<<<<<< HEAD
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import json
 import random
@@ -166,13 +167,9 @@ def test_foodtype():
 if __name__ == '__main__':
     app.run(debug=True)
 
-=======
 import os
 import string
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"
@@ -472,4 +469,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
->>>>>>> c343eb184f7edc463c1e2d2cde3fde4c226c2049
