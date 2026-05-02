@@ -601,3 +601,42 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }, 3000)
 })
+
+function openDeleteModal(){
+    const modal = document.getElementById("deleteModal");
+    if(modal){
+        modal.classList.add("show");
+    }
+}
+
+function closeDeleteModal(){
+    const modal = document.getElementById("deleteModal");
+    if(modal){
+        modal.classList.remove("show");
+    }
+}
+
+// checkbox enable button
+document.addEventListener("DOMContentLoaded", function () {
+    const check = document.getElementById("confirmCheck");
+    const btn = document.getElementById("deleteBtn");
+    if (!check || !btn) return;  
+    check.addEventListener("change", function () {
+        btn.disabled = !this.checked;
+    });
+
+});
+
+
+// click outside modal close
+document.addEventListener("click", function(e){
+    const modal = document.getElementById("deleteModal");
+
+    if(!modal) return;
+
+    if(e.target === modal){
+        closeDeleteModal();
+    }
+});
+
+

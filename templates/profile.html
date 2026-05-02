@@ -1,13 +1,8 @@
 {% extends "base.html" %}
-
 {% block title %}Profile{% endblock %}
-
 {% block content %}
-
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
-
 <div class="profile-container">
-
     <!-- LEFT -->
     <div class="profile-left">
 
@@ -71,6 +66,9 @@
                         Logout
                     </a>
                 </div>
+                <button type="button" class="delete-account-btn" onclick="openDeleteModal()">
+                    Delete Account
+                </button>
 
             </form>
 
@@ -187,4 +185,53 @@
         </div>
     </div>
 </section>
+<!-- DELETE ACCOUNT MODAL -->
+<div id="deleteModal" class="modal hidden">
+    <div class="modal-content delete-modal">
+
+        <h2>Delete Account</h2>
+
+        <p class="warning-text">
+            ⚠ This action is permanent and cannot be undone.
+        </p>
+
+        <form method="POST" action="/delete-my-account">
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <label>Reason (optional)</label>
+                <select name="reason">
+                    <option value="">Select a reason</option>
+                    <option value="privacy">Privacy concerns</option>
+                    <option value="not_useful">Not useful</option>
+                    <option value="email">Too many emails</option>
+                    <option value="better_app">Found better app</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="confirm-box">
+                <label>
+                    <input type="checkbox" id="confirmCheck">
+                    I understand this action cannot be undone
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeDeleteModal()">
+                    Cancel
+                </button>
+
+                <button type="submit" class="confirm-delete-btn" id="deleteBtn" disabled>
+                    Delete My Account
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
 {% endblock %}

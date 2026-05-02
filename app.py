@@ -232,7 +232,7 @@ def profile():
     conn.close()
 
     saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all() if saved_ids else []
-    suggested_recipes = Recipe.query.limit(101).all()  #It automatically retrieves 3 recipes from the database to display
+    suggested_recipes = Recipe.query.limit(3).all()  #It automatically retrieves 3 recipes from the database to display
 
     return render_template(
         "profile.html",
@@ -462,6 +462,7 @@ def update_user(email):
     if session.get("role") != "admin":
         return "403 Forbidden"
 
+    username = request.form.get("username")
     role = request.form.get("role")
 
     conn = sqlite3.connect(DB_PATH)
@@ -471,23 +472,59 @@ def update_user(email):
         UPDATE users
         SET username = ?, role = ?
         WHERE email = ?
-    """, (role, email))
+    """, (username, role, email))
 
     conn.commit()
     conn.close()
 
     return redirect(url_for("admin_users"))
 
-@app.route("/admin/delete/<email>")
+@app.route("/admin/delete/<email>", methods=["POST"])
 def delete_user(email):
     if session.get("role") != "admin":
         return "403 Forbidden"
 
+    reason = request.form.get("reason", "No reason provided")
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    c.execute("DELETE FROM users WHERE email = ?", (email,))
+    # First, confirm that the user exists and retrieve the username while you're at it
+    c.execute("SELECT username FROM users WHERE email = ?", (email,))
+    user = c.fetchone()
 
+    if not user:
+        conn.close()
+        return redirect(url_for("admin_users"))
+
+    username = user[0]
+
+    # SEND EMAIL
+
+    try:
+        msg = Message(
+            subject="Account Removed",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[email]
+        )
+        msg.html = f"""
+        <h2>Account Removed</h2>
+
+        <p>Hi {username},</p>
+
+        <p>Your account has been removed by the admin.</p>
+
+        <p><b>Reason:</b> {reason}</p>
+
+        <p>If you believe this is a mistake, please contact support.</p>
+
+        <p>— Omakase Team</p>
+        """
+        mail.send(msg)
+    except Exception as e:
+        print("Email failed:", e)
+    # delete user
+    c.execute("DELETE FROM users WHERE email = ?", (email,))
     conn.commit()
     conn.close()
 
@@ -773,6 +810,53 @@ def get_notifications():
         "notifications": rows,
         "count": count
     }
+@app.route("/delete-my-account", methods=["POST"])
+def delete_my_account():
+    email = session.get("user")
+
+    if not email:
+        return redirect("/login")
+
+    password = request.form["password"]
+    reason = request.form.get("reason")
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("SELECT password FROM users WHERE email=?", (email,))
+    user = c.fetchone()
+
+    if user and check_password_hash(user[0], password):
+
+        # send email BEFORE delete
+        msg = Message(
+            subject="Your account has been deleted",
+            recipients=[email]
+        )
+        msg.body = f"""
+Hi,
+
+Your account has been successfully deleted.
+
+Reason: {reason if reason else "Not provided"}
+
+If this was not you, please contact support.
+"""
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print("Email failed:", e)
+
+        # delete user
+        c.execute("DELETE FROM users WHERE email=?", (email,))
+        conn.commit()
+        conn.close()
+
+        session.clear()
+        return redirect("/")
+
+    conn.close()
+    return "Wrong password", 403
 
 if __name__ == "__main__":
     app.run(debug=True)
