@@ -582,6 +582,18 @@ def update_recipe(id):
     recipe = Recipe.query.get(id)
 
     if recipe:
+        #Get the old name first (to avoid not being able to get it after changing the name)
+        old_name = recipe.name
+        # Find all users who have saved
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+
+        c.execute("""
+            SELECT user_email FROM saved_recipes
+            WHERE recipe_id = ?
+        """, (id,))
+        users = c.fetchall()
+        # update recipe
         recipe.name = request.form.get("name")
         recipe.rating = request.form.get("rating")
         recipe.clean_ingredients = request.form.get("clean_ingredients")
@@ -597,10 +609,21 @@ def update_recipe(id):
             filename = secure_filename(file.filename)
             path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             file.save(path)
-
             recipe.image = f"/static/uploads/{filename}"
 
         db.session.commit()
+        # send notification
+        for user in users:
+            c.execute("""
+                INSERT INTO notifications (user_email, message)
+                VALUES (?, ?)
+            """, (
+                user[0],
+                f'Your saved recipe "{recipe.name}" has been updated'
+            ))
+
+        conn.commit()
+        conn.close()
 
     return redirect(url_for("admin_recipes"))
 
