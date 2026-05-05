@@ -129,7 +129,6 @@ add_reset_columns()
 def home():
     return render_template("home.html")
 
-
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
