@@ -397,6 +397,10 @@ button:disabled {
     transform: scale(1.02);
 }
 
+.recipe-nav {
+    margin-top: 40px;
+}
+
 /* ⭐ 手機適配 */
 @media (max-width: 768px) {
     .nav-section {

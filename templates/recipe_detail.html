@@ -53,6 +53,8 @@
             </p>
             <div class="ingredient-grid">
                 {% for item in recipe['clean_ingredients'].split(',') %}
+
+                <!-- call out the google for ingredients, not manually -->
                     <a class="ingredient-link"
                         href="https://www.google.com/search?q={{ item.strip() }}"
                         target="_blank">
@@ -105,6 +107,14 @@
         <span>⏱ {{ recipe['timing'] }}</span>
         <span>🌶 {{ recipe['flavor_type'] }}</span>
     </div>
+
+<div class="nav-section recipe-nav">
+    <a href="/" class="home-btn">🏠 Home</a>
+
+    <a href="/{{ recipe['meal_category'] | lower }}" class="back-btn">
+        ← Back to {{ recipe['meal_category'] }}
+    </a>
+</div>
 
 </div>
 
