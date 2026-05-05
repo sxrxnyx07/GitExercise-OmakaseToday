@@ -1,4 +1,3 @@
-from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
@@ -7,6 +6,10 @@ from flask_sqlalchemy import SQLAlchemy
 from itsdangerous import URLSafeTimedSerializer   #Generate a secure password reset link  (token)
 from flask_mail import Mail, Message              #Send the reset link to the user  (msg)
 import secrets
+import string
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import json
+import random
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"   #Used for encryption: session (login state) token (reset password)
@@ -65,7 +68,6 @@ class Recipe(db.Model):
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")   #the img will store in static/uploads inside the folder
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)                     #auto createonce the file not exist
-
 # ---------------- User table(users.db) ----------------
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -876,6 +878,305 @@ def check_password():
         return {"valid": True}
     else:
         return {"valid": False}
+class SavedRecipe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(120), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    recipe = db.relationship('Recipe', backref='saved_by')
+    
+@app.route('/toggle-save', methods=['POST'])
+def toggle_save():
+    user_email = session.get('user')
+    if not user_email:
+        return jsonify({"error": "Login required"}), 401
+    
+    data = request.get_json()
+    recipe_id = data.get('recipe_id')
+    
+    existing_save = SavedRecipe.query.filter_by(user_email=user_email, recipe_id=recipe_id).first()
+    
+    if existing_save:
+        db.session.delete(existing_save)
+        db.session.commit()
+        return jsonify({"status": "unfilled", "message": "Removed"})
+    else:
+        new_save = SavedRecipe(user_email=user_email, recipe_id=recipe_id)
+        db.session.add(new_save)
+        db.session.commit()
+        return jsonify({"status": "filled", "message": "Saved"})
 
+@app.route('/all_recipes')
+def all_recipes():
+    search_query = request.args.get('search', '').strip()
+    active_flavor = request.args.get('flavor', 'ALL').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 9
+
+    query = Recipe.query
+
+    if active_flavor != 'ALL':
+        query = query.filter(Recipe.flavor_type == active_flavor.capitalize())
+
+    if search_query:
+        
+        query = query.filter(Recipe.name.ilike(f"%{search_query}%"))
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return render_template(
+        'all_recipes.html',
+        results=pagination.items,
+        pagination=pagination,
+        search_query=search_query,
+        active_flavor=active_flavor
+    )
+
+
+@app.route('/get_suggestions')
+def get_suggestions():
+    q = request.args.get('q', '').strip()
+    if not q:
+        return jsonify([])
+
+
+    results = Recipe.query.filter(Recipe.name.ilike(f"%{q}%")).limit(5).all()
+    suggestion_list = [r.name for r in results]
+    
+    return jsonify(suggestion_list)
+# ---------------- YOUR INGREDIENT LOGIC ----------------
+
+@app.route("/ingredient-search")  
+def ingredient_index():
+    all_recipes = Recipe.query.all()
+    ingredients_dict = {char: [] for char in string.ascii_uppercase}
+    all_names_flat = set()
+
+    for r in all_recipes:
+        if r.clean_ingredients:
+            names = [i.strip().title() for i in str(r.clean_ingredients).split(',') if i.strip()]
+            for name in names:
+                if name:
+                    first_letter = name[0].upper()
+                    if first_letter in ingredients_dict:
+                        if name not in ingredients_dict[first_letter]:
+                            ingredients_dict[first_letter].append(name)
+                            all_names_flat.add(name)
+
+    active_ingredients = {k: v for k, v in ingredients_dict.items() if len(v) > 0}
+    for char in active_ingredients:
+        active_ingredients[char].sort()
+    
+    alphabet = list(string.ascii_uppercase)
+    sorted_flat_list = sorted(list(all_names_flat))
+
+    return render_template("ingredient.html", 
+                           ingredients=active_ingredients, 
+                           all_ingredients=sorted_flat_list,
+                           alphabet=alphabet)
+
+@app.route('/search', methods=['POST'])
+def search():
+    selected_raw = request.form.get('ingredients')
+    user_input = [s.strip().lower() for s in selected_raw.split(',')] if selected_raw else []
+    results = []
+
+    if user_input:
+        all_recipes = Recipe.query.all()
+        for recipe in all_recipes:
+            recipe_ing_list = [i.strip().lower() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
+            total_count = len(recipe_ing_list)
+
+            if total_count == 0:
+                continue
+
+            
+            is_valid_match = True
+            matched_in_recipe = []
+
+            for ui in user_input:
+                found_this_item = False
+                for ri in recipe_ing_list:
+                    if ui in ri:
+                        found_this_item = True
+                        if ri not in matched_in_recipe:
+                            matched_in_recipe.append(ri)
+                        break 
+                
+                if not found_this_item:
+                    is_valid_match = False
+                    break 
+            
+
+            if is_valid_match:
+                have_count = len(user_input)
+                percent = int((have_count / total_count) * 100)
+                missing_ingredients = [ri for ri in recipe_ing_list if ri not in matched_in_recipe]
+                
+                display_missing = missing_ingredients[:3] 
+                extra_count = len(missing_ingredients) - len(display_missing)
+
+                results.append({
+                    "id": recipe.id,
+                    "name": recipe.name,
+                    "image": recipe.image,
+                    "rating": recipe.rating,
+                    "match": percent,
+                    "missing_names": display_missing,
+                    "extra_count": extra_count
+                })
+
+    results = sorted(results, key=lambda x: x['match'], reverse=True)
+    return render_template('result.html', results=results, selected=user_input)
+
+def get_db_connection():
+    conn = sqlite3.connect('omakase.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+@app.route('/db-test')
+def db_test():
+    conn = get_db_connection()
+    rows = conn.execute("SELECT id, name, rating FROM recipe LIMIT 10").fetchall()
+    conn.close()
+
+    return jsonify([dict(row) for row in rows])
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/random-page')
+def random_page():
+    return render_template('random.html')
+
+@app.route('/breakfast')
+def breakfast():
+
+    conn = get_db_connection()
+
+    recipes = conn.execute(
+        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        ("Breakfast",)
+    ).fetchall()
+
+    conn.close()
+    return render_template('breakfast.html', recipes=recipes)
+
+@app.route('/lunch')
+def lunch():
+    conn = get_db_connection()
+
+    recipes = conn.execute(
+        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        ("Lunch",)
+    ).fetchall()
+
+    conn.close()
+    return render_template('lunch.html', recipes=recipes)
+
+@app.route('/dinner')
+def dinner():
+    conn = get_db_connection()
+
+    recipes = conn.execute(
+        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        ("Dinner",)
+    ).fetchall()
+
+    conn.close()
+    return render_template('dinner.html', recipes=recipes)
+
+@app.route('/dessert')
+def dessert():
+    conn = get_db_connection()
+
+    recipes = conn.execute(
+        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        ("Dessert",)
+    ).fetchall()
+
+    conn.close()
+    return render_template('dessert.html', recipes=recipes)
+
+@app.route('/drinks')
+def drinks():
+    conn = get_db_connection()
+
+    recipes = conn.execute(
+        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        ("Drinks",)
+    ).fetchall()
+
+    conn.close()
+    return render_template('drinks.html', recipes=recipes)
+
+@app.route('/random')
+def get_random_recipe():
+
+    category = request.args.get('category')
+
+    if not category:
+        return jsonify({"recipe": "No category provided"})
+
+    conn = get_db_connection()
+
+    recipe = conn.execute("""
+        SELECT id, name, image
+        FROM recipe
+        WHERE LOWER(meal_category) = LOWER(?)
+        ORDER BY RANDOM()
+        LIMIT 1
+    """, (category,)).fetchone()
+
+    conn.close()
+
+    if not recipe:
+        return jsonify({"recipe": "No recipe found"})
+
+    return jsonify({
+        "id": recipe["id"],
+        "name": recipe["name"],
+        "image": recipe["image"]
+    })
+
+@app.route('/random-multiple')
+def get_multiple_recipes():
+
+    category = request.args.get('category')
+
+    conn = get_db_connection()
+
+    recipes = conn.execute("""
+        SELECT id, name, image
+        FROM recipe
+        WHERE LOWER(meal_category) = LOWER(?)
+        ORDER BY RANDOM()
+        LIMIT 5
+    """, (category,)).fetchall()
+
+    conn.close()
+
+    return jsonify([dict(r) for r in recipes])
+@app.route('/recipe/<int:id>')
+def recipe_detail(id):
+
+    conn = get_db_connection()
+
+    recipe = conn.execute(
+        "SELECT * FROM recipe WHERE id = ?",
+        (id,)
+    ).fetchone()
+
+    conn.close()
+
+    return render_template('recipe_detail.html', recipe=recipe)
+
+@app.route('/test-foodtype')
+def test_foodtype():
+    conn = get_db_connection()
+    rows = conn.execute("SELECT name, food_type FROM recipe LIMIT 5").fetchall()
+    conn.close()
+
+    return jsonify([dict(row) for row in rows])
 if __name__ == "__main__":
     app.run(debug=True)
