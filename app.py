@@ -21,7 +21,7 @@ def db_test():
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('random.html')
 
 @app.route('/about')
 def about():
