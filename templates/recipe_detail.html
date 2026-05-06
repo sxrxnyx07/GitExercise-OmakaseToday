@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recipe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="recipe-bg">
+
+<div class="recipe-bg-wrap">
+
+<div class="recipe-page">
+
+    <!-- TITLE -->
+    <div class="hero">
+        <h1 class="hero-title">{{ recipe['name'].upper() }}</h1>
+        <p class="hero-sub">FAST AND DELICIOUS FOR WHOLE FAMILY</p>
+        <p class="hero-sub small">LET’S DO IT TOGETHER ✨</p>
+    </div>
+
+    <!-- TOP GRID -->
+    <div class="top-grid">
+
+        <!-- IMAGE -->
+        <div class="image-box">
+            <img src="{{ recipe['image'] }}">
+        </div>
+
+        <!-- WHY -->
+        <div class="card why-card">
+            <h3 class="why-title">💛 Why You'll Love This ??</h3>
+
+            <ul class="why-list">
+                <li>☑️Quick and easy</li>
+                <li>☑️Rich and flavorful</li>
+                <li>☑️Perfect for beginners</li>
+                <li>☑️Great for anyday</li>
+            </ul>
+        </div>
+
+    </div>
+
+<!-- MIDDLE GRID -->
+<!-- MIDDLE GRID -->
+<div class="mid-grid">
+
+    <!-- 🔥 左侧：Ingredients + Highlights -->
+    <div class="left-column">
+        <div class="card ingredient-card">
+            <h3>🥕 Ingredients</h3>
+            <p class="ingredient-hint">
+            🌟 If you're unsure about any ingredient, feel free to click and explore more 🔍
+            </p>
+            <div class="ingredient-grid">
+                {% for item in recipe['clean_ingredients'].split(',') %}
+                    <a class="ingredient-link"
+                        href="https://www.google.com/search?q={{ item.strip() }}"
+                        target="_blank">
+                        {{ item.strip() }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- 🔥 Ingredients Highlights（左侧下方） -->
+        <div class="ingredient-highlight">
+            <h4>✨ Ingredients Highlights</h4>
+            <ul class="highlight-list">
+                <li>🥑 Fresh & Natural</li>
+                <li>🍃 Nutrient-Rich</li>
+                <li>🔥 Easy to Find</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 🔥 右侧：Required Amount（不变） -->
+    <div class="card required-card">
+        <h3>📏 Required Amount</h3>
+        <div class="ingredient-grid">
+            {% for item in recipe['full_ingredients'].split(',') %}
+                <div class="ingredient-line">{{ item.strip() }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+    <!-- DIRECTIONS FULL WIDTH -->
+    <div class="card full">
+        <h3>📖 Directions</h3>
+
+        {% set steps = recipe['directions'].split('.') %}
+        {% for step in steps if step.strip() %}
+            <div class="step">
+                <span class="step-num">{{ loop.index }}</span>
+                <span>{{ step.strip() }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- META -->
+    <div class="meta">
+        <span>⏱ {{ recipe['timing'] }}</span>
+        <span>🌶 {{ recipe['flavor_type'] }}</span>
+    </div>
+
+</div>
+
+</div>
+
+</body>
+</html>

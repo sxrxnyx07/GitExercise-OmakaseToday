@@ -1,15 +1,16 @@
-import sqlite3
-from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from werkzeug.utils import secure_filename
-from flask_sqlalchemy import SQLAlchemy
-from itsdangerous import URLSafeTimedSerializer   #Generate a secure password reset link  (token)
-from flask_mail import Mail, Message              #Send the reset link to the user  (msg)
-import secrets
 import string
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import sqlite3
 import json
 import random
+import secrets
+
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from itsdangerous import URLSafeTimedSerializer
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"   #Used for encryption: session (login state) token (reset password)
@@ -62,6 +63,7 @@ class Recipe(db.Model):
     meal_category = db.Column(db.String(50))
     flavor_type = db.Column(db.String(50))
 
+# ---------------- DATABASE INIT (User DB) ----------------
 # =======================
 # Static resource configuration
 # =======================
@@ -82,27 +84,9 @@ def init_db():
         role TEXT DEFAULT 'user'
     )
     """)
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS saved_recipes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,    
-        user_email TEXT,
-        recipe_id INTEGER
-    )
-    """)
-    #id = the save record number (system-generated log ID)
-    #user_email = who saved it
-    #recipe_id = what recipe was saved
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS notifications (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_email TEXT,
-        message TEXT,
-        is_read INTEGER DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
     conn.commit()
     conn.close()
+
 init_db()
 
 def add_reset_columns():
@@ -131,11 +115,13 @@ add_reset_columns()
 def home():
     return render_template("home.html")
 
-# ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
     if request.method == "POST":
+        username = request.form["username"]
+        email = request.form["email"]
+        password = request.form["password"]
         username = request.form.get("username", "").strip()
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
@@ -144,8 +130,11 @@ def register():
             return render_template("register.html", error="All fields required")
 
         hashed_pw = generate_password_hash(password)
-
         try:
+            with sqlite3.connect("users.db") as conn:
+                c = conn.cursor()
+                c.execute("INSERT INTO users (email, username, password, bio) VALUES (?, ?, ?, ?)", (email, username, hashed_pw, ""))
+
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
 
@@ -156,9 +145,7 @@ def register():
 
             conn.commit()
             conn.close()
-
             return redirect(url_for("login"))
-
         except sqlite3.IntegrityError:
             return render_template("register.html", error="This email is already registered!")
 
@@ -176,13 +163,12 @@ def check_email():
     user = c.fetchone()
 
     conn.close()
-
     return {"exists": user is not None}
 
-# ---------------- LOGIN ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
+
         email = request.form["email"]
         password = request.form["password"]
 
@@ -230,10 +216,11 @@ def profile():
         WHERE user_email = ?
     """, (email,))
     saved_ids = [row[0] for row in c.fetchall()]
+
     conn.close()
 
     saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all() if saved_ids else []
-    suggested_recipes = Recipe.query.limit(3).all()  #It automatically retrieves 3 recipes from the database to display
+    suggested_recipes = Recipe.query.limit(3).all()
 
     return render_template(
         "profile.html",
@@ -243,9 +230,28 @@ def profile():
         profile_pic=user[3],
         saved_recipes=saved_recipes,
         suggested_recipes=suggested_recipes,
-        saved_ids=saved_ids, 
+        saved_ids=saved_ids,
         role=session.get("role")
     )
+
+@app.route("/newpassword", methods=["GET", "POST"])
+def newpassword():
+    if "reset_user" not in session: return redirect(url_for("login"))
+    if request.method == "POST":
+        password, repeat = request.form["password"], request.form["repeat-password"]
+        if not password: return render_template("newpassword.html", error="Password is required")
+        if len(password) < 8: return render_template("newpassword.html", error="Too short")
+        if password != repeat: return render_template("newpassword.html", error="No match")
+        hashed_pw = generate_password_hash(password)
+        email = session["reset_user"]
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+        c.execute("UPDATE users SET password=? WHERE email=?", (hashed_pw, email))
+        conn.commit()
+        conn.close()
+        session.pop("reset_user", None)
+        return redirect(url_for("login"))
+    return render_template("newpassword.html")
 
 
 # ---------------- UPLOAD PROFILE PIC ----------------
@@ -394,7 +400,6 @@ def reset_with_token(token):
     conn.close()
     return redirect(url_for("login"))
 
-# ---------------- LOGOUT ----------------
 @app.route("/logout")
 def logout():
     session.pop("user", None)             #clean user status

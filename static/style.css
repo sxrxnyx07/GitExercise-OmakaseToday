@@ -1,0 +1,1099 @@
+               /* ___________For Gacha page____________*/
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #fffdc6, #f7fbce);
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin-top: 90px; 
+    animation: fadeIn 1s ease;
+}
+
+/* title */
+.category-title {
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* subtitle */
+.subtitle {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* gacha machine image */
+.gacha-img {
+    width: 350px;
+    height: 350px;
+
+    object-fit: contain;
+
+    display: block;
+    margin: 0 auto 15px;
+}
+
+.gacha-img:hover {
+    filter: brightness(1.05);
+}
+
+/* machine card */
+.machine-box {
+    position: relative;
+    width: 300px;
+
+    background: #ffffff;
+    border-radius: 25px;
+
+    padding: 25px;
+
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+/* result screen */
+#result {
+    margin: 20px 0;
+
+    padding: 15px;
+
+    background: #f7f7ff;
+
+    border-radius: 12px;
+
+    font-weight: bold;
+    font-size: 18px;
+
+    min-height: 50px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #333;
+}
+
+.result-hint {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #225e81; 
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    text-align: center;
+    font-style: italic;
+}
+
+/* spin button */
+button {
+    padding: 12px 28px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: linear-gradient(45deg, #ff4d6d, #ffb703);
+
+    color: white;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+/* hover effect */
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+/* click effect */
+button:active {
+    transform: scale(0.95);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #ccc;
+}
+
+
+
+.shake {
+    animation: shakeMachine 0.4s ease-in-out 3;
+}
+
+@keyframes shakeMachine {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.gacha-img:hover {
+    filter: brightness(1.05);
+}
+
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+
+    z-index: 1000;
+}
+
+.topbar a {
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 15px 0;
+
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+
+    background: #fff7b2;
+
+    border-right: 1px solid #e0e0e0;
+}
+
+.topbar a:hover {
+    background: #ffe97a;
+}
+
+.topbar a.active {
+    background: #ffdd57;
+    color: #000;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ball {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+
+    position: absolute;
+
+    top: 500px;   
+    left: 50%;
+    transform: translateX(-50%);
+
+    opacity: 0;
+
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.8);
+}
+
+.ball.drop {
+    opacity: 1;
+    transform: translate(-50%, 40px);
+    transition: all 0.5s ease;
+}
+
+.red { background: rgb(255, 127, 116); }
+.yellow { background: rgb(255, 255, 118); }
+.blue { background: rgb(0, 225, 255); }
+.green { background: rgb(74, 255, 170); }
+.purple { background: rgb(255, 139, 255); }
+
+.machine-wrapper {
+    position: relative;
+    width: 350px;
+    height: 350px;
+    overflow: hidden;   
+}
+
+.balls-inside {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;   
+
+    pointer-events: none;
+}
+
+@keyframes spinBalls {
+    0% { transform: translateX(-50%) rotate(0deg); }
+    100% { transform: translateX(-50%) rotate(360deg); }
+}
+
+.balls-inside {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.8s ease;
+}
+
+.balls-inside.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.mini-ball {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(var(--x), var(--y));
+
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.8);
+}
+
+@keyframes floatUp {
+    0%   { transform: translate(var(--x), var(--y)); }
+    100% { transform: translate(var(--x), calc(var(--y) - 10px)); }
+}
+
+@keyframes fallDown {
+    0%   { transform: translate(var(--x), calc(var(--y) - 10px)); }
+    100% { transform: translate(var(--x), var(--y)); }
+}
+
+.float-up {
+    animation: floatUp 1.0s ease forwards;
+}
+
+.fall-down {
+    animation: fallDown 0.5s ease forwards;
+}
+
+.warning-msg {
+    min-height: 20px;
+    margin-bottom: 10px;
+    color: red;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+
+    display: block;   
+}
+
+/* ==============================
+   BUTTON TO REFRESH & BACK HOME
+============================== */
+.nav-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin: 25px 0 35px 0;
+}
+
+.nav-actions {
+    display: none;
+}
+
+.nav-actions.show {
+    display: block;
+}
+
+/* ⭐ BACK按鈕 - 跟SPIN同風格但偏藍 */
+.back-btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.back-btn:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+}
+
+.back-btn:active {
+    transform: scale(0.98);
+}
+
+/* ⭐ HOME按鈕 - 金色調超有質感 */
+.home-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, #f093fb, #f5576c);
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 6px 20px rgba(240, 147, 251, 0.4),
+        0 0 0 1px rgba(255,255,255,0.3) inset;
+    position: relative;
+    overflow: hidden;
+}
+
+.home-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.home-btn:hover::before {
+    left: 100%;
+}
+
+.home-btn:hover {
+    transform: scale(1.08) translateY(-3px);
+    box-shadow: 
+        0 12px 35px rgba(240, 147, 251, 0.6),
+        0 0 0 1px rgba(255,255,255,0.5) inset;
+}
+
+.home-btn:active {
+    transform: scale(1.02);
+}
+
+/* ⭐ 手機適配 */
+@media (max-width: 768px) {
+    .nav-section {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .back-btn, .home-btn {
+        padding: 14px 20px;
+        font-size: 16px;
+        min-width: 180px;
+    }
+}
+
+/* ___________________________________For recipe page_________________________________*/
+/* =========================
+   RECIPE GRID
+========================= */
+
+.recipe-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: -30px;
+    width: 90%;
+    transition: all 0.3s ease;
+}
+
+.recipe-card {
+    background: #fffdf7;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    padding: 15px;
+    transition: 0.3s;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+}
+
+.recipe-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.recipe-card h3 {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.recipe-page {
+    max-width: 900px;
+    margin: auto;
+    padding: 0;            /* 🔥 移除多余padding */
+    box-sizing: border-box;
+}
+
+.recipe-bg-wrap {
+    background: #fdffe9;   /* 米黄色 */
+    padding: 40px 30px;    /* 🔥 缩小左右padding */
+    border-radius: 30px;
+    max-width: 950px;      /* 🔥 稍微放大容器 */
+    margin: 40px auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+}
+
+/* 标题区 */
+.hero {
+    text-align: center;
+    margin-bottom: 25px;
+    margin-top: -20px;
+}
+
+.hero-title {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 20px;
+}
+
+.hero-sub {
+    font-size: 16px;
+    color: #777;
+}
+
+.hero-sub.small {
+    font-size: 14px;
+    color: #aaa;
+}
+
+/* 图片 - 🔥 已优化 */
+.top-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.image-box img {
+    width: 100%;           /* 🔥 自适应宽度 */
+    height: 260px;         /* 🔥 缩小高度 */
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    display: block;
+    margin: 0 auto;        /* 🔥 居中 */
+}
+
+/* 卡片 */
+.card {
+    background: #fffdf7;
+    padding: 20px;
+    border-radius: 18px;
+    margin-bottom: 30px;
+    margin-top: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.2s;
+    box-sizing: border-box;
+}
+
+/* Why卡片 - 🔥 已优化 */
+.why-card {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    background: #fff9f7;
+    padding: 25px 20px;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.why-title {
+    background: #ffa42e;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 24px;      /* 🔥 稍微小一点 */
+    margin-bottom: 20px;  /* 🔥 只有底部间距 */
+    font-weight: bold;
+}
+
+.why-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.why-list li {
+    font-size: 16px;      /* 🔥 正常大小 */
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 15px;
+    border-left: 4px solid #ffa42e;
+}
+
+/* Ingredient highlight */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;            /* Ingredients和Highlights间距 */
+}
+
+.ingredient-highlight {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+    border-left: 5px solid #4caf50;
+    flex-shrink: 0;
+}
+
+.ingredient-highlight h4 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    color: #2e7d32;
+    font-weight: bold;
+    text-align: center;
+}
+
+.highlight-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.highlight-list li {
+    font-size: 14px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    color: #1b5e20;
+    font-weight: 500;
+}
+/* 🔥 Ingredients卡片向上对齐图片 */
+.ingredient-card {
+    background: #fffdf7;
+    width: 90%;           /* 100% = 填满左侧 */
+    max-width: 500px;      /* 🔥 限制最大宽度 */
+    padding: 18px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    overflow: hidden;
+    align-self: start;      /* 🔥 向上对齐 */
+    margin-top: -45px;      /* 🔥 再向上微调 */
+}
+
+/* 🔥 Required Amount卡片向下对齐Why卡片底部 */
+.required-card {
+    background: #fffdf7;
+    width: 100%;           /* 100% = 填满左侧 */
+    max-width: 500px;      /* 🔥 限制最大宽度 */
+    padding: 18px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    overflow: hidden;
+    align-self: end;        /* 🔥 向下对齐 */
+}
+
+.ingredient-card h3,
+.required-card h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+/* tag */
+.tag {
+    display: inline-block;
+    background: #ffe8cc;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin: 5px;
+    font-size: 13px;
+}
+
+.tag.light {
+    background: #f1f1f1;
+}
+
+/* step */
+.step {
+    background: white;
+    padding: 16px 24px;    /* 🔥 让文字区域更宽 */
+    border-radius: 12px;
+    margin: 0 auto 10px;   /* 🔥 完美居中 */
+    max-width: 750px;      /* 🔥 文字更胖 */
+    display: flex;
+    align-items: center;   /* 🔥 垂直对齐 */
+    gap: 20px;             /* 🔥 数字和文字间距 */
+}
+
+.step-num {
+    background: #ff7a00;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    flex-shrink: 0;        /* 🔥 不压缩 */
+}
+
+.detail-img {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 18px;
+    object-fit: cover;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* =========================
+   SECTION CARD
+========================= */
+.detail-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.85);
+    border-radius: 15px;
+    padding: 15px 18px;
+    margin-bottom: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-left: 4px solid #d9a441;
+    transition: 0.2s;
+}
+
+.detail-section:hover {
+    transform: translateY(-3px);
+}
+
+.detail-section h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.detail-section p {
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+/* =========================
+   META
+========================= */
+.meta {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.meta span {
+    background: white;
+    padding: 8px 14px;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* =========================
+   LINK STYLE
+========================= */
+.recipe-title {
+    margin-top: 10px;
+}
+
+.recipe-title a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+}
+
+.recipe-title a:hover {
+    color: #ff7a00;
+}
+
+/* =========================
+   INGREDIENT ITEMS - 🔥 已优化
+========================= */
+.mid-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 15px 0 35px 0;  /* 🔥 Ingredients上移，Required Amount下移 */
+    align-items: start;
+}
+
+.ingredient-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);  /* 🔥 改成2列，更宽松 */
+    gap: 15px;             /* 🔥 增加间距 */
+    min-height: 300px;     /* 🔥 统一高度 */
+}
+
+.ingredient-line {
+    background: white;
+    padding: 14px 16px;    /* 🔥 稍微放大 */
+    border-radius: 10px;
+    font-size: 15px;
+    line-height: 1.4;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    min-height: 60px;      /* 🔥 统一高度 */
+    display: flex;
+    align-items: center;   /* 🔥 垂直居中 */
+}
+
+.ingredient-line::before {
+    content: "• ";
+    color: #ff7a00;
+    font-weight: bold;
+}
+
+.ingredient-hint {         /* let users know the ingredients can click and view in google */
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 12px;
+    text-align: center;
+    font-style: italic;
+}
+
+.ingredient-item:hover {
+    transform: translateX(5px);
+}
+
+.ingredient-item.full {
+    background: #fff7e6;
+}
+
+.ingredient-link {
+    display: block;
+    padding: 10px 14px;
+    margin: 5px 0;
+
+    background: #fff;
+    border-radius: 10px;
+
+    text-decoration: none;
+    color: #333;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: 0.2s;
+}
+
+.ingredient-link:hover {
+    transform: translateX(5px);
+    background: #fff7e6;
+    color: #ff7a00;
+}
+
+.ingredient-link::after {
+    content: " 🔍 Click to search";
+    display: none;
+}
+
+.ingredient-link:hover::after {
+    display: inline;
+}
+
+/* Directions 独立一整行 - 🔥 已优化 */
+.card.full {
+    grid-column: 1 / -1;
+    max-width: 850px;      /* 🔥 限制宽度，让文字胖一点 */
+    margin: 40px auto;     /* 🔥 完美居中 */
+    padding: 30px;         /* 🔥 增加内边距 */
+}
+
+/* 🔥 5. 响应式（手机适配） */
+@media (max-width: 900px) {
+    .top-grid, .mid-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+    
+    .image-box img, .why-card {
+        height: 240px;
+    }
+    
+    .ingredient-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .recipe-bg-wrap {
+        padding: 30px 20px;
+        margin: 20px 10px;
+    }
+}
+
+/*________________________ Result recipe design ___________________ */
+.main-result {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    padding: 30px 0;
+}
+
+.spin-winner-card {
+    width: 340px;                       /* 🔥 更大更豪华 */
+    background: linear-gradient(145deg, #fff, #fffdf7);
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 
+        0 25px 50px rgba(0,0,0,0.25),
+        0 0 0 8px rgba(255, 215, 0, 0.3);  /* 🔥 金色光环 */
+    position: relative;
+    animation: winnerBounce 0.6s ease;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+@keyframes winnerBounce {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.98); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* 🔥 顶部Congrats徽章 */
+.winner-badge {
+    position: absolute;
+    top: 230px;              /* 🔥 稍微下移 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #b8860b;
+    padding: 10px 28px;      /* 🔥 左右增加padding */
+    border-radius: 30px;     /* 🔥 更大圆角 */
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 3px;     /* 🔥 拉开字母间距 */
+    text-transform: uppercase;
+    white-space: nowrap;     /* 🔥 强制不换行 */
+    box-shadow: 0 6px 20px rgba(255,215,0,0.5);
+    z-index: 10;
+    min-width: fit-content;  /* 🔥 自适应文字宽度 */
+}
+
+.detail-image {
+    position: relative;
+    height: 240px;
+    overflow: hidden;
+}
+
+.detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.spin-winner-card:hover .detail-image img {
+    transform: scale(1.08);
+}
+
+.detail-content {
+    padding: 22px;
+    text-align: center;
+}
+
+.detail-title {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+}
+
+.winner-rating {
+    color: #ffd700;
+    font-size: 20px;
+    margin-bottom: 25px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.winner-rating span {
+    font-size: 14px;
+    font-weight: 700;
+    color: #666;
+}
+
+.view-btn {
+    display: inline-block;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: white;
+    padding: 14px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all 0.3s;
+    box-shadow: 0 8px 20px rgba(255,107,107,0.4);
+}
+
+.view-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(255,107,107,0.6);
+}
+
+/* ______________________________For recipe card show after result come out_______________________*/
+.main-result {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+}
+
+.result-mode {
+    display: block !important;
+}
+
+.gacha-result img {
+    width: 100%;
+    height: 280px;             /* 🔥 图片变大 */
+    object-fit: cover;         /* 防变形 */
+    border-radius: 10px;
+}
+
+/* 🔥 弹出动画 */
+.pop {
+    animation: popIn 0.5s ease;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    border: 2px solid gold;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Show another 5 recipe randomly */
+.suggestion-section {
+    margin-top: 30px;
+}
+
+.suggestion-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #8b4513;
+    letter-spacing: 3px;
+    font-family: 'Georgia', serif;
+    text-shadow: 
+        2px 2px 0px #fff,
+        3px 3px 0px rgba(139,69,19,0.3);
+}
+
+.suggestion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    width: 100%;
+}
+
+.small-card img {
+    height: 120px;
+}
+
+/* =========================
+   推荐卡片（Saranya风格）
+========================= */
+
+.recipe-card.small-card {
+    width: 100%;
+    max-width: 200px;
+    background: #fff;
+    border: 3px solid #111;
+    border-radius: 16px;
+    overflow: hidden;
+    text-align: left;
+    transition: 0.2s;
+    box-shadow: 6px 6px 0px #f4c542;
+}
+
+.recipe-card.small-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0px #f4c542;
+}
+
+.image-container {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    border-bottom: 3px solid #111;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-meta {
+    padding: 12px;
+}
+
+.meal-category {
+    font-size: 11px;
+    font-weight: 800;
+    color: #d32f2f;
+    letter-spacing: 2px;
+}
+
+.rating-stars {
+    color: #f4c542;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.all-recipes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 35px;   /* ⭐ 拉开距离 */
+    padding: 20px 10px;
+}

@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}By Ingredient | Omakase Today{% endblock %}
+
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    
+
+<h1>🍳 Find Recipes by Ingredients</h1>
+<p class="header-description">Pick your ingredients and let us suggest the perfect dish for you! ✨</p>
+
+{% if error %}
+    <p style="color: #d32f2f; font-weight: bold;">{{ error }}</p>
+{% endif %}
+
+
+<form action="/search" method="POST" onsubmit="return validateForm()">
+    <div class="form-content-wrapper">
+        
+        <div class="search-container" style="position: relative;">
+            <input type="text" 
+                   id="ingredientInput" 
+                   class="search-box" 
+                   onkeyup="filterSuggestions()" 
+                   placeholder="Search ingredients (e.g. Chicken, Beef)..."
+                   style="padding-right: 80px;">
+            
+            <span id="clearSearch" 
+                  style="position: absolute; right: 55px; top: 50%; transform: translateY(-50%); cursor: pointer; display: none; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10;">
+                ✖
+            </span>
+
+            <button type="submit" class="search-icon-btn">🔍</button>
+            <div id="suggestions" class="suggestions-box"></div>
+        </div>
+
+        <div id="selectedBox" class="selected-box">
+            <span style="color: #999; font-style: italic; font-size: 0.9rem;">No ingredients selected yet...</span>
+        </div>
+
+    </div>
+
+    <div id="limitReminder"></div>
+    <input type="hidden" name="ingredients" id="hiddenInput">
+    <button class="btn-small" type="submit">Find Recipes</button>
+</form>
+
+
+<div class="letters">
+    <div class="az-row">
+        {% for letter in alphabet[:13] %}
+            {% if letter in ingredients %}
+                <a href="#{{ letter }}">{{ letter }}</a>
+            {% else %}
+                <span class="disabled">{{ letter }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="az-row">
+        {% for letter in alphabet[13:] %}
+            {% if letter in ingredients %}
+                <a href="#{{ letter }}">{{ letter }}</a>
+            {% else %}
+                <span class="disabled">{{ letter }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+
+<div class="ingredient-section">
+    {% for letter, items in ingredients.items() %}
+        <h2 id="{{ letter }}">{{ letter }}</h2>
+        <div class="tag-wrapper">
+            {% for item in items %}
+                <div class="tag" onclick="addIngredient('{{ item }}')">
+                    {{ item }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    const ingredients = {{ all_ingredients|tojson }};
+    let selectedIngredients = [];
+
+    const searchInput = document.getElementById('ingredientInput');
+    const clearBtn = document.getElementById('clearSearch');
+    const suggestionsBox = document.getElementById('suggestions');
+
+    // --- X BUTTON LOGIC ---
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = ''; // Only clear the input
+            suggestionsBox.style.display = "none"; // Hide suggestions
+            this.style.display = 'none'; // Hide the X itself
+            searchInput.focus();
+        });
+    }
+
+    function toggleClearBtn() {
+        if (searchInput.value.trim().length > 0) {
+            clearBtn.style.display = 'block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+    }
+
+    function addIngredient(item) {
+        if (selectedIngredients.includes(item)) return;
+
+        if (selectedIngredients.length >= 5) {
+            const reminder = document.getElementById("limitReminder");
+            reminder.innerText = "⚠️ You can only select up to 5 ingredients.";
+            reminder.style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            return;
+        }
+
+        selectedIngredients.push(item);
+        
+        document.querySelectorAll('.tag').forEach(tag => {
+            if (tag.innerText.trim().toLowerCase() === item.toLowerCase()) {
+                tag.classList.add('blocked');
+            }
+        });
+
+        updateUI();
+        searchInput.value = "";
+        toggleClearBtn();
+
+        if (window.scrollY > 300) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function removeIngredient(item) {
+        selectedIngredients = selectedIngredients.filter(i => i !== item);
+        
+        document.querySelectorAll('.tag').forEach(tag => {
+            if (tag.innerText.trim().toLowerCase() === item.toLowerCase()) {
+                tag.classList.remove('blocked');
+            }
+        });
+
+        updateUI();
+    }
+
+    function updateUI() {
+        let box = document.getElementById("selectedBox");
+        let hidden = document.getElementById("hiddenInput");
+        let reminder = document.getElementById("limitReminder");
+
+        if (selectedIngredients.length === 0) {
+            box.innerHTML = '<span style="color: #999; font-style: italic;">No ingredients selected yet...</span>';
+        } else {
+            box.innerHTML = "";
+            selectedIngredients.forEach(item => {
+                let div = document.createElement("div");
+                div.className = "selected-tag";
+                let displayName = item.charAt(0).toUpperCase() + item.slice(1);
+                div.innerHTML = displayName + " <span>✕</span>";
+                div.onclick = () => removeIngredient(item);
+                box.appendChild(div);
+            });
+        }
+
+        reminder.style.display = "none"; 
+        hidden.value = selectedIngredients.join(",");
+    }
+
+    function validateForm() {
+        if (selectedIngredients.length === 0) {
+            const reminder = document.getElementById("limitReminder");
+            reminder.innerText = "⚠️ Please select at least 1 ingredient before searching!";
+            reminder.style.display = "block";
+            return false; 
+        }
+        return true;
+    }
+    
+    function filterSuggestions() {
+        let query = searchInput.value.toLowerCase();
+        toggleClearBtn();
+
+        if (query === "") {
+            suggestionsBox.innerHTML = "";
+            suggestionsBox.style.display = "none";
+            return;
+        }
+
+        const filtered = ingredients.filter(i => 
+            i.toLowerCase().startsWith(query) && !selectedIngredients.includes(i)
+        );
+
+        suggestionsBox.innerHTML = ""; 
+        suggestionsBox.style.display = "block"; 
+
+        if (filtered.length > 0) {
+            filtered.forEach(item => {
+                let div = document.createElement("div");
+                div.className = "suggestion-item"; 
+                let matchingPart = item.slice(0, query.length); 
+                let remainingPart = item.slice(query.length);
+                div.innerHTML = `<strong>${matchingPart}</strong>${remainingPart}`;
+                
+                div.onclick = function(e) {
+                    e.stopPropagation(); 
+                    addIngredient(item);
+                    searchInput.value = ""; 
+                    toggleClearBtn();
+                    suggestionsBox.style.display = "none"; 
+                };
+                suggestionsBox.appendChild(div);
+            });
+        } else {
+            let div = document.createElement("div");
+            div.className = "suggestion-item";
+            div.style.color = "#888";
+            div.style.fontStyle = "italic";
+            div.innerHTML = "No ingredient found...";
+            suggestionsBox.appendChild(div);
+        }
+    }
+
+    searchInput.addEventListener('input', filterSuggestions);
+    searchInput.addEventListener('focus', filterSuggestions);
+
+    document.addEventListener('click', function(event) {
+        if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+            suggestionsBox.style.display = "none";
+        }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); 
+            const query = this.value.toLowerCase().trim();
+            const match = ingredients.find(i => 
+                i.toLowerCase() === query && !selectedIngredients.includes(i)
+            );
+
+            if (match) {
+                addIngredient(match); 
+                this.value = ""; 
+                toggleClearBtn();
+                suggestionsBox.style.display = "none"; 
+            }
+        }
+    });
+</script>
+
+{% endblock %}
