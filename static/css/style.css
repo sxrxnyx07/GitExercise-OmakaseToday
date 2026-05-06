@@ -1006,7 +1006,7 @@ LAST PAGE BUTTON
 .menu-btn:hover {
     transform: scale(1.05);
 }
-<<<<<<< HEAD
+
 
 
 .header {
@@ -2068,7 +2068,7 @@ LAST PAGE BUTTON
         transform: translateY(-3px);
         opacity: 0.9;
     }
-=======
+
 .recipe-slider {
     text-align: center;
     font-family: 'Fredoka', sans-serif;
@@ -3089,4 +3089,4 @@ input:focus, textarea:focus, select:focus {
     justify-content: space-between;
     margin-top: 10px;
 }
->>>>>>> xinfei-branch
+
