@@ -14,17 +14,15 @@
 <nav>
     <ul class="sidebar">
         <li onclick="hideSidebar()"><a href="#">X</a></li>
-        <li><a href="{{ url_for('home') }}">HOME</a></li>
         <li><a href="{{ url_for('all_recipes') }}">SEARCH ALL</a></li>
         <li><a href="{{ url_for('ingredient_index') }}">BY INGREDIENTS</a></li>
-        <li><a href="#">SAVED RECIPE</a></li>
+        <li><a href="{{ url_for('saved_recipes') }}">SAVED RECIPE</a></li>
         <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
     </ul>
 
     <ul>
         <li><a href="{{ url_for('home') }}">Omakase Today</a></li>
         <li class="hideOnMobile"><a href="{{ url_for('home') }}">HOME</a></li>
-        
         <li class="hideOnMobile dropdown">
             <a href="javascript:void(0)" class="dropbtn">SEARCH ▾</a>
             <div class="dropdown-content">
@@ -34,9 +32,38 @@
             </div>
         </li>
 
-        <li class="hideOnMobile"><a href="#">SAVED RECIPE</a></li>
+        <li class="hideOnMobile"><a href="{{ url_for('saved_recipes') }}">SAVED RECIPE</a></li>
         <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
-        <li class="menu-button" onclick="showSidebar()"><a href="#">☰</a></li>
+        <li class="notif-wrapper">
+            <a href="#" class="notif-icon" onclick="toggleNotif(event)">
+                🔔
+                <!-- Dynamic unread count -->
+                {% if notif_count > 0 %}
+                    <span class="notif-badge">{{ notif_count }}</span>
+                {% endif %}
+            </a>
+            <!-- dropdown -->
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header">Notifications</div>
+                {% if new_notifications %}
+                    <div class="notif-section">New</div>
+                    {% for notif in new_notifications %}
+                        <div class="notif-item unread">
+                            <span>{{ notif[0] }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% if old_notifications %}
+                    <div class="notif-section">Earlier</div>
+                    {% for notif in old_notifications %}
+                        <div class="notif-item">
+                            <span>{{ notif[0] }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </li>
+        <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
     </ul>
 </nav>
 {% block content %}{% endblock %}
