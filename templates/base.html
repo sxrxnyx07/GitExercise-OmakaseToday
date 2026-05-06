@@ -14,23 +14,15 @@
 <nav>
     <ul class="sidebar">
         <li onclick="hideSidebar()"><a href="#">X</a></li>
-        <li><a href="{{ url_for('home') }}">HOME</a></li>
-<<<<<<< HEAD
         <li><a href="{{ url_for('all_recipes') }}">SEARCH ALL</a></li>
         <li><a href="{{ url_for('ingredient_index') }}">BY INGREDIENTS</a></li>
-        <li><a href="#">SAVED RECIPE</a></li>
-=======
-        <li><a href="#">SEARCH</a></li>
         <li><a href="{{ url_for('saved_recipes') }}">SAVED RECIPE</a></li>
->>>>>>> xinfei-branch
         <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
     </ul>
 
     <ul>
         <li><a href="{{ url_for('home') }}">Omakase Today</a></li>
         <li class="hideOnMobile"><a href="{{ url_for('home') }}">HOME</a></li>
-<<<<<<< HEAD
-        
         <li class="hideOnMobile dropdown">
             <a href="javascript:void(0)" class="dropbtn">SEARCH ▾</a>
             <div class="dropdown-content">
@@ -40,11 +32,6 @@
             </div>
         </li>
 
-        <li class="hideOnMobile"><a href="#">SAVED RECIPE</a></li>
-        <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
-        <li class="menu-button" onclick="showSidebar()"><a href="#">☰</a></li>
-=======
-        <li class="hideOnMobile"><a href="#">SEARCH</a></li>
         <li class="hideOnMobile"><a href="{{ url_for('saved_recipes') }}">SAVED RECIPE</a></li>
         <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
         <li class="notif-wrapper">
@@ -77,7 +64,6 @@
             </div>
         </li>
         <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
->>>>>>> xinfei-branch
     </ul>
 </nav>
 {% block content %}{% endblock %}
