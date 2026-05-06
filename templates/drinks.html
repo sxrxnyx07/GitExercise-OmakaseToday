@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Drinks | Omakase Today{% endblock %}
+
+{% block content %}
+
+<div class="topbar">
+    <a href="/breakfast">Breakfast</a>
+    <a href="/lunch">Lunch</a>
+    <a href="/dinner">Dinner</a>
+    <a href="/dessert">Dessert</a>
+    <a href="/drinks" class="active">Drinks</a>
+</div>
+
+<div class="container">
+
+<h1 class="category-title">🧋 Drinks 🍹</h1>
+
+<p class="subtitle">
+    Feeling the heat?
+    Grab a refreshing drink and cool yourself down with a little surprise ❄️
+</p>
+
+<div class="machine-wrapper">
+
+    <img id="gachaImg" class="gacha-img fade-in"
+         src="{{ url_for('static', filename='gacha1.png') }}">   <!-- GACHA IMAGE -->
+
+    <div class="balls-inside" id="ballsInside"></div>
+
+</div>
+
+    <div id="ball" class="ball red"></div>
+
+    <div class="machine-box">
+
+    <div id="warningMsg" class="warning-msg"></div>
+
+        <div id="result">
+            Click spin to get your recipe 🍽️
+        </div>
+
+        <div id="resultHint" class="result-hint">
+            Want more? Try spin again~
+        </div>
+
+        <button onclick="spin()">SPIN 🎲</button>
+
+    </div>
+
+<!-- ⭐ 導航按鈕區（Home一直顯示，Back只在result時） -->
+<div class="nav-section">
+    <a href="/" class="home-btn">🏠 Home</a>
+    <div class="nav-actions" id="backActions">
+        <button onclick="backToAllRecipes()">← Back to all recipe</button>
+    </div>
+</div>
+
+<div class="recipe-container all-recipes">
+    {% for r in recipes %}
+
+<div class="recipe-card small-card">
+
+    <div class="image-container">
+        <img src="{{ r['image'] }}">
+    </div>
+
+    <div class="card-meta">
+
+        <div class="meal-category">
+            {{ r['meal_category'] if r['meal_category'] else 'RECIPE' }}
+        </div>
+
+        <h3 class="recipe-title">
+            <a href="/recipe/{{ r['id'] }}">
+                {{ r['name'] }}
+            </a>
+        </h3>
+
+        <div class="rating-stars">
+            ⭐⭐⭐⭐☆ <span>(4.0)</span>
+        </div>
+
+    </div>
+
+</div>
+
+    {% endfor %}
+</div>
+
+</div>
+
+<script>
+    let originalHTML;
+
+    let isSpinning = false;
+    
+    let balls = document.querySelectorAll(".mini-ball");
+
+window.onload = function () {
+
+    originalHTML = document.querySelector(".recipe-container").innerHTML;
+
+    const wrapper = document.getElementById("ballsInside");
+
+    let colors = ["red","yellow","green","blue","purple"];
+
+    // coordinate for balls
+    let positions = [
+        [-40, -40],
+        [0, -60],
+        [-20, 10],
+        [-50, -10],
+        [58, -47],
+        [-85, -15],
+        [-67, 13],
+        [-16, -20],
+        [10, 0],
+        [55, -10],
+        [37, 17],
+        [-40, 30],
+        [0, 35],
+        [20, -30],
+        [35, -80],
+        [-75, -50],
+        [-45, -75]
+    ];
+
+    positions.forEach(pos => {
+
+        let ball = document.createElement("div");
+        ball.classList.add("mini-ball");
+
+        let color = colors[Math.floor(Math.random() * colors.length)];
+        ball.classList.add(color);
+
+        ball.style.setProperty('--x', pos[0] + 'px');
+        ball.style.setProperty('--y', pos[1] + 'px');
+
+        wrapper.appendChild(ball);
+    });
+    setTimeout(() => {
+        wrapper.classList.add("show");
+    }, 100);
+
+};
+
+function spin() {
+
+    document.getElementById("resultHint").style.opacity = 0;
+
+    let warningMsg = document.getElementById("warningMsg");
+
+    let ball = document.getElementById("ball");
+    let miniBalls = document.querySelectorAll(".mini-ball");
+
+    let resultBox = document.getElementById("result");
+    let button = document.querySelector(".machine-box button");
+    let gachaImg = document.getElementById("gachaImg");
+    let inside = document.querySelector(".balls-inside");
+
+    let colors = ["red","yellow","green","blue","purple"];
+
+        isSpinning = true;
+    button.disabled = true;
+    warningMsg.innerText = "⚠️ Please wait, the machine is spinning... ";
+
+    // ⭐ reset ONLY state 
+    ball.className = "ball";
+
+    // start animations
+    gachaImg.classList.add("shake");
+    inside.classList.add("spin-inside");
+
+    resultBox.innerText = "Spinning...";
+
+    // ⭐ balls inside move up slightly
+    miniBalls.forEach(b => {
+        b.classList.remove("fall-down");
+        b.classList.add("float-up");
+    });
+
+    setTimeout(() => {
+
+        // balls drop back
+        miniBalls.forEach(b => {
+            b.classList.remove("float-up");
+            b.classList.add("fall-down");
+        });
+
+        // ⭐ generate result ball
+        let randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        ball.classList.add(randomColor);
+        ball.classList.add("drop");
+
+        const category = "Drinks"; // ⭐ 每个页面改这里
+
+        Promise.all([
+            fetch('/random?category=' + category).then(res => res.json()),
+            fetch('/random-multiple?category=' + category).then(res => res.json())
+        ])
+        .then(([mainData, listData]) => {
+
+            setTimeout(() => {
+
+                isSpinning = false;
+                button.disabled = false;
+                warningMsg.innerText = "";
+
+                resultBox.innerText = "You got: " + mainData.name;
+
+                let container = document.querySelector(".recipe-container");
+
+                // ⭐ 主结果（中间）
+            let mainCard = `
+                <div class="main-result">
+                    <div class="spin-winner-card pop">
+                        <div class="winner-badge">🎉 CONGRATS 🎉</div>
+                        <div class="detail-image">
+                            <img src="${mainData.image}">
+                        </div>
+                        <div class="detail-content">
+                            <h2 class="detail-title">${mainData.name}</h2>
+                            <div class="winner-rating">
+                                ⭐⭐⭐⭐☆ <span>(4.0)</span>
+                            </div>
+                            <a href="/recipe/${mainData.id}" class="view-btn">View Recipe →</a>
+                        </div>
+                    </div>
+                 </div>
+            `;
+
+                // ⭐ 5个推荐
+                let suggestionCards = listData.map(r => `
+                    <div class="recipe-card small-card">
+
+                        <div class="image-container">
+                            <img src="${r.image}">
+                        </div>
+
+                        <div class="card-meta">
+
+                        <div class="meal-category">RECOMMENDED</div>
+
+                        <h3 class="recipe-title">
+                            <a href="/recipe/${r.id}">
+                                ${r.name}
+                            </a>
+                        </h3>
+
+                        <div class="rating-stars">
+                            ⭐⭐⭐⭐☆ <span>(4.0)</span>
+                        </div>
+
+                        </div>
+
+                    </div>
+                `).join('');
+
+                // ⭐ 最终结构
+                container.innerHTML = `
+                    ${mainCard}
+
+                    <div class="suggestion-section">
+                        <h3 class="suggestion-title">🍽️ You may also like</h3>
+                        <div class="suggestion-grid">
+                            ${suggestionCards}
+                        </div>
+                    </div>
+                `;
+                container.classList.add("result-mode");
+
+                document.getElementById("backActions").classList.add("show");
+
+                document.getElementById("resultHint").style.opacity = 1;
+
+                gachaImg.classList.remove("shake");
+                inside.classList.remove("spin-inside");
+
+            }, 500);
+
+        });
+
+    }, 1000);
+}
+
+function backToAllRecipes() {
+
+    let container = document.querySelector(".recipe-container");
+
+    // 恢復原本所有 recipes
+    container.innerHTML = originalHTML;
+
+    container.classList.remove("result-mode");
+
+    // 隱藏按鈕
+    document.getElementById("backActions").classList.remove("show");
+
+    // reset UI
+    document.getElementById("result").innerText =
+        "Click spin to get your recipe 🍽️";
+
+    document.getElementById("resultHint").style.opacity = 0;
+
+    // reset ball
+    document.getElementById("ball").className = "ball";
+
+    // reset warning
+    document.getElementById("warningMsg").innerText = "";
+}
+
+</script>
+{% endblock %}
