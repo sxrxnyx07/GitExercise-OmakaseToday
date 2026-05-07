@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}All Recipes | Omakase Today{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+
+<div id="loginModal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-icon">🔒</div>
+        <h3>Login Required</h3>
+        <p>You need to login to save recipes.<br>Go to login page?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn yes" onclick="redirectToLogin()">Yes</button>
+            <button class="modal-btn no" onclick="closeModal()">No</button>
+        </div>
+    </div>
+</div>
+
+<div class="all-recipes-header-container">
+    <div class="page-header">
+        <h1>🍱 All Recipes</h1>
+        <p class="header-subtext">
+            <strong>Browse our entire collection of delicious masterpieces! ✨</strong>
+        </p>
+    </div>
+
+    <div class="search-container-bold">
+        <form action="{{ url_for('all_recipes') }}" method="GET" class="search-form-bold" id="searchForm">
+            <input type="hidden" name="flavor" value="{{ active_flavor }}">
+            
+            <div class="input-sticker-wrapper" style="position: relative; display: flex; align-items: center;">
+                <input type="text" 
+                       name="search" 
+                       id="recipeSearch"
+                       placeholder="Search Recipes..." 
+                       value="{{ search_query or '' }}" 
+                       autocomplete="off" 
+                       class="search-box-bold"
+                       style="padding-right: 80px;"> 
+                
+                <span id="clearSearch" class="clear-btn" 
+                      style="position: absolute; right: 55px; cursor: pointer; display: none; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10;">
+                    ✖
+                </span>
+
+                <button type="submit" class="bold-icon-btn">🔍</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="filter-container">
+        {% set flavors = ['ALL', 'LIGHT', 'SOUR', 'SPICY', 'SWEET'] %}
+        {% for f in flavors %}
+            <a href="{{ url_for('all_recipes', flavor=f, search=search_query) }}" 
+               class="filter-pill {% if active_flavor == f %}active{% endif %}">
+                {{ f }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="all-recipes-grid">
+    {% for r in results %}
+    <div class="recipe-card">
+        <div class="image-container">
+            <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
+            {% if r.image and r.image.startswith('http') %}
+                <img src="{{ r.image }}" alt="{{ r.name }}">
+            {% else %}
+                <img src="{{ url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
+            {% endif %}
+        </div>
+        
+        <div class="card-meta">
+            <div class="meal-category">{{ r.meal_category|upper if r.meal_category else 'RECIPE' }}</div>
+            <span class="recipe-title">{{ r.name }}</span>
+            
+            <div class="rating-stars">
+               {% set current_rating = r.rating|default(0)|int %}
+               {% for i in range(5) %}
+                   <span style="color: {{ '#ffc107' if i < current_rating else '#e4e5e9' }};">★</span>
+               {% endfor %}
+               <span class="rating-count">({{ r.rating|default('0.0') }})</span>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <a href="/recipe/{{ r.id }}" class="btn-return" style="margin: 0; padding: 10px 25px; font-size: 1rem;">View Recipe</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="no-results-centered">
+        <h2 class="no-match-title">😕 No Matches Found</h2>
+        <p>We couldn't find any <strong>{{ active_flavor if active_flavor != 'ALL' else '' }}</strong> recipes matching "<strong>{{ search_query }}</strong>".</p>
+        <br>
+        <a href="{{ url_for('all_recipes') }}" class="view-all-link">View All Recipes</a>
+    </div>
+    {% endfor %}
+</div>
+
+{% if results and pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a href="{{ url_for('all_recipes', page=pagination.prev_num, search=search_query, flavor=active_flavor) }}">⬅ Prev</a>
+    {% endif %}
+
+    {% for page_num in pagination.iter_pages() %}
+        {% if page_num %}
+            <a href="{{ url_for('all_recipes', page=page_num, search=search_query, flavor=active_flavor) }}"
+               class="{% if page_num == pagination.page %}active{% endif %}">
+               {{ page_num }}
+            </a>
+        {% else %}
+            <span class="dots">...</span>
+        {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+        <a href="{{ url_for('all_recipes', page=pagination.next_num, search=search_query, flavor=active_flavor) }}">Next ➡</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+
+const loginModal = document.getElementById('loginModal');
+
+function closeModal() {
+    loginModal.style.display = 'none';
+}
+
+function redirectToLogin() {
+    window.location.href = "{{ url_for('login') }}";
+}
+
+
+window.addEventListener('click', function(event) {
+    if (event.target == loginModal) {
+        closeModal();
+    }
+});
+
+
+function toggleSave(recipeId, button) {
+    if (!button) return;
+    
+    fetch('/toggle-save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe_id: recipeId })
+    })
+    .then(response => {
+        if (response.status === 401) {
+            
+            loginModal.style.display = 'block';
+            return;
+        }
+        if (response.ok) {
+            button.classList.toggle('saved');
+        } else {
+            console.error('Failed to save recipe');
+        }
+    })
+    .catch(error => console.error('Fetch Error:', error));
+}
+
+
+(function() {
+    const searchInput = document.getElementById('recipeSearch');
+    const wrapper = document.querySelector('.input-sticker-wrapper');
+    const clearBtn = document.getElementById('clearSearch');
+
+    if (wrapper && searchInput) {
+        const suggestionsBox = document.createElement('div');
+        suggestionsBox.className = 'suggestions-dropdown';
+        wrapper.appendChild(suggestionsBox);
+
+        function toggleClearBtn() {
+            if (searchInput.value.trim().length > 0) {
+                clearBtn.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+            }
+        }
+
+        toggleClearBtn();
+
+        searchInput.addEventListener('input', async function() {
+            const query = this.value.trim();
+            toggleClearBtn(); 
+
+            if (query.length < 1) {
+                suggestionsBox.innerHTML = "";
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/get_suggestions?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                suggestionsBox.innerHTML = "";
+                suggestionsBox.style.display = "block";
+
+                if (data && data.length > 0) {
+                    data.forEach(name => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        const regex = new RegExp(`(${query})`, 'gi');
+                        div.innerHTML = name.replace(regex, "<strong>$1</strong>");
+                        div.onclick = function() {
+                            searchInput.value = name;
+                            suggestionsBox.style.display = "none";
+                            toggleClearBtn();
+                            searchInput.closest('form').submit();
+                        };
+                        suggestionsBox.appendChild(div);
+                    });
+                } else {
+                    const noResult = document.createElement('div');
+                    noResult.className = 'suggestion-item';
+                    noResult.style.color = "#888";
+                    noResult.style.fontStyle = "italic";
+                    noResult.innerText = "No recipe found...";
+                    suggestionsBox.appendChild(noResult);
+                }
+            } catch (err) {
+                console.error("Suggestion Error:", err);
+            }
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                suggestionsBox.style.display = "none";
+                toggleClearBtn();
+                searchInput.closest('form').submit();
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) {
+                suggestionsBox.style.display = "none";
+            }
+        });
+    }
+})();
+
+window.addEventListener('pageshow', function(event) {
+    const searchInput = document.getElementById('recipeSearch');
+    if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+        if (searchInput) {
+            searchInput.value = "";
+            const clearBtn = document.getElementById('clearSearch');
+            if(clearBtn) clearBtn.style.display = 'none';
+        }
+    }
+});
+</script>
+
+{% endblock %}
