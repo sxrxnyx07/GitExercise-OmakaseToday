@@ -1,154 +1,203 @@
 {% extends "base.html" %}
 
-{% block title %}Recipe Result | Omakase Today{% endblock %}
+
+
+{% block title %}Recipe Results | Omakase Today{% endblock %}
+
+
 
 {% block content %}
+
 <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 
 
 
 <div class="page-header" style="text-align: center;">
-    <h1>🍳 Omakase Today</h1>
-    <p style="font-weight: bold; font-size: 1.1rem; margin-top: 10px; color: #333;">
-        Turn your leftovers into a masterpiece! ✨
-    </p>
 
-    {% if selected %}
-        <div style="margin-top: 20px;">
-            <h3 style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; color: red; margin-bottom: 15px;">
-                <span style="border-bottom: 2px solid red; padding-bottom: 5px;">IN YOUR KITCHEN</span>
-            </h3>
-            <div class="tag-container" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
-                {% for item in selected %}
-                    <div class="ingredient-pop" style="background: white; padding: 8px 18px; border-radius: 25px; border: 1.5px solid black; font-weight: bold; color: #444;">
-                        <span style="color: #fbc02d;">★</span> {{ item }}
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
+    <h1>{{ active_tag }} Recipes ✨</h1>
+
+
+
 </div>
+
+
 
 <div class="recipe-grid">
+
     {% if results %}
+
         {% for r in results %}
-        <div class="recipe-card {% if loop.index > 6 %}hidden-card{% endif %}" 
+
+        <div class="recipe-card {% if loop.index > 6 %}hidden-card{% endif %}"
+
              style="{% if loop.index > 6 %}display: none;{% endif %}">
+
+           
+
             <div class="image-container">
+
                 <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
+
                 <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
+
             </div>
-            
+
+           
+
             <div class="card-meta">
+
                 <div class="meal-category">{{ r.meal_category|default('RECIPE') }}</div>
+
                 <span class="recipe-title" style="display: block; font-weight: bold; margin-bottom: 10px;">{{ r.name }}</span>
-                
+
+               
+
                 <div class="rating-stars">
+
                    {% set current_rating = r.rating|default(0)|int %}
+
                    {% for i in range(5) %}
+
                        <span style="color: {{ '#ffc107' if i < current_rating else '#e4e5e9' }};">★</span>
+
                    {% endfor %}
+
                    <span class="rating-count">({{ r.rating|default('0.0') }})</span>
+
                 </div>
 
-                <div class="match-badge 
-                    {% if r.match|int >= 80 %}match-high
-                    {% elif r.match|int >= 50 %}match-mid
-                    {% else %}match-low{% endif %}">
-                    Match: {{ r.match }}%
-                </div>
-                
-                {% if r.missing_names %}
-                    <div class="missing-info">
-                        <strong style="color: #d9534f;">Missing:</strong>
-                        <span style="color: #666; font-weight: bold; text-transform: capitalize;">
-                            {{ r.missing_names|join(', ') }}
-                        </span>
-                        
-                        {% if r.extra_count > 0 %}
-                            <span class="extra-count">
-                                ... (+{{ r.extra_count }} more)
-                            </span>
-                        {% endif %}
-                    </div>
-                {% else %}
-                    <p class="match-badge match-high" style="text-align: center; display: block;">✨ PERFECT MATCH</p>
-                {% endif %}
+
 
                 <div style="margin-top: 15px; text-align: left;">
+
                      <a href="/recipe/{{ r.id }}" class="btn-return" style="margin: 0; padding: 10px 25px; font-size: 1rem;">View Recipe</a>
+
                 </div>
+
             </div>
+
         </div>
+
         {% endfor %}
+
     {% else %}
+
         <div class="empty-container" style="text-align: center; margin-top: 50px; width: 100%;">
-            <h2 class="no-match-title">😕 No Matches Found !</h2>
-            <p style="font-weight: 50; color: #222 !important;"> 
-        Try removing some ingredients to see more results. 
-    </p>
+
+            <h2 class="no-match-title">😕 No Recipes Found</h2>
+
+            <p style="font-weight: 50; color: #222 !important;">
+
+                Check back later for more {{ active_tag }} recipes!
+
+            </p>
+
         </div>
+
     {% endif %}
+
 </div>
+
+
 
 <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 40px 0;">
+
     {% if results|length > 6 %}
+
     <div id="load-more-container">
+
         <button id="loadMoreBtn" class="btn-gray">Load More Recipes</button>
+
     </div>
+
     {% endif %}
 
-    <a href="{{ url_for('ingredient_index') }}" class="btn-gray">⬅ Back to Ingredients</a>
+
+
+    <a href="{{ url_for('category_index') }}" class="btn-gray">⬅ Back to Categories</a>
+
 </div>
 
+
+
 <script>
+
     const loginModal = document.getElementById('loginModal');
 
+
+
     function closeModal() {
-        loginModal.style.display = 'none';
+
+        if (loginModal) loginModal.style.display = 'none';
+
     }
 
-    function redirectToLogin() {
-        window.location.href = "{{ url_for('login') }}";
-    }
 
-    function toggleSave(recipeId, button) { 
+
+    function toggleSave(recipeId, button) {
+
         if (!button) return;
 
+
+
         fetch('/toggle-save', {
+
             method: 'POST',
+
             headers: { 'Content-Type': 'application/json' },
+
             body: JSON.stringify({ recipe_id: recipeId })
+
         })
+
         .then(response => {
+
             if (response.status === 401) {
-                
-                loginModal.style.display = 'block';
+
+                if (loginModal) loginModal.style.display = 'block';
+
                 return;
+
             }
+
             if (response.ok) {
+
                 button.classList.toggle('saved');
+
             }
+
         })
+
         .catch(error => console.error('Error:', error));
+
     }
 
 
-    window.onclick = function(event) {
-        if (event.target == loginModal) closeModal();
-    }
 
     document.getElementById('loadMoreBtn')?.addEventListener('click', function() {
+
         const hiddenCards = document.querySelectorAll('.hidden-card');
-        const batchSize = 6; 
+
+        const batchSize = 6;
+
         for (let i = 0; i < batchSize && i < hiddenCards.length; i++) {
+
             hiddenCards[i].style.display = 'block';
+
             hiddenCards[i].classList.remove('hidden-card');
+
         }
+
         if (document.querySelectorAll('.hidden-card').length === 0) {
-            document.getElementById('load-more-container').style.display = 'none';
+
+            const container = document.getElementById('load-more-container');
+
+            if (container) container.style.display = 'none';
+
         }
+
     });
+
 </script>
 
 {% endblock %}
