@@ -43,15 +43,14 @@
     {% if results %}
         {% for r in results %}
         <div class="recipe-card {% if loop.index > 6 %}hidden-card{% endif %}" 
-             style="{% if loop.index > 6 %}display: none;{% endif %}">
+            style="{% if loop.index > 6 %}display: none;{% endif %}">
             <div class="image-container">
                 <button class="heart-btn
                     {% if r.id in saved_ids %}saved{% endif %}"
                     data-id="{{ r.id }}"
                     data-name="{{ r.name }}"
                     data-image="{{ r.image }}"
-                    onclick="toggleSave(this)"
-                    {% if r.id in saved_ids %}disabled{% endif %}>
+                    onclick="toggleSave(this)">
                     ❤
                 </button>
                 <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
@@ -127,28 +126,38 @@
         window.location.href = "{{ url_for('login') }}";
     }
 
-    function toggleSave(recipeId, button) { 
-        if (!button) return;
+    async function toggleSave(button) {
 
-        fetch('/toggle-save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recipe_id: recipeId })
-        })
-        .then(response => {
-            if (response.status === 401) {
-                
+        const recipeId = button.dataset.id;
+        const isSaved = button.classList.contains("saved");
+
+        button.disabled = true;
+
+        const url = isSaved
+            ? `/unsave-recipe/${recipeId}`
+            : `/save-recipe/${recipeId}`;
+
+        try {
+
+            const res = await fetch(url);
+
+            // not logged in
+            if (res.redirected) {
                 loginModal.style.display = 'block';
+                button.disabled = false;
                 return;
             }
-            if (response.ok) {
-                button.classList.toggle('saved');
+
+            if (res.ok) {
+                button.classList.toggle("saved");
             }
-        })
-        .catch(error => console.error('Error:', error));
+
+        } catch (error) {
+            console.error(error);
+        }
+
+        button.disabled = false;
     }
-
-
     window.onclick = function(event) {
         if (event.target == loginModal) closeModal();
     }

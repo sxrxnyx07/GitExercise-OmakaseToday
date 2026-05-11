@@ -1037,7 +1037,15 @@ def search():
                 })
 
     results = sorted(results, key=lambda x: x['match'], reverse=True)
-    return render_template('result.html', results=results, selected=user_input)
+    saved_ids = set()
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+    return render_template(
+        'result.html',
+        results=results,
+        selected=user_input,
+        saved_ids=saved_ids
+    )
 
 def get_db_connection():
     conn = sqlite3.connect('omakase.db')
