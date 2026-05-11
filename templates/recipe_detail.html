@@ -5,6 +5,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
+{% extends "base.html" %}
+
+{% block title %}Recipe{% endblock %}
+
+{% block content %}
+
 <body class="recipe-bg">
 
 <div class="recipe-bg-wrap">
@@ -122,3 +128,4 @@
 
 </body>
 </html>
+{% endblock %}

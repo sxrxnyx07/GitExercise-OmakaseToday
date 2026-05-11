@@ -1116,6 +1116,10 @@ def drinks():
     return render_template('drinks.html', recipes=recipes)
 
 @app.route('/random')
+def random_recipe():
+    return render_template('random.html')
+
+@app.route('/random-recipe')
 def get_random_recipe():
 
     category = request.args.get('category')

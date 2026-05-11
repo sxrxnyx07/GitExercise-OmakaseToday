@@ -9,6 +9,10 @@
 
 <body>
 
+{% extends "base.html" %}
+
+{% block content %}
+
 <div class="topbar">
     <a href="/breakfast">Breakfast</a>
     <a href="/lunch">Lunch</a>
@@ -202,7 +206,7 @@ function spin() {
         const category = "Dessert"; // ⭐ 每个页面改这里
 
         Promise.all([
-            fetch('/random?category=' + category).then(res => res.json()),
+            fetch('/random-recipe?category=' + category).then(res => res.json()),
             fetch('/random-multiple?category=' + category).then(res => res.json())
         ])
         .then(([mainData, listData]) => {
@@ -319,3 +323,5 @@ function backToAllRecipes() {
 
 </body>
 </html>
+
+{% endblock %}
