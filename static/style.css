@@ -211,7 +211,7 @@ button:disabled {
 
     position: absolute;
 
-    top: 500px;   
+    top: 600px;   
     left: 50%;
     transform: translateX(-50%);
 
@@ -1040,7 +1040,7 @@ button:disabled {
 .suggestion-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 15px;
+    gap: 60px;
     width: 100%;
 }
 
@@ -1054,10 +1054,10 @@ button:disabled {
 
 .recipe-card.small-card {
     width: 100%;
-    max-width: 200px;
+    max-width: 250px;
+    border-radius: 16px;
     background: #fff;
     border: 3px solid #111;
-    border-radius: 16px;
     overflow: hidden;
     text-align: left;
     transition: 0.2s;
@@ -1102,6 +1102,6 @@ button:disabled {
 .all-recipes {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 35px;   /* ⭐ 拉开距离 */
+    gap: 60px;   /* ⭐ 拉开距离 */
     padding: 20px 10px;
 }
