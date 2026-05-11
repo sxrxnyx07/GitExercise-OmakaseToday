@@ -84,6 +84,25 @@ def init_db():
         role TEXT DEFAULT 'user'
     )
     """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS saved_recipes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,    
+        user_email TEXT,
+        recipe_id INTEGER
+    )
+    """)
+    #id = the save record number (system-generated log ID)
+    #user_email = who saved it
+    #recipe_id = what recipe was saved
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        message TEXT,
+        is_read INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     conn.commit()
     conn.close()
 
@@ -131,7 +150,7 @@ def register():
 
         hashed_pw = generate_password_hash(password)
         try:
-            with sqlite3.connect("users.db") as conn:
+            with sqlite3.connect(DB_PATH) as conn:
                 c = conn.cursor()
                 c.execute("INSERT INTO users (email, username, password, bio) VALUES (?, ?, ?, ?)", (email, username, hashed_pw, ""))
 
@@ -883,33 +902,17 @@ def check_password():
         return {"valid": True}
     else:
         return {"valid": False}
-class SavedRecipe(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_email = db.Column(db.String(120), nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
-    recipe = db.relationship('Recipe', backref='saved_by')
-    
-@app.route('/toggle-save', methods=['POST'])
-def toggle_save():
-    user_email = session.get('user')
-    if not user_email:
-        return jsonify({"error": "Login required"}), 401
-    
-    data = request.get_json()
-    recipe_id = data.get('recipe_id')
-    
-    existing_save = SavedRecipe.query.filter_by(user_email=user_email, recipe_id=recipe_id).first()
-    
-    if existing_save:
-        db.session.delete(existing_save)
-        db.session.commit()
-        return jsonify({"status": "unfilled", "message": "Removed"})
-    else:
-        new_save = SavedRecipe(user_email=user_email, recipe_id=recipe_id)
-        db.session.add(new_save)
-        db.session.commit()
-        return jsonify({"status": "filled", "message": "Saved"})
+def get_saved_set(user_email):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
 
+    rows = conn.execute(
+        "SELECT recipe_id FROM saved_recipes WHERE user_email=?",
+        (user_email,)
+    ).fetchall()
+
+    conn.close()
+    return {r["recipe_id"] for r in rows}
 @app.route('/all_recipes')
 def all_recipes():
     search_query = request.args.get('search', '').strip()
@@ -928,15 +931,18 @@ def all_recipes():
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
+    saved_ids = set()
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
     return render_template(
         'all_recipes.html',
         results=pagination.items,
         pagination=pagination,
         search_query=search_query,
-        active_flavor=active_flavor
+        active_flavor=active_flavor,
+        saved_ids=saved_ids
     )
-
-
 @app.route('/get_suggestions')
 def get_suggestions():
     q = request.args.get('q', '').strip()

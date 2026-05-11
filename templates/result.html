@@ -45,7 +45,15 @@
         <div class="recipe-card {% if loop.index > 6 %}hidden-card{% endif %}" 
              style="{% if loop.index > 6 %}display: none;{% endif %}">
             <div class="image-container">
-                <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
+                <button class="heart-btn
+                    {% if r.id in saved_ids %}saved{% endif %}"
+                    data-id="{{ r.id }}"
+                    data-name="{{ r.name }}"
+                    data-image="{{ r.image }}"
+                    onclick="toggleSave(this)"
+                    {% if r.id in saved_ids %}disabled{% endif %}>
+                    ❤
+                </button>
                 <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
             </div>
             
