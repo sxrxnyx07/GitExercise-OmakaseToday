@@ -9,31 +9,41 @@
 
 <body>
 
-{% extends "base.html" %}
-
-{% block content %}
-
-<div class="topbar">
-    <a href="/breakfast">Breakfast</a>
-    <a href="/lunch">Lunch</a>
-    <a href="/dinner">Dinner</a>
-    <a href="/dessert">Dessert</a>
-    <a href="/drinks">Drinks</a>
-</div>
-
-<div class="container">
+<div class="randompage-container">
 
     <h1>🍽️ Welcome to Omakase Today</h1>
 
-    <p class="subtitle">
+    <p class="subtitle1">
         Not sure what to eat today?<br><br>
         Let our gacha system decide for you! 🎲<br><br>
-        Choose a category from the top menu to get started.
+        Choose a category below 👇
     </p>
+
+    <!-- 🔥 NEW LAYOUT -->
+    <div class="layout">
+
+        <!-- LEFT SIDE -->
+        <div class="left">
+            <img src="{{ url_for('static', filename='gacha.png') }}"
+                 class="gacha-img1">
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="right">
+
+            <div class="category-buttons">
+                <a href="/breakfast">🍳 Breakfast</a>
+                <a href="/lunch">🍜 Lunch</a>
+                <a href="/dinner">🍖 Dinner</a>
+                <a href="/dessert">🍰 Dessert</a>
+                <a href="/drinks">🧃 Drinks</a>
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
 </body>
 </html>
-
-{% endblock %}

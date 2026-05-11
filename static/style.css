@@ -35,7 +35,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* gacha machine image */
+/* gacha machine image in category*/
 .gacha-img {
     width: 350px;
     height: 350px;
@@ -1104,4 +1104,53 @@ button:disabled {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 60px;   /* ⭐ 拉开距离 */
     padding: 20px 10px;
+}
+
+/* =========================
+   RANDOM PAGE LAYOUT
+========================= */
+
+.subtitle1 {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.randompage-container {
+    text-align: center;
+    margin-top: 90px;
+}
+
+.layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 80px;
+}
+
+.left {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+
+    transform: translate(-300px, 200px);
+}
+
+.gacha-img1 {
+    width: 600px;
+    height: 600px;
+    object-fit: contain;
+    margin-top: -30px;
+}
+
+.category-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
