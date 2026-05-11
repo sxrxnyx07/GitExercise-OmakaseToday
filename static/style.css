@@ -151,8 +151,8 @@ button:disabled {
 }
 
 .topbar {
-    position: fixed;
-    top: 50px;
+    position: relative;
+    top: 0px;
     left: 0;
     width: 100%;
 
