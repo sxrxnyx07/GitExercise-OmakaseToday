@@ -14,9 +14,8 @@
     <p class="category-subtitle">
         <strong>Curated collections for every palate. Dive into the flavors of Omakase ✨</strong>
     </p>
-
     <div class="search-container-bold">
-        <form action="{{ url_for('category_index') }}" method="GET" class="search-form-bold" id="searchForm">
+        <form action="{{ url_for('all_recipes') }}" method="GET" class="search-form-bold" id="searchForm">
             
             <div class="input-sticker-wrapper" style="position: relative; display: flex; align-items: center;">
                 <input type="text" 
@@ -37,6 +36,7 @@
             </div>
         </form>
     </div>
+
 
     <div class="category-visual-grid" id="categoryGrid">
     {% if categories %}

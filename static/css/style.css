@@ -1942,6 +1942,142 @@ input#recipeSearch.search-box-bold {
     margin-top: -5px; 
 }
 
+h1 {
+    margin-top: 50px !important; 
+    text-align: center !important;
+}
+
+
+.header-description {
+    margin-bottom: 30px !important;
+    text-align: center !important;
+}
+
+
+.search-container{
+    width: 650px !important;
+    max-width: 90% !important;
+    margin: 0 auto !important;
+    position: relative !important;
+}
+
+
+
+
+.search-box:focus{
+    outline: none !important;
+    box-shadow: none !important;
+    border: 3px solid black !important;
+    background: #f5f5f5 !important;
+    box-shadow: 0 4px 0 black !important;
+}
+
+
+.search-box {
+    width: 100% !important;
+    height: 48px !important; 
+    padding: 0 90px 0 25px !important;
+    
+    border-radius: 40px!important; 
+    border: 3px solid black!important;
+    
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 400 !important; 
+    font-size: 0.9rem !important;
+    background: #f5f5f5 !important;
+    
+    outline: none !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+
+#clearSearch {
+    position: absolute !important;
+    right: 55px !important; 
+    top: 50% !important;
+    transform: translateY(-80%) !important;
+    
+    display: none ; 
+    align-items: center !important;
+    justify-content: center !important;
+    
+    width: 24px !important;
+    height: 24px !important;
+    
+    font-size: 1.2rem !important;
+    color: #888 !important;
+    cursor: pointer!important;
+    z-index: 10 !important;
+    line-height: 1 !important;
+}
+
+
+.search-icon-btn {
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+
+
+    transform: translateY(-80%) !important;
+
+    width: 32px !important;
+    height: 32px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+
+    font-size: 1.35rem !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    line-height: 1 !important;
+}
+
+.suggestions-box{
+    width: 100% !important;
+    max-height: 320px !important;
+    overflow-y: auto !important;
+
+    position: absolute !important;
+    top: 52px !important;
+    left: 0 !important;
+
+    background: #f5f5f5 !important;
+
+    border-left: 2px solid #bdbdbd !important;
+    border-right: 2px solid #bdbdbd !important;
+    border-bottom: 2px solid #bdbdbd !important;
+
+    border-top: none !important;  
+
+    border-radius: 0 0 18px 18px !important;
+
+    box-sizing: border-box !important;
+    z-index: 999 !important;
+
+    display: none;
+}
+
+
+.suggestion-item{
+    padding: 16px 18px !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+
+    border-bottom: 1px solid #d3d3d3 !important;
+}
+
+.suggestion-item:hover{
+    background: #ececec !important;
+}
 
 .suggestion-item {
     padding: 15px 20px;
@@ -2081,6 +2217,7 @@ input#recipeSearch.search-box-bold {
     margin-bottom: 30px;
     font-weight: 500;
 }
+ 
 
 
 

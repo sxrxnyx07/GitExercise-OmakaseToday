@@ -17,146 +17,7 @@
     <p style="color: #d32f2f; font-weight: bold;">{{ error }}</p>
 {% endif %}
 
-<style>
-    /* Adding space between the Navbar and the Header */
-h1 {
-    margin-top: 50px; /* Adjust this number if you want a bigger or smaller gap */
-    text-align: center;
-}
 
-/* Optional: Add a little gap to the description text too */
-.header-description {
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-
-    .search-container{
-    width: 650px;
-    max-width: 90%;
-    margin: 0 auto;
-    position: relative;
-}
-
-
-
-/* REMOVE YELLOW FOCUS */
-.search-box:focus{
-    outline: none;
-    box-shadow: none;
-    border: 3px solid black;
-    background: #f5f5f5;
-    box-shadow: 0 4px 0 black;
-}
-
-/* SEARCH BOX - Increased height to match your other page */
-.search-box {
-    width: 100%;
-    height: 48px; /* Matching the taller box from your screenshot */
-    padding: 0 90px 0 25px;
-    
-    border-radius: 40px; /* Slightly rounder for the taller height */
-    border: 3px solid black;
-    
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 400; /* Keeping it normal weight, no bold */
-    font-size: 0.9rem;
-    background: #f5f5f5;
-    
-    outline: none;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-}
-
-/* X BUTTON - Force Centered */
-#clearSearch {
-    position: absolute;
-    right: 55px; 
-    top: 50%;
-    transform: translateY(-80%);
-    
-    display: none; /* Controlled by your JS */
-    align-items: center;
-    justify-content: center;
-    
-    width: 24px;
-    height: 24px;
-    
-    font-size: 1.2rem;
-    color: #888;
-    cursor: pointer;
-    z-index: 10;
-    line-height: 1;
-}
-
-/* SEARCH ICON BUTTON - Force Centered */
-/* SEARCH ICON BUTTON */
-.search-icon-btn {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-
-    /* THIS FIXES THE EMOJI POSITION */
-    transform: translateY(-80%);
-
-    width: 32px;
-    height: 32px;
-
-    padding: 0;
-    margin: 0;
-
-    border: none;
-    background: transparent;
-    cursor: pointer;
-
-    font-size: 1.35rem;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    line-height: 1;
-}
-/* DROPDOWN */
-.suggestions-box{
-    width: 100%;
-    max-height: 320px;
-    overflow-y: auto;
-
-    position: absolute;
-    top: 52px;
-    left: 0;
-
-    background: #f5f5f5;
-
-    border-left: 2px solid #bdbdbd;
-    border-right: 2px solid #bdbdbd;
-    border-bottom: 2px solid #bdbdbd;
-
-    border-top: none;   /* removes the line */
-
-    border-radius: 0 0 18px 18px;
-
-    box-sizing: border-box;
-    z-index: 999;
-
-    display: none;
-}
-
-/* ITEMS */
-.suggestion-item{
-    padding: 16px 18px;
-    font-size: 1rem;
-    cursor: pointer;
-
-    border-bottom: 1px solid #d3d3d3;
-}
-
-.suggestion-item:hover{
-    background: #ececec;
-}
-</style>
 <form action="/search" method="POST" onsubmit="return validateForm()">
     <div class="form-content-wrapper">
         
@@ -166,13 +27,14 @@ h1 {
                    class="search-box" 
                    onkeyup="filterSuggestions()" 
                    placeholder="Search ingredients (e.g. Chicken, Beef)..."
-                   style="padding-right: 85px;">
+                   style="padding-right: 80px;">
             
-            <span id="clearSearch">✖</span>
+            <span id="clearSearch" 
+                  style="position: absolute; right: 55px; top: 50%; transform: translateY(-50%); cursor: pointer; display: none; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10;">
+                ✖
+            </span>
 
-            <button type="submit" class="search-icon-btn">
-                  <span style="display:flex; align-items:center;">🔍</span>
-            </button>
+            <button type="submit" class="search-icon-btn">🔍</button>
             <div id="suggestions" class="suggestions-box"></div>
         </div>
 
