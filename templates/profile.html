@@ -1,20 +1,27 @@
 {% extends "base.html" %}
-
 {% block title %}Profile{% endblock %}
-
 {% block content %}
-
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
-
 <div class="profile-container">
-
     <!-- LEFT -->
     <div class="profile-left">
 
         <div class="profile-card">
 
             <div class="profile-img-box">
-                <img src="{{ url_for('static', filename='default.png') }}">
+                <img src="{{ url_for('static', filename='uploads/' + profile_pic) if profile_pic else url_for('static', filename='uploads/default.png') }}">
+
+                <form action="/upload-profile-pic" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="image" id="fileInput" accept="image/*" hidden>
+                    <label for="fileInput" class="upload-btn">
+                        Choose Photo
+                    </label>
+
+                    <button type="submit" class="upload-submit">
+                        Upload
+                    </button>
+
+                </form>
             </div>
 
         </div>
@@ -25,8 +32,6 @@
     <div class="profile-right">
 
         <div class="info-card">
-
-            <h1>PROFILE</h1>
 
             <form method="POST">
                 <div class="input-box">
@@ -52,8 +57,18 @@
                     <button type="submit" class="edit-btn" id="saveBtn" style="display:none;">
                         Save
                     </button>
-
+                    {% if role == 'admin' %}
+                    <a href="/admin" class="admin-access-btn">
+                        Admin Page
+                    </a>
+                    {% endif %}
+                    <a href="/logout" class="logout-btn">
+                        Logout
+                    </a>
                 </div>
+                <button type="button" class="delete-account-btn" onclick="openDeleteModal()">
+                    Delete Account
+                </button>
 
             </form>
 
@@ -63,5 +78,160 @@
     </div>
 
 </div>
+<section class="saved-rituals">
 
+    <!-- Header -->
+    <div class="rituals-header">
+        <h2>Saved Rituals</h2>
+        <a href="{{ url_for('saved_recipes') }}" class="view-all">View all</a>
+    </div>
+
+    <div class="rituals-grid" id="savedGrid">
+
+        {% if saved_recipes and saved_recipes|length > 0 %}
+
+            {% for recipe in saved_recipes %}
+            <div class="ritual-card" id="card-{{ recipe.id }}">
+
+                <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
+                <div class="card-meta">
+
+                    <div class="meal-category">
+                        {{ recipe.meal_category }}
+                    </div>
+
+                    <span class="recipe-title">
+                        {{ recipe.name }}
+                    </span>
+
+                    <!-- ⭐ RATING -->
+                    {% if recipe.rating %}
+                    <div class="rating-stars">
+                        {% for i in range(5) %}
+                            <span class="{% if i < recipe.rating %}star-filled{% else %}star-empty{% endif %}">
+                                ★
+                            </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty-wrapper" id="emptyState">
+
+                <div class="empty-state-card">
+                    <div class="empty-icon">🍽️</div>
+
+                    <h2>No Saved Rituals Yet</h2>
+
+                    <p>Start exploring delicious recipes and build your collection.</p>
+
+                    <a href="/" class="explore-btn">Explore Recipes</a>
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+
+    <div class="suggested-section">
+
+        <div class="suggested-header">
+            <h3>Recommended for You</h3>
+            <span class="suggested-sub">Picked based on your preferences</span>
+        </div>
+
+        <div class="suggested-recipes">
+            {% for recipe in suggested_recipes %}
+            <div class="recipe-card">
+                <div class="image-container">
+                    <button class="heart-btn
+                        {% if recipe.id in saved_ids %}saved{% endif %}"
+                        data-id="{{ recipe.id }}"
+                        data-name="{{ recipe.name }}"
+                        data-image="{{ recipe.image }}"
+                        onclick="toggleSave(this)"
+                        {% if recipe.id in saved_ids %}disabled{% endif %}>
+                        
+                        ❤
+                    </button>
+
+
+                    <img src="{{ recipe.image if recipe.image and recipe.image.startswith('http') else url_for('static', filename=recipe.image or 'placeholder.png') }}"
+                        alt="{{ recipe.name }}">
+                </div>
+
+                <div class="card-meta">
+                    <div class="meal-category">{{ recipe.meal_category }}</div>
+                    <span class="recipe-title">
+                        {{ recipe.name }}
+                    </span>
+                    {% if recipe.rating %}
+                    <div class="rating-stars">
+                        {% for i in range(5) %}
+                            <span class="{% if i < recipe.rating %}star-filled{% else %}star-empty{% endif %}">★</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- DELETE ACCOUNT MODAL -->
+<div id="deleteModal" class="modal hidden">
+    <div class="modal-content delete-modal">
+
+        <h2>Delete Account</h2>
+
+        <p class="warning-text">
+            ⚠ This action is permanent and cannot be undone.
+        </p>
+
+        <form method="POST" action="/delete-my-account">
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" id="deletePassword" required>
+                <div id="passwordError" style="color:red; font-size:14px;"></div>
+            </div>
+            <div class="form-group">
+                <label>Reason (optional)</label>
+                <select name="reason">
+                    <option value="">Select a reason</option>
+                    <option value="privacy">Privacy concerns</option>
+                    <option value="not_useful">Not useful</option>
+                    <option value="email">Too many emails</option>
+                    <option value="better_app">Found better app</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="confirm-box">
+                <label>
+                    <input type="checkbox" id="confirmCheck">
+                    I understand this action cannot be undone
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeDeleteModal()">
+                    Cancel
+                </button>
+
+                <button type="submit" class="confirm-delete-btn" id="deleteBtn" disabled>
+                    Delete My Account
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
 {% endblock %}

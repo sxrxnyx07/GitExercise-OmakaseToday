@@ -1,5 +1,4 @@
 const page = document.body.dataset.page || ""
-
 const form = document.getElementById('form')
 const username_input = document.getElementById('username-input')
 const email_input = document.getElementById('email-input')
@@ -13,60 +12,47 @@ let emailExists = false
 // SUBMIT
 // =========================
 if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener("submit", (e) => {
 
-        let errors = []
+        let errors = [];
 
+        // REGISTER
         if (page === "register") {
-            errors = getSignupFormErrors(
-                username_input?.value,
-                email_input?.value,
-                password_input?.value,
-                repeat_password_input?.value,
-                emailExists
-            )
+            if (!username_input?.value) errors.push("Username required");
+            if (!email_input?.value) errors.push("Email required");
+            if (!password_input?.value) errors.push("Password required");
+
+            if (password_input?.value !== repeat_password_input?.value) {
+                errors.push("Passwords do not match");
+            }
         }
 
+        // RESET
         else if (page === "reset") {
-            errors = getResetErrors(
-                username_input?.value,
-                email_input?.value
-            )
+            if (!email_input?.value) errors.push("Email required");
         }
 
+        // NEW PASSWORD
         else if (page === "newpassword") {
-            errors = getNewPasswordErrors(
-                password_input?.value,
-                repeat_password_input?.value
-            )
+            if (!password_input?.value) errors.push("Password required");
+
+            if (password_input?.value !== repeat_password_input?.value) {
+                errors.push("Passwords do not match");
+            }
         }
 
+        // LOGIN
         else if (page === "login") {
-            errors = getLoginFormErrors(
-                email_input?.value,
-                password_input?.value
-            )
+            if (!email_input?.value) errors.push("Email required");
+            if (!password_input?.value) errors.push("Password required");
         }
 
         if (errors.length > 0) {
-            e.preventDefault()
-            error_message.innerText = errors.join("\n")
+            e.preventDefault();
+            error_message.innerText = errors.join("\n");
         }
-    })
+    });
 }
-
-// =========================
-// RESET STEP 1
-// =========================
-function getResetErrors(username, email) {
-    let errors = []
-
-    if (!username) errors.push("Username is required")
-    if (!email) errors.push("Email is required")
-
-    return errors
-}
-
 // =========================
 // NEW PASSWORD
 // =========================
@@ -82,7 +68,6 @@ function getNewPasswordErrors(password, repeat) {
 
     return errors
 }
-
 // =========================
 // LOGIN
 // =========================
@@ -94,7 +79,6 @@ function getLoginFormErrors(email, password) {
 
     return errors
 }
-
 // =========================
 // REGISTER
 // =========================
@@ -109,44 +93,56 @@ function getSignupFormErrors(username, email, password, repeat, emailExists) {
 
     return errors
 }
-
 // =========================
-// EMAIL CHECK REGISTER ONLY
+// EMAIL CHECK (ONLY UI WARNING)
 // =========================
 if (page === "register" && email_input) {
 
-    let timeout
+    let timeout;
 
-    email_input.addEventListener('input', () => {
+    email_input.addEventListener("input", () => {
 
-        clearTimeout(timeout)
+        clearTimeout(timeout);
 
         timeout = setTimeout(async () => {
 
-            const email = email_input.value.trim()
+            const email = email_input.value.trim();
 
             if (!email) {
-                emailExists = false
-                return
+                emailExists = false;
+                error_message.innerText = "";
+                return;
             }
 
-            const res = await fetch(`/check-email?email=${email}`)
-            const data = await res.json()
+            const res = await fetch(`/check-email?email=${email}`);
+            const data = await res.json();
 
-            emailExists = data.exists
+            emailExists = data.exists;
 
             if (emailExists) {
-                error_message.innerText = "This email is already registered!"
+                error_message.innerText = "⚠ This email is already registered";
+                error_message.style.color = "red";
             } else {
-                if (error_message.innerText === "This email is already registered!") {
-                    error_message.innerText = ""
-                }
+                error_message.innerText = "";
             }
 
-        }, 300)
-    })
+        }, 300);
+    });
 }
+function enableEdit() {
+    const username = document.getElementById("username")
+    const bio = document.getElementById("bio")
+    const saveBtn = document.getElementById("saveBtn")
 
+    if (username && bio) {
+        username.disabled = false
+        bio.disabled = false
+    }
+
+    if (saveBtn) {
+        saveBtn.style.display = "inline-block"
+    }
+}
 // =========================
 // CLEAR STYLE
 // =========================
@@ -165,18 +161,19 @@ const pages = [
 let currentPage = 0;
 
 function nextPage(){
-    if (currentPage < pages.length){
+    if (currentPage < pages.length && pages[currentPage]) {
         pages[currentPage].classList.add("flipped")
         currentPage++
     }
 }
 
 function prevPage(){
-    if (currentPage > 0){
+    if (currentPage > 0 && pages[currentPage-1]) {
         currentPage--
         pages[currentPage].classList.remove("flipped")
     }
 }
+
 let autoFlip = setInterval(() => {
 
     if (currentPage < pages.length){
@@ -192,3 +189,490 @@ let autoFlip = setInterval(() => {
 function goLogin(){
     window.location.href = "/login"
 }
+
+function slideLeft() {
+    document.getElementById("slider").scrollBy({
+        left: -220,
+        behavior: "smooth"
+    });
+}
+
+function slideRight() {
+    document.getElementById("slider").scrollBy({
+        left: 220,
+        behavior: "smooth"
+    });
+}
+function showSidebar() {
+    const sidebar = document.querySelector(".sidebar")
+    if (sidebar) {
+        sidebar.style.display = "flex"
+    }
+}
+
+function hideSidebar() {
+    const sidebar = document.querySelector(".sidebar")
+    if (sidebar) {
+        sidebar.style.display = "none"
+    }
+}
+// =========================
+// SEARCH FUNCTION
+// =========================
+function filterRecipes() {
+    const input = document.getElementById("recipeSearch").value.toLowerCase();
+    const rows = document.querySelectorAll("#recipeBody tr");
+
+    rows.forEach(row => {
+        const nameInput = row.querySelector("input[name='name']");
+        if (!nameInput) return;
+
+        const name = nameInput.value.toLowerCase();
+
+        if (name.includes(input)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+const recipeSearchInput = document.getElementById("recipeSearch");
+
+if (recipeSearchInput) {
+    recipeSearchInput.addEventListener("input", filterRecipes);
+}
+
+function filterUsers() {
+    const input = document.getElementById("userSearch").value.toLowerCase();
+    const rows = document.querySelectorAll("#userBody tr");
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+
+        if (cells.length < 2) return;
+
+        const email = cells[1].textContent.toLowerCase();
+
+        if (email.includes(input)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+const userSearchInput = document.getElementById("userSearch");
+if (userSearchInput) {
+    userSearchInput.addEventListener("input", filterUsers);
+}
+
+async function toggleSave(button) {
+
+    const recipeId = button.dataset.id;
+    const isSaved = button.classList.contains("saved");
+
+    button.disabled = true;
+
+    const url = isSaved
+        ? `/unsave-recipe/${recipeId}`
+        : `/save-recipe/${recipeId}`;
+
+    const res = await fetch(url);
+
+    if (!res.ok) return;
+    location.reload();
+
+    button.classList.toggle("saved");
+
+    const savedGrid = document.getElementById("savedGrid");
+    const emptyState = document.getElementById("emptyState");
+
+    // =========================
+    // SAVE ACTION
+    // =========================
+    if (!isSaved) {
+
+        // remove empty state
+        if (emptyState) emptyState.remove();
+
+        // create new card (you can enhance styling later)
+        const card = document.createElement("div");
+        card.className = "ritual-card";
+        card.id = `card-${recipeId}`;
+
+        card.innerHTML = `
+            <img src="${button.dataset.image}">
+            <h3>${button.dataset.name}</h3>
+        `;
+
+        savedGrid.appendChild(card);
+    }
+
+    // =========================
+    // UNSAVE ACTION
+    // =========================
+    else {
+
+        const card = document.getElementById(`card-${recipeId}`);
+        if (card) card.remove();
+
+        // if empty → show empty state again
+        if (savedGrid.children.length === 0) {
+
+            const empty = document.createElement("div");
+            empty.className = "empty-wrapper";
+            empty.id = "emptyState";
+
+            empty.innerHTML = `
+                <div class="empty-state-card">
+                    <div class="empty-icon">🍽️</div>
+                    <h2>No Saved Rituals Yet</h2>
+                    <p>Start exploring delicious recipes and build your collection.</p>
+                    <a href="/" class="explore-btn">Explore Recipes</a>
+                </div>
+            `;
+
+            savedGrid.appendChild(empty);
+        }
+    }
+
+    button.disabled = false;
+}
+function enableEditRow(btn) {
+    const row = btn.closest("tr");
+
+    // hide text
+    row.querySelectorAll(".view").forEach(el => el.style.display = "none");
+
+    // show inputs
+    row.querySelectorAll(".edit").forEach(el => el.hidden = false);
+
+    // toggle buttons
+    btn.style.display = "none";
+    row.querySelector(".save-btn").hidden = false;
+}
+function openAddModal() {
+
+    document.getElementById("editModal").style.display = "block";
+    document.getElementById("editForm").action = "/admin/recipes/add";
+    document.querySelector(".modal-content h2").innerText = "Add New Recipe";
+    // clear all fields
+    document.getElementById("edit-name").value = "";
+    document.getElementById("edit-rating").value = "";
+    document.getElementById("edit-clean").value = "";
+    document.getElementById("edit-full").value = "";
+    document.getElementById("edit-directions").value = "";
+    document.getElementById("edit-timing").value = "";
+    document.getElementById("edit-category").value = "";
+    document.getElementById("edit-flavor").value = "";
+    const preview = document.getElementById("imagePreview");
+    if (preview) {
+        preview.src = "";
+        preview.style.display = "none";
+    }
+}
+
+function openEditModal(id, name, rating, clean, full, directions, timing, category, flavor) {
+
+    document.getElementById("editModal").style.display = "block";
+    document.getElementById("editForm").action = `/admin/recipes/update/${id}`;
+    document.querySelector(".modal-content h2").innerText = "Edit Recipe";
+    document.getElementById("edit-mode").value = "edit";
+    document.getElementById("edit-name").value = name;
+    document.getElementById("edit-rating").value = rating;
+    document.getElementById("edit-clean").value = clean;
+    document.getElementById("edit-full").value = full;
+    document.getElementById("edit-directions").value = directions;
+    document.getElementById("edit-timing").value = timing;
+    document.getElementById("edit-category").value = category;
+    document.getElementById("edit-flavor").value = flavor;
+}
+
+
+function closeModal() {
+    document.getElementById("editModal").style.display = "none";
+}
+
+// 点击外面关闭
+window.onclick = function(event) {
+    const modal = document.getElementById("editModal");
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+document.addEventListener("DOMContentLoaded", function () {
+
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("imagePreview");
+
+    if (imageInput) {
+        imageInput.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+});
+function openTab(tabName) {
+
+    // hide all tabs
+    document.querySelectorAll(".tab-content").forEach(tab => {
+        tab.classList.remove("active");
+    });
+
+    // remove active button
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+    });
+
+    // show selected tab
+    document.getElementById("tab-" + tabName).classList.add("active");
+
+    // highlight button
+    event.target.classList.add("active");
+}
+function filterSavedRecipes() {
+    const input = document.getElementById("savedSearch").value.toLowerCase();
+    const cards = document.querySelectorAll(".recipe-card");
+
+    cards.forEach(card => {
+        const title = card.querySelector(".recipe-title").innerText.toLowerCase();
+
+        if (title.includes(input)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+// live search
+const savedSearchInput = document.getElementById("savedSearch");
+
+if (savedSearchInput) {
+
+    const cards = document.querySelectorAll(".recipe-card");
+
+    savedSearchInput.addEventListener("input", function () {
+
+        const input = this.value.toLowerCase();
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const titleEl = card.querySelector(".recipe-title");
+
+            if (!titleEl) return;
+
+            const title = titleEl.innerText.toLowerCase();
+
+            if (title.includes(input)) {
+                card.style.display = "block";
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+            }
+        });
+
+    });
+}
+function toggleNotif(event){
+    event.preventDefault()
+
+    const dropdown = document.getElementById("notifDropdown")
+    dropdown.classList.toggle("show")
+
+    // 👉 只有打开时才 mark as read
+    if(dropdown.classList.contains("show")){
+        fetch("/mark-notifications-read").then(()=>{
+            const badge = document.querySelector(".notif-badge")
+            if(badge){
+                badge.style.display = "none"
+            }
+        })
+
+        loadNotifications() // 打开时刷新一次
+    }
+}
+
+// click outside to close
+document.addEventListener("click", function(event){
+    const box = document.getElementById("notifDropdown");
+    const icon = document.querySelector(".notif-icon");
+
+    if (!box || !icon) return
+
+    if (!box.contains(event.target) && !icon.contains(event.target)) {
+        box.classList.remove("show");
+    }
+})
+
+function loadNotifications(){
+    fetch("/get-notifications")
+    .then(res => res.json())
+    .then(data => {
+
+        const dropdown = document.getElementById("notifDropdown")
+        const badge = document.querySelector(".notif-badge")
+
+        if(!dropdown) return
+
+        // =========================
+        // 🔥 BADGE UPDATE + ANIMATION
+        // =========================
+        let oldCount = badge ? parseInt(badge.innerText || "0") : 0
+        let newCount = data.count
+
+        if(newCount > 0){
+            if(badge){
+                badge.innerText = newCount
+                badge.style.display = "inline"
+
+                // 👉 only animate when new notifications come in
+                if(newCount > oldCount){
+                    badge.classList.add("pop")
+                    setTimeout(() => {
+                        badge.classList.remove("pop")
+                    }, 300)
+                }
+            }
+        } else {
+            if(badge){
+                badge.style.display = "none"
+            }
+        }
+
+        // =========================
+        // dropdown only updates when opened
+        // =========================
+        if(!dropdown.classList.contains("show")){
+            return
+        }
+
+        // rebuild dropdown
+        dropdown.innerHTML = `
+            <div class="notif-header">Notifications</div>
+        `
+
+        if(data.notifications.length === 0){
+            dropdown.innerHTML += `
+                <div class="notif-item">
+                    <span>No notifications</span>
+                </div>
+            `
+            return
+        }
+
+        data.notifications.forEach(n => {
+            dropdown.innerHTML += `
+                <div class="notif-item ${n[1] == 0 ? "unread" : ""}">
+                    <span>${n[0]}</span>
+                </div>
+            `
+        })
+    })
+}
+// Correct initialization）
+document.addEventListener("DOMContentLoaded", () => {
+    loadNotifications()
+    setInterval(() => {
+        if (!document.hidden) {
+            loadNotifications()
+        }
+    }, 3000)
+})
+
+function openDeleteModal(){
+    const modal = document.getElementById("deleteModal");
+    if(modal){
+        modal.classList.add("show");
+        modal.classList.remove("hidden");
+    }
+}
+
+function closeDeleteModal(){
+    const modal = document.getElementById("deleteModal");
+    if(modal){
+        modal.classList.remove("show");
+        modal.classList.add("hidden");
+    }
+}
+
+// checkbox enable button
+document.addEventListener("DOMContentLoaded", function () {
+    const check = document.getElementById("confirmCheck");
+    const btn = document.getElementById("deleteBtn");
+    if (!check || !btn) return;  
+    check.addEventListener("change", function () {
+        btn.disabled = !this.checked;
+    });
+
+});
+
+
+// click outside modal close
+document.addEventListener("click", function(e){
+    const modal = document.getElementById("deleteModal");
+
+    if(!modal) return;
+
+    if(e.target === modal){
+        closeDeleteModal();
+    }
+});
+document.addEventListener("DOMContentLoaded", function () {
+
+    const passwordInput = document.querySelector("#deleteModal input[name='password']");
+    const passwordError = document.getElementById("passwordError");
+    const deleteBtn = document.getElementById("deleteBtn");
+
+    if (!passwordInput || !deleteBtn) return;
+
+    let timeout;
+
+    passwordInput.addEventListener("input", () => {
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(async () => {
+
+            const password = passwordInput.value;
+
+            if (!password) {
+                passwordError.innerText = "";
+                deleteBtn.disabled = true;
+                return;
+            }
+
+            const res = await fetch("/check-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ password })
+            });
+
+            const data = await res.json();
+
+            if (data.valid) {
+                passwordError.innerText = "";
+                deleteBtn.disabled = false;
+            } else {
+                passwordError.innerText = "Wrong password";
+                deleteBtn.disabled = true;
+            }
+
+        }, 300);
+
+    });
+
+});
