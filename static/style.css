@@ -132,8 +132,6 @@ button:disabled {
     background: #ccc;
 }
 
-
-
 .shake {
     animation: shakeMachine 0.4s ease-in-out 3;
 }
@@ -158,7 +156,7 @@ button:disabled {
 
     display: flex;
 
-    z-index: 1000;
+    z-index: 1;
 }
 
 .topbar a {
