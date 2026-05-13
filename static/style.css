@@ -1116,6 +1116,16 @@ button:disabled {
     margin-bottom: 20px;
 }
 
+.subtitle2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    width: 100%;        /* 占满右边区域 */
+    text-align: center; /* 文字居中 */
+
+    margin-bottom: 25px; /* 跟按钮分开 */
+}
+
 .randompage-container {
     text-align: center;
     margin-top: 90px;
@@ -1138,8 +1148,10 @@ button:disabled {
     flex: 1;
 
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;   /* ⭐ 关键：变成上下排列 */
+
+    align-items: center;      /* 横向居中 */
+    justify-content: flex-start; /* ⭐ 关键：全部往上对齐 */
 
     margin-top: 80px;
     margin-left: -120px;
