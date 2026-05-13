@@ -715,6 +715,25 @@ button:disabled {
     line-height: 1.8;
 }
 
+.view-recipe-btn {
+    display: inline-block;
+    padding: 10px 25px;
+    font-size: 1rem;
+    background: #f4c542;
+    color: #111;
+    border: 2px solid #111;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 4px 4px 0 #111;
+    transition: 0.2s ease;
+}
+
+.view-recipe-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #111;
+}
+
 /* =========================
    META
 ========================= */
