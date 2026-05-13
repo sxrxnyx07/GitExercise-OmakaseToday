@@ -1263,7 +1263,7 @@ button:disabled {
 
     background: linear-gradient(45deg, #ff758c, #ffb199);
 
-    color: white;
+    color: rgb(10, 9, 9);
 
     padding: 20px 50px;
 

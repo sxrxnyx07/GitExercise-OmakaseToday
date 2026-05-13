@@ -1187,5 +1187,10 @@ def test_foodtype():
     conn.close()
 
     return jsonify([dict(row) for row in rows])
+
+@app.route("/spin")
+def spin_page():
+    return render_template("random.html")
+
 if __name__ == "__main__":
     app.run(debug=True)
