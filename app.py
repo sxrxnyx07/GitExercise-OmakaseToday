@@ -11,6 +11,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
+from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session
+
+
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"   #Used for encryption: session (login state) token (reset password)
@@ -62,6 +66,7 @@ class Recipe(db.Model):
     timing = db.Column(db.String(100))     
     meal_category = db.Column(db.String(50))
     flavor_type = db.Column(db.String(50))
+    special_tag = db.Column(db.String(50))
 
 # ---------------- DATABASE INIT (User DB) ----------------
 # =======================
@@ -985,13 +990,133 @@ def get_saved_set(user_email):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
+def get_saved_set(user_email):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+
     rows = conn.execute(
         "SELECT recipe_id FROM saved_recipes WHERE user_email=?",
         (user_email,)
     ).fetchall()
 
     conn.close()
+
     return {r["recipe_id"] for r in rows}
+
+
+@app.route('/categories')
+def category_index():
+
+    search_query = request.args.get('search', '').strip().lower()
+
+    # 1. Get all unique tags
+    all_recipes = Recipe.query.with_entities(Recipe.special_tag).all()
+
+    unique_tags = set()
+
+    for r in all_recipes:
+
+        if r.special_tag:
+
+            tags = [
+                t.strip()
+                for t in r.special_tag.split(',')
+            ]
+
+            unique_tags.update(tags)
+
+    categories_with_images = []
+    used_recipe_ids = set()
+
+    # 2. Filter the tags
+    filtered_tags = [
+        t for t in sorted(list(unique_tags))
+        if search_query in t.lower()
+    ]
+
+    for tag in filtered_tags:
+
+        sample_recipe = Recipe.query.filter(
+            Recipe.special_tag.ilike(f"%{tag}%"),
+            Recipe.id.notin_(used_recipe_ids)
+        ).first()
+
+        if not sample_recipe:
+
+            sample_recipe = Recipe.query.filter(
+                Recipe.special_tag.ilike(f"%{tag}%")
+            ).first()
+
+        if sample_recipe:
+
+            used_recipe_ids.add(sample_recipe.id)
+
+            categories_with_images.append({
+                'name': tag,
+                'image': sample_recipe.image
+            })
+
+    return render_template(
+        'category.html',
+        categories=categories_with_images,
+        search_query=search_query
+    )
+
+
+@app.route('/categories/<tag>')
+def category_results(tag):
+
+    search_query = request.args.get('search', '').strip()
+
+    recipes_query = Recipe.query.filter(
+        Recipe.special_tag.ilike(f"%{tag}%")
+    )
+
+    if search_query:
+
+        recipes_query = recipes_query.filter(
+            Recipe.name.ilike(f"%{search_query}%")
+        )
+
+    results = recipes_query.all()
+
+    return render_template(
+        'category_results.html',
+        results=results,
+        active_tag=tag,
+        search_query=search_query
+    )
+
+
+@app.route('/get_cat_suggestions')
+def get_cat_suggestions():
+
+    q = request.args.get('q', '').strip().lower()
+
+    if not q:
+        return jsonify([])
+
+    all_tags = set()
+
+    recipes = Recipe.query.with_entities(
+        Recipe.special_tag
+    ).all()
+
+    for r in recipes:
+
+        if r.special_tag:
+
+            tags = [
+                t.strip()
+                for t in r.special_tag.split(',')
+            ]
+
+            for tag in tags:
+
+                if q in tag.lower():
+                    all_tags.add(tag)
+
+    return jsonify(sorted(list(all_tags))[:10])
 @app.route('/all_recipes')
 def all_recipes():
     search_query = request.args.get('search', '').strip()

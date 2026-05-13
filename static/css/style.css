@@ -1006,7 +1006,7 @@ LAST PAGE BUTTON
 .menu-btn:hover {
     transform: scale(1.05);
 }
-<<<<<<< HEAD
+
 
 
 .header {
@@ -1018,20 +1018,14 @@ LAST PAGE BUTTON
             border-bottom: 2px solid #111;
         }
 
-        h1 {
-            font-family: 'Montserrat', sans-serif;
-            margin-top: 40px;
-            font-size: 2.5rem;
-        }
-
         .search-container {
-            position: relative;
-            display: inline-block;
-            margin-top: 20px;
+            position: relative !important;
+            display: inline-block !important;
+            margin-top: 20px !important;
         }
 
         .search-box {
-            width: 450px;
+            width: 450px ;
             padding: 15px 25px;
             border-radius: 50px;
             border: 2px solid #111;
@@ -1215,21 +1209,21 @@ LAST PAGE BUTTON
         }
 
         .tag { 
-            background: #fff; 
-            border: 2px solid #111; 
-            padding: 10px 20px; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            font-size: 1rem; 
-            color: #111; 
-            box-shadow: 4px 4px 0px #eee; 
-            transition: all 0.2s ease; 
-            cursor: pointer; 
+            background: #fff !important ; 
+            border: 2px solid #111 !important; 
+            padding: 10px 20px !important; 
+            border-radius: 12px !important; 
+            font-weight: bold !important; 
+            font-size: 1rem !important; 
+            color: #111 !important; 
+            box-shadow: 4px 4px 0px #eee !important; 
+            transition: all 0.2s ease !important; 
+            cursor: pointer !important; 
         }
         
         .tag:hover { 
-            transform: translate(-2px, -2px); 
-            box-shadow: 5px 5px 0px #f4c542; 
+            transform: translate(-2px, -2px) !important; 
+            box-shadow: 5px 5px 0px #f4c542 !important; 
         }
 
 
@@ -1239,7 +1233,7 @@ LAST PAGE BUTTON
         }
 
         h1 {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Fredoka', sans-serif;
             font-weight: 700;
             font-size: 3rem;
             margin-bottom: 15px;
@@ -1271,6 +1265,8 @@ LAST PAGE BUTTON
             border-bottom: 2px solid #f4c542;
             padding-bottom: 5px;
         }
+
+        
 
         .tag-container {
             display: flex;
@@ -1428,14 +1424,20 @@ LAST PAGE BUTTON
             padding: 20px;
         }
 
+        
+
+
+
         .meal-category {
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            color: #d32f2f;
-            letter-spacing: 2px;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 0.9rem !important; /* Slightly bigger */
+    font-weight: 800 !important; /* Extra bold */
+    color: #d32f2f !important; /* That deep red color */
+    letter-spacing: 2px !important; /* Spaced out like the image */
+    text-transform: uppercase !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
 
         .recipe-title {
             display: block;
@@ -1579,6 +1581,75 @@ LAST PAGE BUTTON
     border-bottom: none;
 }
 
+/* 1. MAKE THE "BROWSE..." SUBTEXT BIGGER & CLEANER */
+.header-subtext, 
+.header-subtext strong {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 1.1rem !important; /* Made it a bit bigger */
+    font-weight: 500 !important; /* Medium weight for readability */
+    color: #333 !important;
+    margin-top: 10px !important;
+    display: block !important;
+}
+
+/* 2. MAKE THE FILTER PILLS ("ALL", "SPICY", ETC.) MATCH */
+.filter-pill {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 0.9rem !important; /* Increased size */
+    font-weight: 700 !important; /* Kept bold for the "button" look */
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 8px 20px !important; /* More breathing room */
+    border: 2px solid #111 !important;
+    border-radius: 50px !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Ensure the active pill stays bold and visible */
+.filter-pill.active {
+    background-color: #111 !important;
+    color: white !important;
+}
+
+/* 3. QUICK FIX FOR THE SEARCH BOX TYPE STYLE (AS DISCUSSED) */
+input#recipeSearch.search-box-bold {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 0.95rem !important;
+}
+    /* 1. FORCE THE SEARCH INPUT TEXT TO BE THIN/NORMAL */
+    input#recipeSearch.search-box-bold,
+    .search-box-bold {
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 400 !important; /* Forces NO BOLD */
+        font-size: 0.95rem !important; /* Smaller size from image_841c12.jpg */
+        color: #111 !important;
+        -webkit-appearance: none !important; /* Removes mobile browser styling */
+    }
+
+    /* 2. FORCE THE DROPDOWN ITEMS TO BE THIN/NORMAL */
+    .suggestion-item,
+    .suggestion-item * {
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 400 !important; /* Forces everything in dropdown to be thin */
+        font-size: 0.95rem !important;
+    }
+
+    /* 3. KEEP THE PURPLE HIGHLIGHTS BUT REMOVE BOLDING */
+    .suggestion-item span, 
+    .suggestion-item b, 
+    .suggestion-item strong {
+        color: #8a70d6 !important; /* The purple from image_841839.jpg */
+        font-weight: 400 !important; /* Strictly forces thin weight */
+        font-style: normal !important;
+    }
+
+    /* 4. FIX THE PLACEHOLDER */
+    .search-box-bold::-webkit-input-placeholder { font-weight: 400 !important; font-family: 'Montserrat' !important; }
+    .search-box-bold::-moz-placeholder { font-weight: 400 !important; font-family: 'Montserrat' !important; }
+    .search-box-bold:-ms-input-placeholder { font-weight: 400 !important; font-family: 'Montserrat' !important; }
+
+
     .all-recipes-grid {
     transition: opacity 0.3s ease-in-out;
 }
@@ -1622,22 +1693,22 @@ LAST PAGE BUTTON
 
 
 .input-sticker-wrapper {
-    position: relative;
-    display: flex; 
-    align-items: center; 
-    width: 500px; 
-    margin: 0 auto 20px auto; 
+    position: relative !important;
+    display: flex !important; 
+    align-items: center !important; 
+    width: 500px !important; 
+    margin: 0 auto 20px auto !important; 
 }
 
 .search-box-bold {
-    width: 100%; 
-    padding: 12px 55px 12px 25px; 
-    border: 3px solid #111; 
-    border-radius: 50px; 
-    font-size: 1.1rem;
-    outline: none;
-    background: white;
-    box-shadow: 4px 4px 0px #000; 
+    width: 100% !important; 
+    padding: 12px 55px 12px 25px !important; 
+    border: 3px solid #111 !important; 
+    border-radius: 50px !important; 
+    font-size: 1.1rem !important;
+    outline: none !important;
+    background: white !important;
+    box-shadow: 4px 4px 0px #000 !important; 
 }
 
 
@@ -1816,12 +1887,12 @@ LAST PAGE BUTTON
 
         
 .form-content-wrapper {
-    width: 100%;
-    max-width: 500px; 
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    width: 100% !important;
+    max-width: 500px !important; 
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
 }
 
 
@@ -1871,6 +1942,142 @@ LAST PAGE BUTTON
     margin-top: -5px; 
 }
 
+h1 {
+    margin-top: 50px !important; 
+    text-align: center !important;
+}
+
+
+.header-description {
+    margin-bottom: 30px !important;
+    text-align: center !important;
+}
+
+
+.search-container{
+    width: 650px !important;
+    max-width: 90% !important;
+    margin: 0 auto !important;
+    position: relative !important;
+}
+
+
+
+
+.search-box:focus{
+    outline: none !important;
+    box-shadow: none !important;
+    border: 3px solid black !important;
+    background: #f5f5f5 !important;
+    box-shadow: 0 4px 0 black !important;
+}
+
+
+.search-box {
+    width: 100% !important;
+    height: 48px !important; 
+    padding: 0 90px 0 25px !important;
+    
+    border-radius: 40px!important; 
+    border: 3px solid black!important;
+    
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 400 !important; 
+    font-size: 0.9rem !important;
+    background: #f5f5f5 !important;
+    
+    outline: none !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+
+#clearSearch {
+    position: absolute !important;
+    right: 55px !important; 
+    top: 50% !important;
+    transform: translateY(-80%) !important;
+    
+    display: none ; 
+    align-items: center !important;
+    justify-content: center !important;
+    
+    width: 24px !important;
+    height: 24px !important;
+    
+    font-size: 1.2rem !important;
+    color: #888 !important;
+    cursor: pointer!important;
+    z-index: 10 !important;
+    line-height: 1 !important;
+}
+
+
+.search-icon-btn {
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+
+
+    transform: translateY(-80%) !important;
+
+    width: 32px !important;
+    height: 32px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+
+    font-size: 1.35rem !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    line-height: 1 !important;
+}
+
+.suggestions-box{
+    width: 100% !important;
+    max-height: 320px !important;
+    overflow-y: auto !important;
+
+    position: absolute !important;
+    top: 52px !important;
+    left: 0 !important;
+
+    background: #f5f5f5 !important;
+
+    border-left: 2px solid #bdbdbd !important;
+    border-right: 2px solid #bdbdbd !important;
+    border-bottom: 2px solid #bdbdbd !important;
+
+    border-top: none !important;  
+
+    border-radius: 0 0 18px 18px !important;
+
+    box-sizing: border-box !important;
+    z-index: 999 !important;
+
+    display: none;
+}
+
+
+.suggestion-item{
+    padding: 16px 18px !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+
+    border-bottom: 1px solid #d3d3d3 !important;
+}
+
+.suggestion-item:hover{
+    background: #ececec !important;
+}
 
 .suggestion-item {
     padding: 15px 20px;
@@ -1905,13 +2112,17 @@ LAST PAGE BUTTON
 }
 
 .search-container {
-    position: relative;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 500px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    display: inline-block !important;
+    margin-top: 20px !important;
     border-bottom: none !important; 
     box-shadow: none !important;
 }
+
 
 .search-box {
     width: 100%;
@@ -2006,69 +2217,10 @@ LAST PAGE BUTTON
     margin-bottom: 30px;
     font-weight: 500;
 }
+ 
 
-.custom-modal {
-        display: none;
-        position: fixed;
-        z-index: 2000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(8px);
-    }
-    .modal-content {
-        background: #ffffff;
-        margin: 12% auto;
-        padding: 40px 30px;
-        border-radius: 24px;
-        width: 90%;
-        max-width: 380px;
-        text-align: center;
-        border: 2px solid black; 
-        box-shadow: 0 0 20px rgba(255, 193, 7, 0.2), 0 20px 40px rgba(0,0,0,0.2);
-        animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes modalPop {
-        from { transform: scale(0.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-    .modal-icon { font-size: 3rem; margin-bottom: 15px; }
-    .modal-content h3 { font-family: 'Montserrat', sans-serif; margin-bottom: 10px; color: #333; }
-    .modal-content p { color: #666; line-height: 1.5; font-size: 1.05rem; }
-    
-    .modal-buttons {
-        margin-top: 30px;
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-    }
-    .modal-btn {
-        flex: 1;
-        padding: 14px;
-        border-radius: 14px;
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 1rem;
-        transition: all 0.2s ease;
-    }
-    .modal-btn.yes {
-        background: #ffc107;
-        color: #000;
-        border: 2px solid black; 
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-    }
-    .modal-btn.no {
-        background: #f1f3f5;
-        color: #555;
-        border: 2px solid black; 
-    }
-    .modal-btn:hover {
-        transform: translateY(-3px);
-        opacity: 0.9;
-    }
-=======
+
+
 .recipe-slider {
     text-align: center;
     font-family: 'Fredoka', sans-serif;
@@ -3089,4 +3241,4 @@ input:focus, textarea:focus, select:focus {
     justify-content: space-between;
     margin-top: 10px;
 }
->>>>>>> xinfei-branch
+
