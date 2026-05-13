@@ -25,50 +25,29 @@
 
         <div class="slider" id="slider">
         
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f1.jpg') }}">
-                    <div class="saved-tag">💾 120 saved</div>
-                </div>
-                <p>Sweet Apples Squares</p>
-            </div>
+            {% for recipe in popular_recipes %}
 
             <div class="home-card">
+
                 <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f2.jpg') }}">
-                    <div class="saved-tag">💾 70 saved</div>
+
+                    {% if recipe.image and recipe.image.startswith('http') %}
+                        <img src="{{ recipe.image }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=recipe.image or 'placeholder.png') }}">
+                    {% endif %}
+
+                    <div class="saved-tag">
+                        💾 {{ recipe.saved_count }} saved
+                    </div>
+
                 </div>
-                <p>Chicken Adobo</p>
+
+                <p>{{ recipe.name }}</p>
+
             </div>
 
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f3.jpg') }}">
-                    <div class="saved-tag">💾 10 saved</div>
-                </div>
-                <p>Cinanamon Chicken Curry</p>
-            </div>
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f4.jpg') }}">
-                    <div class="saved-tag">💾 90 saved</div>
-                </div>
-                <p>Chickpea stew</p>
-            </div>
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f5.jpg') }}">
-                    <div class="saved-tag">💾 70 saved</div>
-                </div>
-                <p>Rainbow Salad</p>
-            </div>
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f5.jpg') }}">
-                    <div class="saved-tag">💾 70 saved</div>
-                </div>
-                <p>Avocado Toast</p>
-            </div>
+            {% endfor %}
         </div>
         <button class="slide-btn left" onclick="slideLeft()">‹</button>
         <button class="slide-btn right" onclick="slideRight()">›</button>

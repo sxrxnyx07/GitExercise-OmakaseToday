@@ -103,6 +103,14 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS search_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        keyword TEXT,
+        searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     conn.commit()
     conn.close()
 
@@ -132,7 +140,40 @@ add_reset_columns()
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
-    return render_template("home.html")
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT recipe_id, COUNT(*) as total_saved
+        FROM saved_recipes
+        GROUP BY recipe_id
+        ORDER BY total_saved DESC
+        LIMIT 6
+    """)
+
+    popular_data = c.fetchall()
+
+    conn.close()
+
+    popular_recipes = []
+
+    for recipe_id, total_saved in popular_data:
+
+        recipe = Recipe.query.get(recipe_id)
+
+        if recipe:
+            popular_recipes.append({
+                "id": recipe.id,
+                "name": recipe.name,
+                "image": recipe.image,
+                "saved_count": total_saved
+            })
+
+    return render_template(
+        "home.html",
+        popular_recipes=popular_recipes
+    )
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -236,11 +277,50 @@ def profile():
     """, (email,))
     saved_ids = [row[0] for row in c.fetchall()]
 
+    # =========================
+    # recommendation logic
+    # =========================
+
+    c.execute("""
+        SELECT keyword, COUNT(*) as total
+        FROM search_history
+        WHERE user_email = ?
+        GROUP BY keyword
+        ORDER BY total DESC
+        LIMIT 3
+    """, (email,))
+
+    top_keywords = [row[0] for row in c.fetchall()]
+
     conn.close()
 
-    saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all() if saved_ids else []
-    suggested_recipes = Recipe.query.limit(3).all()
+    saved_recipes = Recipe.query.filter(
+        Recipe.id.in_(saved_ids)
+    ).all() if saved_ids else []
 
+    suggested_recipes = []
+
+    for keyword in top_keywords:
+        recipes = Recipe.query.filter(
+            Recipe.name.ilike(f"%{keyword}%")
+        ).limit(3).all()
+
+        for recipe in recipes:
+            if recipe.id not in saved_ids:
+                suggested_recipes.append(recipe)
+
+    # remove duplicates
+    unique_recipes = []
+    seen_ids = set()
+
+    for recipe in suggested_recipes:
+        if recipe.id not in seen_ids:
+            unique_recipes.append(recipe)
+            seen_ids.add(recipe.id)
+
+    suggested_recipes = unique_recipes[:6]
+    if not suggested_recipes:
+        suggested_recipes = Recipe.query.limit(6).all()
     return render_template(
         "profile.html",
         username=user[0],
@@ -757,7 +837,7 @@ def inject_notifications():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # 取最近通知
+
     c.execute("""
         SELECT message, is_read, created_at
         FROM notifications
@@ -768,10 +848,9 @@ def inject_notifications():
 
     rows = c.fetchall()
 
-    # 🔥 分组（重点）
-    new_notifs = [n for n in rows if n[1] == 0]  # 未读
-    old_notifs = [n for n in rows if n[1] == 1]  # 已读
-
+    # 
+    new_notifs = [n for n in rows if n[1] == 0]  
+    old_notifs = [n for n in rows if n[1] == 1]  
     # unread count（红点）
     c.execute("""
         SELECT COUNT(*) FROM notifications
@@ -856,7 +935,7 @@ def delete_my_account():
         # send email BEFORE delete
         msg = Message(
             subject="Your account has been deleted",
-            sender=app.config['MAIL_USERNAME'],   # ✅ 加这一行
+            sender=app.config['MAIL_USERNAME'],   # 
             recipients=[email]
         )
         msg.body = f"""
@@ -926,8 +1005,20 @@ def all_recipes():
         query = query.filter(Recipe.flavor_type == active_flavor.capitalize())
 
     if search_query:
-        
+
         query = query.filter(Recipe.name.ilike(f"%{search_query}%"))
+
+        if "user" in session:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+
+            c.execute("""
+                INSERT INTO search_history (user_email, keyword)
+                VALUES (?, ?)
+            """, (session["user"], search_query))
+
+            conn.commit()
+            conn.close()
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
