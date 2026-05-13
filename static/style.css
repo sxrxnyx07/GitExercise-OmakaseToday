@@ -1126,32 +1126,25 @@ button:disabled {
 
 .subtitle1 {
     font-size: 20px;
-
-    font-family: 'Trebuchet MS', sans-serif;
-
-    color: #5f5f5f;
-
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+    color: #5303a2;
     line-height: 1.8;
-
     margin-bottom: 5px;
 }
 
 .subtitle2 {
     font-size: 34px;
-
     font-family: Georgia, serif;
-
     font-weight: bold;
-
     text-align: center;
-
     color: #5c3d2e;
-
     letter-spacing: 2px;
-
     text-shadow: 1px 2px 3px rgba(0,0,0,0.12);
-
-    margin-bottom: 10px;
+    margin-bottom: -50px;
+    text-decoration: underline;
+    text-decoration-color: #000;
+    text-underline-offset: 3px;
 }
 
 .randompage-container {
@@ -1186,8 +1179,8 @@ button:disabled {
 }
 
 .gacha-img1 {
-    width: 600px;
-    height: 600px;
+    width: 550px;
+    height: 550px;
     object-fit: contain;
     margin-top: -30px;
 }
