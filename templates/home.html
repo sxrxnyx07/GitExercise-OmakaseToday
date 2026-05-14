@@ -4,11 +4,22 @@
 
 {% block content %}
 <div class="home-container">
+       <!-- FLOATING EMOJIS -->
+    <div class="floating floating1">🍣</div>
+    <div class="floating floating2">🥗</div>
+    <div class="floating floating3">🍕</div>
+    <div class="floating floating4">🥞</div>
+    <div class="hero-text">
+        <h1 class="home-title">
+            Discover Your Next
+            <span>Favorite Meal</span>
+        </h1>
 
-    <h1 class="home-title">
-        What should I eat <span>today?</span>
-    </h1>
-
+        <p class="home-subtitle">
+            Explore delicious recipes, save your favorites,
+            and cook with confidence.
+        </p>
+    </div>
     <div class="home-image-wrapper">
         <img id="foodImage" src="{{ url_for('static', filename='css/picture/dishclose.png') }}">
         <button class="lid-btn" onclick="liftLid()">🍽 Lift the lid</button>
@@ -25,50 +36,33 @@
 
         <div class="slider" id="slider">
         
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f1.jpg') }}">
-                    <div class="saved-tag">💾 120 saved</div>
-                </div>
-                <p>Sweet Apples Squares</p>
-            </div>
+        {% for recipe in popular_recipes %}
+
+        <a href="/recipe/{{ recipe.id }}" class="home-card-link">
 
             <div class="home-card">
+
                 <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f2.jpg') }}">
-                    <div class="saved-tag">💾 70 saved</div>
+
+                    {% if recipe.image and recipe.image.startswith('http') %}
+                        <img src="{{ recipe.image }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=recipe.image or 'placeholder.png') }}">
+                    {% endif %}
+
+                    <div class="saved-tag">
+                        ❤ {{ recipe.saved_count }} saved
+                    </div>
+
                 </div>
-                <p>Chicken Adobo</p>
+
+                <span class="recipe-title">{{ recipe.name }}</span>
+
             </div>
 
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f3.jpg') }}">
-                    <div class="saved-tag">💾 10 saved</div>
-                </div>
-                <p>Cinanamon Chicken Curry</p>
-            </div>
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f4.jpg') }}">
-                    <div class="saved-tag">💾 90 saved</div>
-                </div>
-                <p>Chickpea stew</p>
-            </div>
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f5.jpg') }}">
-                    <div class="saved-tag">💾 70 saved</div>
-                </div>
-                <p>Rainbow Salad</p>
-            </div>
-            <div class="home-card">
-                <div class="card-img-wrapper">
-                    <img src="{{ url_for('static', filename='css/picture/f5.jpg') }}">
-                    <div class="saved-tag">💾 70 saved</div>
-                </div>
-                <p>Avocado Toast</p>
-            </div>
+        </a>
+
+        {% endfor %}
         </div>
         <button class="slide-btn left" onclick="slideLeft()">‹</button>
         <button class="slide-btn right" onclick="slideRight()">›</button>
@@ -112,7 +106,7 @@
 
         <p class="preview-note">Watch how it works 👇</p>
 
-        <a href="/spin" class="feature-btn">Try the Spinner →</a>
+        <a href="" class="feature-btn">Try the Spinner →</a>
     </div>
 </div>
 <div class="feature-block search-block">

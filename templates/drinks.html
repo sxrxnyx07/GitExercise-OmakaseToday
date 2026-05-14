@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Gacha Recipe System</title>
+{% extends "base.html" %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% block title %}Drinks | Omakase Today{% endblock %}
 
-<body>
+{% block content %}
 
 <div class="topbar">
     <a href="/breakfast">Breakfast</a>
@@ -316,6 +311,4 @@ function backToAllRecipes() {
 }
 
 </script>
-
-</body>
-</html>
+{% endblock %}

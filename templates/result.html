@@ -5,17 +5,7 @@
 {% block content %}
 <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 
-<div id="loginModal" class="custom-modal">
-    <div class="modal-content">
-        <div class="modal-icon">🔒</div>
-        <h3>Login Required</h3>
-        <p>Login to save recipes.<br>Go to login page?</p>
-        <div class="modal-buttons">
-            <button class="modal-btn yes" onclick="redirectToLogin()">Yes</button>
-            <button class="modal-btn no" onclick="closeModal()">No</button>
-        </div>
-    </div>
-</div>
+
 
 <div class="page-header" style="text-align: center;">
     <h1>🍳 Omakase Today</h1>
@@ -43,9 +33,16 @@
     {% if results %}
         {% for r in results %}
         <div class="recipe-card {% if loop.index > 6 %}hidden-card{% endif %}" 
-             style="{% if loop.index > 6 %}display: none;{% endif %}">
+            style="{% if loop.index > 6 %}display: none;{% endif %}">
             <div class="image-container">
-                <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
+                <button class="heart-btn
+                    {% if r.id in saved_ids %}saved{% endif %}"
+                    data-id="{{ r.id }}"
+                    data-name="{{ r.name }}"
+                    data-image="{{ r.image }}"
+                    onclick="toggleSave(this)">
+                    ❤
+                </button>
                 <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
             </div>
             
@@ -93,7 +90,10 @@
         {% endfor %}
     {% else %}
         <div class="empty-container" style="text-align: center; margin-top: 50px; width: 100%;">
-            <h3 style="font-size: 2.5rem; color: #444;">No matches found! 😕</h3>
+            <h2 class="no-match-title">😕 No Matches Found !</h2>
+            <p style="font-weight: 50; color: #222 !important;"> 
+        Try removing some ingredients to see more results. 
+    </p>
         </div>
     {% endif %}
 </div>
@@ -119,28 +119,38 @@
         window.location.href = "{{ url_for('login') }}";
     }
 
-    function toggleSave(recipeId, button) { 
-        if (!button) return;
+    async function toggleSave(button) {
 
-        fetch('/toggle-save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recipe_id: recipeId })
-        })
-        .then(response => {
-            if (response.status === 401) {
-                
+        const recipeId = button.dataset.id;
+        const isSaved = button.classList.contains("saved");
+
+        button.disabled = true;
+
+        const url = isSaved
+            ? `/unsave-recipe/${recipeId}`
+            : `/save-recipe/${recipeId}`;
+
+        try {
+
+            const res = await fetch(url);
+
+            // not logged in
+            if (res.redirected) {
                 loginModal.style.display = 'block';
+                button.disabled = false;
                 return;
             }
-            if (response.ok) {
-                button.classList.toggle('saved');
+
+            if (res.ok) {
+                button.classList.toggle("saved");
             }
-        })
-        .catch(error => console.error('Error:', error));
+
+        } catch (error) {
+            console.error(error);
+        }
+
+        button.disabled = false;
     }
-
-
     window.onclick = function(event) {
         if (event.target == loginModal) closeModal();
     }

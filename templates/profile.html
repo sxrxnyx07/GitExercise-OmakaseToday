@@ -91,31 +91,40 @@
         {% if saved_recipes and saved_recipes|length > 0 %}
 
             {% for recipe in saved_recipes %}
-            <div class="ritual-card" id="card-{{ recipe.id }}">
+            <a href="/recipe/{{ recipe.id }}" class="ritual-link">
+                <div class="ritual-card" id="card-{{ recipe.id }}">
 
-                <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
-                <div class="card-meta">
+                    <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
 
-                    <div class="meal-category">
-                        {{ recipe.meal_category }}
-                    </div>
+                    <div class="card-meta">
 
-                    <span class="recipe-title">
-                        {{ recipe.name }}
-                    </span>
+                        <div class="meal-category">
+                            {{ recipe.meal_category }}
+                        </div>
 
-                    <!-- ⭐ RATING -->
-                    {% if recipe.rating %}
-                    <div class="rating-stars">
-                        {% for i in range(5) %}
-                            <span class="{% if i < recipe.rating %}star-filled{% else %}star-empty{% endif %}">
-                                ★
+                        <span class="recipe-title">
+                            {{ recipe.name }}
+                        </span>
+
+                        <div class="rating-stars">
+
+                            {% set current_rating = recipe.rating|default(0)|int %}
+
+                            {% for i in range(5) %}
+                                <span class="{% if i < current_rating %}star-filled{% else %}star-empty{% endif %}">
+                                    ★
+                                </span>
+                            {% endfor %}
+
+                            <span class="rating-count">
+                                {{ recipe.rating|default('0.0') }}
                             </span>
-                        {% endfor %}
+
+                        </div>
                     </div>
-                    {% endif %}
+
                 </div>
-            </div>
+            </a>
             {% endfor %}
 
         {% else %}
@@ -139,16 +148,16 @@
     </div>
 
 
-
-    <div class="suggested-section">
-
-        <div class="suggested-header">
-            <h3>Recommended for You</h3>
-            <span class="suggested-sub">Picked based on your preferences</span>
-        </div>
-
-        <div class="suggested-recipes">
-            {% for recipe in suggested_recipes %}
+<div class="suggested-section">
+    <div class="suggested-header">
+        <h3>Recommended for You</h3>
+        <span class="suggested-sub">
+            Picked based on your preferences
+        </span>
+    </div>
+    <div class="suggested-recipes">
+        {% for recipe in suggested_recipes %}
+        <a href="/recipe/{{ recipe.id }}" class="recipe-link">
             <div class="recipe-card">
                 <div class="image-container">
                     <button class="heart-btn
@@ -156,33 +165,39 @@
                         data-id="{{ recipe.id }}"
                         data-name="{{ recipe.name }}"
                         data-image="{{ recipe.image }}"
-                        onclick="toggleSave(this)"
+                        onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)"
                         {% if recipe.id in saved_ids %}disabled{% endif %}>
-                        
                         ❤
                     </button>
-
-
                     <img src="{{ recipe.image if recipe.image and recipe.image.startswith('http') else url_for('static', filename=recipe.image or 'placeholder.png') }}"
                         alt="{{ recipe.name }}">
                 </div>
-
                 <div class="card-meta">
-                    <div class="meal-category">{{ recipe.meal_category }}</div>
+                    <div class="meal-category">
+                        {{ recipe.meal_category }}
+                    </div>
                     <span class="recipe-title">
                         {{ recipe.name }}
                     </span>
-                    {% if recipe.rating %}
                     <div class="rating-stars">
+                        {% set current_rating = recipe.rating|default(0)|int %}
                         {% for i in range(5) %}
-                            <span class="{% if i < recipe.rating %}star-filled{% else %}star-empty{% endif %}">★</span>
+                            <span class="{% if i < current_rating %}star-filled{% else %}star-empty{% endif %}">
+                                ★
+                            </span>
                         {% endfor %}
+                        <span class="rating-count">
+                            {{ recipe.rating|default('0.0') }}
+                        </span>
                     </div>
-                    {% endif %}
+                    <div style="margin-top: 15px;">
+                        <a href="/recipe/{{ recipe.id }}" class="btn-return" style="margin: 0; padding: 10px 25px; font-size: 1rem;">View Recipe</a>
+                    </div>
                 </div>
             </div>
-            {% endfor %}
-        </div>
+        </a>
+        {% endfor %}
+    </div>
     </div>
 </section>
 <!-- DELETE ACCOUNT MODAL -->

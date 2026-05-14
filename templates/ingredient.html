@@ -4,11 +4,14 @@
 
 {% block content %}
 
+
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     
 
 <h1>🍳 Find Recipes by Ingredients</h1>
-<p class="header-description">Pick your ingredients and let us suggest the perfect dish for you! ✨</p>
+<p class="header-subtext">
+    <strong>Pick your ingredients and let us suggest the perfect dish for you! ✨</strong>
+    </p>
 
 {% if error %}
     <p style="color: #d32f2f; font-weight: bold;">{{ error }}</p>
