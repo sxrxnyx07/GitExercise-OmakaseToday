@@ -206,7 +206,7 @@ button:disabled {
 
     position: absolute;
 
-    top: 550px;   
+    top: 620px;   
     left: 50%;
     transform: translateX(-50%);
 
@@ -217,7 +217,7 @@ button:disabled {
 
 .ball.drop {
     opacity: 1;
-    transform: translate(-50%, 20px);
+    transform: translate(-50%, 30px);
     transition: all 0.5s ease;
 }
 

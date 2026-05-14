@@ -17,57 +17,67 @@
         >
     </div>
 
-    {% if saved_recipes and saved_recipes|length > 0 %}
+{% if saved_recipes and saved_recipes|length > 0 %}
 
-    <div class="saved-grid">
+<div class="saved-grid">
 
-        {% for recipe in saved_recipes %}
-        <div class="recipe-card">
+    {% for recipe in saved_recipes %}
 
-            <!-- IMAGE -->
-            <div class="image-container">
+    <div class="saved-card"
+         onclick="window.location.href='/recipe/{{ recipe.id }}'">
 
-                <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
-                     alt="{{ recipe.name }}">
+        <!-- IMAGE -->
+        <div class="image-container">
 
-            </div>
-
-            <!-- CONTENT -->
-            <div class="card-meta">
-
-                <div class="meal-category">
-                    {{ recipe.meal_category }}
-                </div>
-
-                <span class="recipe-title">
-                    {{ recipe.name }}
-                </span>
-
-                <!-- ⭐ RATING -->
-                {% if recipe.rating %}
-                <div class="rating-stars">
-                    {% for i in range(5) %}
-                        <span class="{% if i < recipe.rating %}star-filled{% else %}star-empty{% endif %}">
-                            ★
-                        </span>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                <!-- ❌ REMOVE BUTTON -->
-                <a href="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}"
-                   class="unsave-btn">
-                    Remove
-                </a>
-
-            </div>
+            <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
+                 alt="{{ recipe.name }}">
 
         </div>
-        {% endfor %}
+
+        <!-- CONTENT -->
+        <div class="card-meta">
+
+            <div class="meal-category">
+                {{ recipe.meal_category }}
+            </div>
+
+            <span class="recipe-title">
+                {{ recipe.name }}
+            </span>
+
+            <!-- ⭐ RATING -->
+            <div class="rating-stars">
+
+                {% set current_rating = recipe.rating|default(0)|int %}
+
+                {% for i in range(5) %}
+                    <span class="{% if i < current_rating %}star-filled{% else %}star-empty{% endif %}">
+                        ★
+                    </span>
+                {% endfor %}
+
+                <span class="rating-count">
+                    {{ recipe.rating|default('0.0') }}
+                </span>
+
+            </div>
+
+            <!-- ❌ REMOVE BUTTON -->
+            <a href="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}"
+               class="unsave-btn"
+               onclick="event.stopPropagation()">
+                Remove
+            </a>
+
+        </div>
 
     </div>
 
-    {% else %}
+    {% endfor %}
+
+</div>
+
+{% else %}
 
     <!-- EMPTY STATE -->
     <div class="empty-wrapper">
