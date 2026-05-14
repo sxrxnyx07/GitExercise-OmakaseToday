@@ -703,6 +703,7 @@ LAST PAGE BUTTON
     box-shadow: 6px 6px 0 #fbc02d;
     transition: all 0.25s ease;
     cursor: pointer;
+    height: 430px;
 }
 
 .ritual-card:hover {
@@ -723,6 +724,15 @@ LAST PAGE BUTTON
     color: #000000;
     position: relative;
     margin-bottom: 4px;
+}
+.ritual-link{
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.ritual-link *{
+    text-decoration: none;
 }
 /* SUGGESTED SECTION */
 .suggested-section{
@@ -853,13 +863,23 @@ LAST PAGE BUTTON
     box-shadow: 6px 6px 0 #fbc02d;
     transition: all 0.25s ease;
     cursor: pointer;
+    height: 500px;  
+
 }
 
 .recipe-card:hover {
     transform: translate(-3px, -3px);
     box-shadow: 10px 10px 0 #fbc02d;
 }
+.recipe-link{
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
 
+.recipe-link *{
+    text-decoration: none;
+}
 /* ===== IMAGE ===== */
 .image-container {
     width: 100%;
@@ -931,33 +951,105 @@ LAST PAGE BUTTON
 /* =========================
    HOME PAGE
 ========================= */
-.home-container {
+.home-container{
+    position: relative;
     min-height: 100vh;
+    padding: 10px 8%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+
+    background:
+        radial-gradient(circle at top left, #ffe7c7 0%, transparent 20%),
+        radial-gradient(circle at bottom right, #fff0d6 0%, transparent 25%),
+        #fffaf5;
+
+    overflow: hidden;
+}
+.floating{
+    position: absolute;
+    font-size: 2.5rem;
+    animation: float 4s ease-in-out infinite;
+    z-index: 0;
+    opacity: 0.9;
 }
 
-/* title */
-.home-title {
-    font-size: 3.5rem;
-    font-weight: 900;
-    margin-bottom: 40px;
+/* INDIVIDUAL POSITIONS */
+.floating1{
+    top: 80px;
+    left: 8%;
 }
 
-.home-title span {
-    color: orange;
+.floating2{
+    top: 120px;
+    right: 10%;
+    animation-delay: 1s;
 }
 
+.floating3{
+    bottom: 80px;
+    left: 15%;
+    animation-delay: 2s;
+}
+
+.floating4{
+    bottom: 120px;
+    right: 18%;
+    animation-delay: 1.5s;
+}
+
+/* FLOAT ANIMATION */
+@keyframes float{
+    0%{
+        transform: translateY(0px);
+    }
+
+    50%{
+        transform: translateY(-15px);
+    }
+
+    100%{
+        transform: translateY(0px);
+    }
+}
+.hero-text{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.home-title{
+    font-size: 5rem;
+    line-height: 1;
+    font-weight: 800;
+    color: #2c1b12;
+    max-width: 700px;
+    margin: 0 0 20px 0;
+    z-index: 2;
+}
+
+.home-title span{
+    color: #f4a940;
+}
+
+.home-subtitle{
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #666;
+    max-width: 500px;
+    margin: 0 0 20px 50px;
+    z-index: 2;
+}
 /* image wrapper */
-.home-image-wrapper {
-    position: relative;
+.home-image-wrapper{
+    position: absolute;
     display: inline-block;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
-/* circular image */
-.home-image-wrapper img {
+.home-image-wrapper img{
     width: 320px;
     height: 320px;
     border-radius: 50%;
@@ -970,7 +1062,11 @@ LAST PAGE BUTTON
     transform: scale(1.05);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
 }
-
+.home-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
 /* LIFT THE LID BUTTON */
 .lid-btn {
     position: absolute;
@@ -992,7 +1088,7 @@ LAST PAGE BUTTON
 
 /* ACCESS MENU BUTTON */
 .menu-btn {
-    margin-top: 60px;
+    margin-top: 10px;
     display: inline-block;
     background: black;
     color: white;
@@ -1001,13 +1097,12 @@ LAST PAGE BUTTON
     text-decoration: none;
     font-size: 18px;
     transition: 0.3s;
+    margin-left: 200px;
 }
 
 .menu-btn:hover {
     transform: scale(1.05);
 }
-
-
 
 .header {
             background: white;
@@ -2218,17 +2313,18 @@ h1 {
     font-weight: 500;
 }
  
-
-
-
 .recipe-slider {
     text-align: center;
-    font-family: 'Fredoka', sans-serif;
     background: rgb(255, 238, 163);
     padding: 30px 10px;
 }
 .recipe-slider h2 {
     margin-bottom: 20px;
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #ff9800, #ff5722);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .slider-container {
@@ -2256,9 +2352,17 @@ h1 {
     border-radius: 12px;
     padding: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    height: 270px;
 }
+.recipe-card,
+.home-card{
+    transition: all 0.3s ease;
+}
+
+.recipe-card:hover,
 .home-card:hover{
-    transform: translateY(-5px);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
 }
 
 .home-card img {
@@ -2298,7 +2402,7 @@ h1 {
     background: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 4px 8px;
-    font-size: 12px;
+    font-size: 18px;
     border-radius: 6px;
 }
 
@@ -2718,6 +2822,7 @@ h1 {
     height: 600px;
     padding-left: 100px;
 }
+
 /* TEXT */
 .feature-text{
     flex: 1;
@@ -2977,7 +3082,7 @@ h1 {
 
 /* ===== CARD ===== */
 .saved-card {
-    width: 260px;
+    width: 300px;
     background: #ffffff;
     border: 2px solid #000;
     border-radius: 16px;
@@ -2985,6 +3090,7 @@ h1 {
     box-shadow: 6px 6px 0 #fbc02d;
     transition: all 0.25s ease;
     cursor: pointer;
+    height: 500px;
 }
 
 .saved-card:hover {
@@ -2995,7 +3101,7 @@ h1 {
 /* IMAGE */
 .saved-card img{
     width: 100%;
-    height: 200px;
+    height: 250px;
     object-fit: cover;
 }
 .saved-card h3 {

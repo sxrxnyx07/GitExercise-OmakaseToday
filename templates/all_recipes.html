@@ -53,14 +53,7 @@
     {% for r in results %}
     <div class="recipe-card">
         <div class="image-container">
-            <button class="heart-btn
-                {% if r.id in saved_ids %}saved{% endif %}"
-                data-id="{{ r.id }}"
-                data-name="{{ r.name }}"
-                data-image="{{ r.image }}"
-                onclick="toggleSave(this)">
-                ❤
-            </button>
+            <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
             {% if r.image and r.image.startswith('http') %}
                 <img src="{{ r.image }}" alt="{{ r.name }}">
             {% else %}
@@ -135,24 +128,7 @@ window.addEventListener('click', function(event) {
         closeModal();
     }
 });
-async function toggleSave(button) {
 
-<<<<<<< HEAD
-    const recipeId = button.dataset.id;
-    const isSaved = button.classList.contains("saved");
-
-    button.disabled = true;
-
-    const url = isSaved
-        ? `/unsave-recipe/${recipeId}`
-        : `/save-recipe/${recipeId}`;
-
-    try {
-
-        const res = await fetch(url);
-        // not logged in
-        if (res.redirected) {
-=======
 function toggleSave(recipeId, button) {
     if (!button) return;
     
@@ -163,26 +139,18 @@ function toggleSave(recipeId, button) {
     })
     .then(response => {
         if (response.status === 401) {
->>>>>>> main
             loginModal.style.display = 'block';
-            button.disabled = false;
             return;
         }
-
-        if (res.ok) {
-            button.classList.toggle("saved");
+        if (response.ok) {
+            button.classList.toggle('saved');
+        } else {
+            console.error('Failed to save recipe');
         }
-
-    } catch (error) {
-        console.error(error);
-    }
-
-    button.disabled = false;
+    })
+    .catch(error => console.error('Fetch Error:', error));
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 (function() {
     const searchInput = document.getElementById('recipeSearch');
     const wrapper = document.querySelector('.input-sticker-wrapper');

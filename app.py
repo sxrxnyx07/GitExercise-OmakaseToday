@@ -986,10 +986,7 @@ def check_password():
         return {"valid": True}
     else:
         return {"valid": False}
-def get_saved_set(user_email):
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-
+    
 def get_saved_set(user_email):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -1264,7 +1261,9 @@ def search():
     )
 
 def get_db_connection():
-    conn = sqlite3.connect('omakase.db')
+    conn = sqlite3.connect(
+        os.path.join(BASE_DIR, 'omakase.db')
+    )
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -1413,5 +1412,6 @@ def test_foodtype():
     conn.close()
 
     return jsonify([dict(row) for row in rows])
+
 if __name__ == "__main__":
     app.run(debug=True)
