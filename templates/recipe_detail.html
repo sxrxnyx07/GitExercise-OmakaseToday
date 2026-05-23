@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Recipe</title>
+    <title>Recipe Detail | Omakase Today</title>
+
+    <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -21,7 +24,7 @@
     <div class="hero">
         <h1 class="hero-title">{{ recipe['name'].upper() }}</h1>
         <p class="hero-sub">FAST AND DELICIOUS FOR WHOLE FAMILY</p>
-        <p class="hero-sub small">LET’S DO IT TOGETHER ✨</p>
+        <p class="hero-sub small">LET'S DO IT TOGETHER ✨</p>
     </div>
 
     <!-- TOP GRID -->
