@@ -1000,26 +1000,32 @@ def get_saved_set(user_email):
     return {r["recipe_id"] for r in rows}
 
 
+from flask import request, render_template, jsonify, redirect, url_for
+
 @app.route('/categories')
 def category_index():
-
     search_query = request.args.get('search', '').strip().lower()
 
     # 1. Get all unique tags
     all_recipes = Recipe.query.with_entities(Recipe.special_tag).all()
-
     unique_tags = set()
 
     for r in all_recipes:
-
         if r.special_tag:
-
             tags = [
                 t.strip()
                 for t in r.special_tag.split(',')
             ]
-
             unique_tags.update(tags)
+
+    # --- NEW REDIRECT LOGIC FOR EXACT MATCHES ---
+    # If the user typed or selected an exact category name from the dropdown,
+    # send them straight to its specific results page instead of reloading this index.
+    if search_query:
+        for tag in unique_tags:
+            if search_query == tag.lower():
+                return redirect(url_for('category_results', tag=tag))
+    # --------------------------------------------
 
     categories_with_images = []
     used_recipe_ids = set()
@@ -1031,20 +1037,17 @@ def category_index():
     ]
 
     for tag in filtered_tags:
-
         sample_recipe = Recipe.query.filter(
             Recipe.special_tag.ilike(f"%{tag}%"),
             Recipe.id.notin_(used_recipe_ids)
         ).first()
 
         if not sample_recipe:
-
             sample_recipe = Recipe.query.filter(
                 Recipe.special_tag.ilike(f"%{tag}%")
             ).first()
 
         if sample_recipe:
-
             used_recipe_ids.add(sample_recipe.id)
 
             categories_with_images.append({
@@ -1061,7 +1064,6 @@ def category_index():
 
 @app.route('/categories/<tag>')
 def category_results(tag):
-
     search_query = request.args.get('search', '').strip()
 
     recipes_query = Recipe.query.filter(
@@ -1069,7 +1071,6 @@ def category_results(tag):
     )
 
     if search_query:
-
         recipes_query = recipes_query.filter(
             Recipe.name.ilike(f"%{search_query}%")
         )
@@ -1086,7 +1087,6 @@ def category_results(tag):
 
 @app.route('/get_cat_suggestions')
 def get_cat_suggestions():
-
     q = request.args.get('q', '').strip().lower()
 
     if not q:
@@ -1099,20 +1099,18 @@ def get_cat_suggestions():
     ).all()
 
     for r in recipes:
-
         if r.special_tag:
-
             tags = [
                 t.strip()
                 for t in r.special_tag.split(',')
             ]
 
             for tag in tags:
-
                 if q in tag.lower():
                     all_tags.add(tag)
 
     return jsonify(sorted(list(all_tags))[:10])
+
 @app.route('/all_recipes')
 def all_recipes():
     search_query = request.args.get('search', '').strip()

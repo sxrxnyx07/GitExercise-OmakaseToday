@@ -15,7 +15,7 @@
         <strong>Curated collections for every palate. Dive into the flavors of Omakase ✨</strong>
     </p>
     <div class="search-container-bold">
-        <form action="{{ url_for('all_recipes') }}" method="GET" class="search-form-bold" id="searchForm">
+        <form action="{{ url_for('category_index') }}" method="GET" class="search-form-bold" id="searchForm">
             
             <div class="input-sticker-wrapper" style="position: relative; display: flex; align-items: center;">
                 <input type="text" 
@@ -28,7 +28,7 @@
                        style="padding-right: 80px;"> 
                 
                 <span id="clearSearch" class="clear-btn" 
-                      style="position: absolute; right: 55px; cursor: pointer; display: none; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10;">
+                      style="position: absolute !important; right: 50px !important; top: 50% !important; transform: translateY(-50%) !important; display: none; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10000 !important; line-height: 1 !important; height: auto !important;">
                     ✖
                 </span>
 
@@ -52,7 +52,7 @@
         {% endfor %}
     {% else %}
         <div class="empty-container" style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">
-            <h2 style="color: #1a3a5f;">😕 No Matches Found!</h2>
+            <h2 style="color: #1a3a5f; border-bottom: none; text-decoration: none;">😕 No Matches Found!</h2>
             <p style="color: #666;">We couldn't find any category matching "{{ search_query }}".</p>
             <a href="{{ url_for('category_index') }}" style="color: red; font-weight: bold; text-decoration: underline;">Show All Categories</a>
         </div>
@@ -73,7 +73,7 @@
         wrapper.appendChild(suggestionsBox);
 
         function toggleClearBtn() {
-            clearBtn.style.display = searchInput.value.trim().length > 0 ? 'block' : 'none';
+            clearBtn.style.display = searchInput.value.trim().length > 0 ? 'flex' : 'none';
         }
 
         toggleClearBtn();
@@ -119,12 +119,15 @@
         });
 
         if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
+            // MODIFIED: Added e.preventDefault() and e.stopPropagation() so clicking hits the X instantly
+            clearBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 searchInput.value = '';
                 suggestionsBox.innerHTML = "";
                 suggestionsBox.style.display = "none";
                 toggleClearBtn();
-                searchInput.focus();
+                window.location.href = "{{ url_for('category_index') }}";
             });
         }
 
@@ -178,7 +181,7 @@ body { background-color: #fdfae5; }
     border: 3px solid #000;
     border-radius: 10px;
     box-shadow: 6px 6px 0px #000;
-    z-index: 9999 !important;
+    z-index: 9999 !important; /* This is 9999, so the X button is now 10000 to stay on top */
     display: none;
     max-height: 300px;
     overflow-y: auto;
@@ -197,12 +200,13 @@ body { background-color: #fdfae5; }
 
 .category-visual-grid {
     display: grid;
-    /* Fixed 4 columns */
-    grid-template-columns: repeat(4, 1fr); 
-    /* Centers the items if the last row is incomplete */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 250px)); 
     justify-content: center;
     gap: 40px;
     margin-top: 50px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .category-item { position: relative; z-index: 1; }
@@ -222,7 +226,7 @@ body { background-color: #fdfae5; }
 
 /* The Text Label Styling */
 .category-text {
-    display: inline-block; /* Required for transform and margin to work smoothly */
+    display: inline-block;
     font-weight: 800;
     font-size: 1.2rem;
     color: #1a3a5f;
@@ -231,8 +235,8 @@ body { background-color: #fdfae5; }
     font-family: 'Montserrat', sans-serif;
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: all 0.3s ease; /* Smooth transition for the hover effect */
-    border-bottom: 3px solid transparent; /* Hidden border that appears on hover */
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
 }
 
 /* Hover Effect: Card jumps and Text Underlines */
@@ -243,15 +247,15 @@ body { background-color: #fdfae5; }
 
 .category-item:hover .category-text {
     color: #000;
-    border-bottom: 3px solid #1a3a5f; /* Underline effect using border */
-    transform: translateY(-2px); /* Slight lift */
+    border-bottom: 3px solid #1a3a5f;
+    transform: translateY(-2px);
 }
 
 a { text-decoration: none; }
 
 @media (max-width: 900px) {
     .category-visual-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
     }
 }
 </style>
