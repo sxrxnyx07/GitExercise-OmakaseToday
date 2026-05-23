@@ -15,6 +15,16 @@
 
 {% block content %}
 
+<!-- Login Modal -->
+<div id="loginModal" class="modal" style="display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: white; padding: 28px; width: 400px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); text-align: center;">
+        <span onclick="closeModal()" style="float: right; font-size: 24px; cursor: pointer;">&times;</span>
+        <h2 style="margin-bottom: 15px;">🔐 Login Required</h2>
+        <p style="margin-bottom: 20px; color: #666;">Please login to save your favorite recipes!</p>
+        <button onclick="redirectToLogin()" style="padding: 12px 30px; background: #000; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer;">Go to Login →</button>
+    </div>
+</div>
+
 <div class="topbar">
     <a href="/breakfast" class="active">Breakfast</a>
     <a href="/lunch">Lunch</a>
@@ -35,7 +45,7 @@
 <div class="machine-wrapper">
 
     <img id="gachaImg" class="gacha-img fade-in"
-         src="{{ url_for('static', filename='image2/gacha1.png') }}">   <!-- GACHA IMAGE -->
+         src="{{ url_for('static', filename='image2/gacha1.png') }}">
 
     <div class="balls-inside" id="ballsInside"></div>
 
@@ -59,7 +69,6 @@
 
     </div>
 
-<!-- ⭐ 導航按鈕區（Home一直顯示，Back只在result時） -->
 <div class="nav-section">
     <a href="/" class="home-btn">🏠 Home</a>
     <div class="nav-actions" id="backActions">
@@ -71,6 +80,9 @@
     {% for r in recipes %}
 
 <div class="recipe-card small-card">
+
+    <!-- Updated heart button with toggleSave -->
+    <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
 
     <div class="image-container">
         <img src="{{ r['image'] }}">
@@ -132,7 +144,6 @@ window.onload = function () {
 
     let colors = ["red","yellow","green","blue","purple"];
 
-    // coordinate for balls
     let positions = [
         [-40, -40],
         [0, -60],
@@ -192,16 +203,13 @@ function spin() {
     button.disabled = true;
     warningMsg.innerText = "⚠️ Please wait, the machine is spinning... ";
 
-    // ⭐ reset ONLY state 
     ball.className = "ball";
 
-    // start animations
     gachaImg.classList.add("shake");
     inside.classList.add("spin-inside");
 
     resultBox.innerText = "Spinning...";
 
-    // ⭐ balls inside move up slightly
     miniBalls.forEach(b => {
         b.classList.remove("fall-down");
         b.classList.add("float-up");
@@ -209,19 +217,17 @@ function spin() {
 
     setTimeout(() => {
 
-        // balls drop back
         miniBalls.forEach(b => {
             b.classList.remove("float-up");
             b.classList.add("fall-down");
         });
 
-        // ⭐ generate result ball
         let randomColor = colors[Math.floor(Math.random() * colors.length)];
 
         ball.classList.add(randomColor);
         ball.classList.add("drop");
 
-        const category = "Breakfast"; // ⭐ 每个页面改这里
+        const category = "Breakfast";
 
         Promise.all([
             fetch('/random-recipe?category=' + category).then(res => res.json()),
@@ -239,7 +245,6 @@ function spin() {
 
                 let container = document.querySelector(".recipe-container");
 
-                // ⭐ 主结果（中间）
             let mainCard = `
                 <div class="main-result">
                     <div class="spin-winner-card pop">
@@ -262,9 +267,11 @@ function spin() {
                  </div>
             `;
 
-                // ⭐ 5个推荐
+                // Updated suggestion cards with heart button
                 let suggestionCards = listData.map(r => `
                     <div class="recipe-card small-card">
+
+                        <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('\${r.id}', this);">❤</button>
 
                         <div class="image-container">
                             <img src="${r.image}">
@@ -299,7 +306,6 @@ function spin() {
                     </div>
                 `).join('');
 
-                // ⭐ 最终结构
                 container.innerHTML = `
                     ${mainCard}
 
@@ -330,27 +336,69 @@ function backToAllRecipes() {
 
     let container = document.querySelector(".recipe-container");
 
-    // 恢復原本所有 recipes
     container.innerHTML = originalHTML;
 
     container.classList.remove("result-mode");
 
-    // 隱藏按鈕
     document.getElementById("backActions").classList.remove("show");
 
-    // reset UI
     document.getElementById("result").innerText =
         "Click spin to get your recipe 🍽️";
 
     document.getElementById("resultHint").style.opacity = 0;
 
-    // reset ball
     document.getElementById("ball").className = "ball";
 
-    // reset warning
     document.getElementById("warningMsg").innerText = "";
 }
 
+    // ===== Heart Button 功能 =====
+    const loginModal = document.getElementById('loginModal');
+
+    function closeModal() {
+        loginModal.style.display = 'none';
+    }
+
+    function redirectToLogin() {
+        window.location.href = "/login";
+    }
+
+    window.addEventListener('click', function(event) {
+        if (event.target == loginModal) {
+            closeModal();
+        }
+    });
+
+    function toggleSave(recipeId, button) {
+        if (!button) return;
+
+        console.log('Clicked! ID:', recipeId);
+        
+        fetch('/toggle-save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipe_id: recipeId })
+        })
+        .then(response => {
+            if (response.status === 401) {
+                loginModal.style.display = 'flex';
+                return;
+            }
+            if (response.ok) {
+                button.classList.toggle('saved');
+
+                // 改变爱心文字
+            if (button.classList.contains('saved')) {
+                button.innerHTML = '♥';
+            } else {
+                button.innerHTML = '❤';
+            }
+            } else {
+                console.error('Failed to save recipe');
+            }
+        })
+        .catch(error => console.error('Fetch Error:', error));
+    }
 </script>
 
 </body>
