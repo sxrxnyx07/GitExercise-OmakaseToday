@@ -1293,7 +1293,17 @@ def breakfast():
     ).fetchall()
 
     conn.close()
-    return render_template('breakfast.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'breakfast.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/lunch')
 def lunch():
@@ -1305,7 +1315,17 @@ def lunch():
     ).fetchall()
 
     conn.close()
-    return render_template('lunch.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'lunch.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/dinner')
 def dinner():
@@ -1317,7 +1337,17 @@ def dinner():
     ).fetchall()
 
     conn.close()
-    return render_template('dinner.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'dinner.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/dessert')
 def dessert():
@@ -1329,7 +1359,17 @@ def dessert():
     ).fetchall()
 
     conn.close()
-    return render_template('dessert.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'dessert.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/drinks')
 def drinks():
@@ -1341,7 +1381,17 @@ def drinks():
     ).fetchall()
 
     conn.close()
-    return render_template('drinks.html', recipes=recipes)
+    
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'drinks.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/random')
 def random_recipe():
@@ -1416,6 +1466,49 @@ def test_foodtype():
     conn.close()
 
     return jsonify([dict(row) for row in rows])
+
+@app.route("/toggle-save", methods=["POST"])
+def toggle_save():
+
+    if "user" not in session:
+        return jsonify({"error": "login required"}), 401
+
+    data = request.get_json()
+    recipe_id = data.get("recipe_id")
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT * FROM saved_recipes
+        WHERE user_email=? AND recipe_id=?
+    """, (session["user"], recipe_id))
+
+    existing = c.fetchone()
+
+    if existing:
+        c.execute("""
+            DELETE FROM saved_recipes
+            WHERE user_email=? AND recipe_id=?
+        """, (session["user"], recipe_id))
+
+        saved = False
+
+    else:
+        c.execute("""
+            INSERT INTO saved_recipes (user_email, recipe_id)
+            VALUES (?, ?)
+        """, (session["user"], recipe_id))
+
+        saved = True
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "saved": saved
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)

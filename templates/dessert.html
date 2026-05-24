@@ -15,6 +15,16 @@
 
 {% block content %}
 
+<!-- Login Modal -->
+<div id="loginModal" class="modal" style="display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: white; padding: 28px; width: 400px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); text-align: center;">
+        <span onclick="closeModal()" style="float: right; font-size: 24px; cursor: pointer;">&times;</span>
+        <h2 style="margin-bottom: 15px;">🔐 Login Required</h2>
+        <p style="margin-bottom: 20px; color: #666;">Please login to save your favorite recipes!</p>
+        <button onclick="redirectToLogin()" style="padding: 12px 30px; background: #000; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer;">Go to Login →</button>
+    </div>
+</div>
+
 <div class="topbar">
     <a href="/breakfast">Breakfast</a>
     <a href="/lunch">Lunch</a>
@@ -71,6 +81,15 @@
     {% for r in recipes %}
 
 <div class="recipe-card small-card">
+        <!-- Updated heart button with toggleSave -->
+    <button
+        type="button"
+        class="heart-btn {% if r.id in saved_ids %}saved{% endif %}"
+        data-id="{{ r['id'] }}"
+        onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)"
+        {% if r.id in saved_ids %}disabled{% endif %}>
+        ❤
+    </button>
 
     <div class="image-container">
         <img src="{{ r['image'] }}">
@@ -265,6 +284,9 @@ function spin() {
                 // ⭐ 5个推荐
                 let suggestionCards = listData.map(r => `
                     <div class="recipe-card small-card">
+                        <button type="button" class="heart-btn" 
+                            data-id="${r.id}"
+                            onclick="event.stopPropagation(); toggleSave(this)">❤</button>
 
                         <div class="image-container">
                             <img src="${r.image}">
@@ -351,6 +373,49 @@ function backToAllRecipes() {
     document.getElementById("warningMsg").innerText = "";
 }
 
+    // ===== Heart Button 功能 =====
+    const loginModal = document.getElementById('loginModal');
+
+    function closeModal() {
+        loginModal.style.display = 'none';
+    }
+
+    function redirectToLogin() {
+        window.location.href = "/login";
+    }
+
+    window.addEventListener('click', function(event) {
+        if (event.target == loginModal) {
+            closeModal();
+        }
+    });
+
+    function toggleSave(button) {
+
+        const recipeId = button.dataset.id;
+
+        fetch('/toggle-save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                recipe_id: recipeId
+            })
+        })
+        .then(response => {
+
+            if (response.status === 401) {
+                loginModal.style.display = 'flex';
+                return;
+            }
+
+            if (response.ok) {
+                button.classList.toggle('saved');
+            }
+        })
+        .catch(error => console.log(error));
+    }
 </script>
 
 </body>

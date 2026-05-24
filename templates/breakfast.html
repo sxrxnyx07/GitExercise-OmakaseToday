@@ -69,6 +69,7 @@
 
     </div>
 
+<!-- ⭐ 導航按鈕區（Home一直顯示，Back只在result時） -->
 <div class="nav-section">
     <a href="/" class="home-btn">🏠 Home</a>
     <div class="nav-actions" id="backActions">
@@ -80,9 +81,15 @@
     {% for r in recipes %}
 
 <div class="recipe-card small-card">
-
-    <!-- Updated heart button with toggleSave -->
-    <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
+        <!-- Updated heart button with toggleSave -->
+    <button
+        type="button"
+        class="heart-btn {% if r.id in saved_ids %}saved{% endif %}"
+        data-id="{{ r['id'] }}"
+        onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)"
+        {% if r.id in saved_ids %}disabled{% endif %}>
+        ❤
+    </button>
 
     <div class="image-container">
         <img src="{{ r['image'] }}">
@@ -144,6 +151,7 @@ window.onload = function () {
 
     let colors = ["red","yellow","green","blue","purple"];
 
+    // coordinate for balls
     let positions = [
         [-40, -40],
         [0, -60],
@@ -203,13 +211,16 @@ function spin() {
     button.disabled = true;
     warningMsg.innerText = "⚠️ Please wait, the machine is spinning... ";
 
+    // ⭐ reset ONLY state 
     ball.className = "ball";
 
+    // start animation
     gachaImg.classList.add("shake");
     inside.classList.add("spin-inside");
 
     resultBox.innerText = "Spinning...";
 
+    // ⭐ balls inside move up slightly
     miniBalls.forEach(b => {
         b.classList.remove("fall-down");
         b.classList.add("float-up");
@@ -217,11 +228,13 @@ function spin() {
 
     setTimeout(() => {
 
+        // balls drop back
         miniBalls.forEach(b => {
             b.classList.remove("float-up");
             b.classList.add("fall-down");
         });
 
+        // ⭐ generate result ball
         let randomColor = colors[Math.floor(Math.random() * colors.length)];
 
         ball.classList.add(randomColor);
@@ -245,6 +258,7 @@ function spin() {
 
                 let container = document.querySelector(".recipe-container");
 
+                // ⭐ 主结果（中间）
             let mainCard = `
                 <div class="main-result">
                     <div class="spin-winner-card pop">
@@ -267,11 +281,12 @@ function spin() {
                  </div>
             `;
 
-                // Updated suggestion cards with heart button
+                // ⭐ 5个推荐
                 let suggestionCards = listData.map(r => `
                     <div class="recipe-card small-card">
-
-                        <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('\${r.id}', this);">❤</button>
+                        <button type="button" class="heart-btn" 
+                            data-id="${r.id}"
+                            onclick="event.stopPropagation(); toggleSave(this)">❤</button>
 
                         <div class="image-container">
                             <img src="${r.image}">
@@ -306,6 +321,7 @@ function spin() {
                     </div>
                 `).join('');
 
+                // ⭐ 最终结构
                 container.innerHTML = `
                     ${mainCard}
 
@@ -336,19 +352,24 @@ function backToAllRecipes() {
 
     let container = document.querySelector(".recipe-container");
 
+    // 恢復原本所有 recipes
     container.innerHTML = originalHTML;
 
     container.classList.remove("result-mode");
 
+    // 隱藏按鈕
     document.getElementById("backActions").classList.remove("show");
 
+    // reset UI
     document.getElementById("result").innerText =
         "Click spin to get your recipe 🍽️";
 
     document.getElementById("resultHint").style.opacity = 0;
 
+    // reset ball
     document.getElementById("ball").className = "ball";
 
+    // reset warning
     document.getElementById("warningMsg").innerText = "";
 }
 
@@ -369,35 +390,31 @@ function backToAllRecipes() {
         }
     });
 
-    function toggleSave(recipeId, button) {
-        if (!button) return;
+    function toggleSave(button) {
 
-        console.log('Clicked! ID:', recipeId);
-        
+        const recipeId = button.dataset.id;
+
         fetch('/toggle-save', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recipe_id: recipeId })
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                recipe_id: recipeId
+            })
         })
         .then(response => {
+
             if (response.status === 401) {
                 loginModal.style.display = 'flex';
                 return;
             }
+
             if (response.ok) {
                 button.classList.toggle('saved');
-
-                // 改变爱心文字
-            if (button.classList.contains('saved')) {
-                button.innerHTML = '♥';
-            } else {
-                button.innerHTML = '❤';
-            }
-            } else {
-                console.error('Failed to save recipe');
             }
         })
-        .catch(error => console.error('Fetch Error:', error));
+        .catch(error => console.log(error));
     }
 </script>
 
