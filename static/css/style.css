@@ -853,24 +853,7 @@ LAST PAGE BUTTON
     padding: 20px;
 }
 
-/* ===== CARD ===== */
-.recipe-card {
-    width: 260px;
-    background: #ffffff;
-    border: 2px solid #000;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 6px 6px 0 #fbc02d;
-    transition: all 0.25s ease;
-    cursor: pointer;
-    height: 500px;  
 
-}
-
-.recipe-card:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 10px 10px 0 #fbc02d;
-}
 .recipe-link{
     text-decoration: none;
     color: inherit;
@@ -2359,7 +2342,7 @@ h1 {
     transition: all 0.3s ease;
 }
 
-.recipe-card:hover,
+
 .home-card:hover{
     transform: translateY(-8px) scale(1.02);
     box-shadow: 0 18px 40px rgba(0,0,0,0.12);
