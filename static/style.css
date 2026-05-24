@@ -963,19 +963,6 @@ button:disabled {
     letter-spacing: 1px;
 }
 
-.winner-rating {
-    color: #ffd700;
-    font-size: 20px;
-    margin-bottom: 25px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.winner-rating span {
-    font-size: 14px;
-    font-weight: 700;
-    color: #666;
-}
-
 .view-btn {
     display: inline-block;
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
@@ -1107,10 +1094,26 @@ button:disabled {
     letter-spacing: 2px;
 }
 
-.rating-stars {
-    color: #f4c542;
-    font-size: 14px;
-    margin-top: 6px;
+/* ===== RATING ===== */
+
+.rating-stars,
+.winner-rating {
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.filled-star {
+    color: #ffc107;
+}
+
+.empty-star {
+    color: #e4e5e9;
+}
+
+.rating-count {
+    color: #666;
+    font-size: 0.85rem;
+    margin-left: 6px;
 }
 
 .all-recipes {

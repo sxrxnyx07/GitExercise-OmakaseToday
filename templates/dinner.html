@@ -87,7 +87,17 @@
         </h3>
 
         <div class="rating-stars">
-            ⭐⭐⭐⭐☆ <span>(4.0)</span>
+            {% set current_rating = r['rating']|default(0)|int %}
+
+            {% for i in range(5) %}
+                <span class="{% if i < current_rating %}filled-star{% else %}empty-star{% endif %}">
+                    ★
+                </span>
+            {% endfor %}
+
+                <span class="rating-count">
+                    ({{ r['rating']|default('0.0') }})
+                </span>
         </div>
 
         <div style="margin-top: 15px;">
@@ -237,9 +247,13 @@ function spin() {
                         </div>
                         <div class="detail-content">
                             <h2 class="detail-title">${mainData.name}</h2>
-                            <div class="winner-rating">
-                                ⭐⭐⭐⭐☆ <span>(4.0)</span>
-                            </div>
+                        <div class="winner-rating">
+                            ${'<span class="filled-star">★</span>'.repeat(Math.floor(mainData.rating))}
+                            ${'<span class="empty-star">★</span>'.repeat(5 - Math.floor(mainData.rating))}
+                            <span class="rating-count">
+                                (${mainData.rating})
+                            </span>
+                        </div>
                             <a href="/recipe/${mainData.id}" class="view-btn">View Recipe →</a>
                         </div>
                     </div>
@@ -263,9 +277,13 @@ function spin() {
                                 ${r.name}
                             </a>
                         </h3>
-
+                        
                         <div class="rating-stars">
-                            ⭐⭐⭐⭐☆ <span>(4.0)</span>
+                            ${'<span class="filled-star">★</span>'.repeat(Math.floor(r.rating))}
+                            ${'<span class="empty-star">★</span>'.repeat(5 - Math.floor(r.rating))}
+                            <span class="rating-count">
+                                (${r.rating})
+                            </span>
                         </div>
 
                         <div style="margin-top: 15px;">

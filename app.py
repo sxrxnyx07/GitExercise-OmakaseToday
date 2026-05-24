@@ -1310,7 +1310,7 @@ def breakfast():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Breakfast",)
     ).fetchall()
 
@@ -1322,7 +1322,7 @@ def lunch():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Lunch",)
     ).fetchall()
 
@@ -1334,7 +1334,7 @@ def dinner():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Dinner",)
     ).fetchall()
 
@@ -1346,7 +1346,7 @@ def dessert():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Dessert",)
     ).fetchall()
 
@@ -1358,7 +1358,7 @@ def drinks():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Drinks",)
     ).fetchall()
 
@@ -1380,7 +1380,7 @@ def get_random_recipe():
     conn = get_db_connection()
 
     recipe = conn.execute("""
-        SELECT id, name, image
+        SELECT id, name, image, rating
         FROM recipe
         WHERE LOWER(meal_category) = LOWER(?)
         ORDER BY RANDOM()
@@ -1395,7 +1395,8 @@ def get_random_recipe():
     return jsonify({
         "id": recipe["id"],
         "name": recipe["name"],
-        "image": recipe["image"]
+        "image": recipe["image"],
+        "rating": recipe["rating"]
     })
 
 @app.route('/random-multiple')
@@ -1406,7 +1407,7 @@ def get_multiple_recipes():
     conn = get_db_connection()
 
     recipes = conn.execute("""
-        SELECT id, name, image
+        SELECT id, name, image, rating
         FROM recipe
         WHERE LOWER(meal_category) = LOWER(?)
         ORDER BY RANDOM()
