@@ -486,7 +486,7 @@ button:disabled {
 
 .hero-sub.small {
     font-size: 14px;
-    color: #aaa;
+    color: #0067bb;
 }
 
 /* 图片 - 🔥 已优化 */
@@ -1364,4 +1364,99 @@ button:disabled {
 
 .recipe-card{
     position: relative;
+}
+
+/*_________ Keep Screen Awake Button _______*/
+
+/* ===== TOGGLE SWITCH ===== */
+.wake-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 70px;
+    height: 36px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider track */
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #ccc;
+    border-radius: 36px;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* The circle knob */
+.toggle-slider::before {
+    content: "";
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* ON state - green */
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(45deg, #4caf50, #8bc34a);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(34px);
+}
+
+/* OFF state - gray */
+.toggle-switch input:not(:checked) + .toggle-slider {
+    background: linear-gradient(45deg, #9e9e9e, #bdbdbd);
+}
+
+/* Label text */
+.toggle-label {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    pointer-events: none;
+    z-index: 1;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    box-sizing: border-box;
+}
+
+.toggle-label span:first-child {
+    opacity: 0.5;
+}
+
+.toggle-label span:last-child {
+    opacity: 0;
+}
+
+.toggle-switch input:checked ~ .toggle-label span:first-child {
+    opacity: 0;
+}
+
+.toggle-switch input:checked ~ .toggle-label span:last-child {
+    opacity: 1;
 }

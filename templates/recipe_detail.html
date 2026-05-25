@@ -25,6 +25,18 @@
         <h1 class="hero-title">{{ recipe['name'].upper() }}</h1>
         <p class="hero-sub">FAST AND DELICIOUS FOR WHOLE FAMILY</p>
         <p class="hero-sub small">LET'S DO IT TOGETHER ✨</p>
+
+        <!-- SCREEN WAKE BUTTON 不熄屏 -->
+        <div class="wake-wrapper">
+            <label class="toggle-switch">
+                <input type="checkbox" id="wakeToggle">
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">
+                    <span>💤</span>
+                    <span>☀️</span>
+                </span>
+            </label>
+        </div>
     </div>
 
     <!-- TOP GRID -->
@@ -50,7 +62,6 @@
     </div>
 
 <!-- MIDDLE GRID -->
-<!-- MIDDLE GRID -->
 <div class="mid-grid">
 
     <!-- 🔥 左侧：Ingredients + Highlights -->
@@ -63,7 +74,7 @@
             <div class="ingredient-grid">
                 {% for item in recipe['clean_ingredients'].split(',') %}
 
-                <!-- call out the google for ingredients, not manually -->
+                <!-- Call out the Google for ingredients, not manually -->
                     <a class="ingredient-link"
                         href="https://www.google.com/search?q={{ item.strip() }}"
                         target="_blank">
@@ -128,6 +139,34 @@
 </div>
 
 </div>
+
+<script>
+let wakeLock = null;
+let isAwake = false;
+
+const wakeToggle = document.getElementById("wakeToggle");
+
+async function toggleWakeLock() {
+    try {
+        if (!isAwake) {
+            wakeLock = await navigator.wakeLock.request("screen");
+            isAwake = true;
+        } else {
+            if (wakeLock) {
+                await wakeLock.release();
+            }
+            wakeLock = null;
+            isAwake = false;
+        }
+    } catch (err) {
+        console.log(err);
+        // 如果不支持，保持关闭状态
+        wakeToggle.checked = false;
+    }
+}
+
+wakeToggle.addEventListener("change", toggleWakeLock);
+</script>
 
 </body>
 </html>
