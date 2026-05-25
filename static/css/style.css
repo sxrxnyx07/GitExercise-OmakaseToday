@@ -3348,3 +3348,566 @@ input:focus, textarea:focus, select:focus {
     margin-top: 10px;
 }
 
+/* =========================
+   MAIN WRAPPER
+========================= */
+
+.homepage-wrapper{
+    width: 100%;
+    overflow-x: hidden;
+}
+
+
+/* =========================
+   SHARED SCENE STYLE
+========================= */
+
+.scene{
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+
+/* =========================================================
+   INTRO SCENE
+========================================================= */
+
+.intro-scene{
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8%;
+    overflow: hidden;
+}
+
+
+/* FLOATING FOOD */
+
+.floating-food{
+    position: absolute;
+    font-size: 2.5rem;
+    animation: floating 4s ease-in-out infinite;
+    opacity: 0.9;
+    z-index: 0;
+}
+
+.food1{
+    top: 100px;
+    left: 8%;
+}
+
+.food2{
+    top: 140px;
+    right: 18%;
+    animation-delay: 1s;
+}
+
+.food3{
+    bottom: 120px;
+    left: 15%;
+    animation-delay: 2s;
+}
+
+.food4{
+    bottom: 160px;
+    right: 20%;
+    animation-delay: 1.5s;
+}
+
+/* FLOAT ANIMATION */
+@keyframes floating{
+
+    0%{
+        transform: translateY(0px);
+    }
+
+    50%{
+        transform: translateY(-16px);
+    }
+
+    100%{
+        transform: translateY(0px);
+    }
+}
+
+
+/* HERO LEFT */
+.hero-left{
+    width: 50%;
+    position: relative;
+    z-index: 5;
+    padding-bottom: 80px;
+}
+
+.hero-title{
+    font-size: 4rem;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.hero-title span{
+    color: #f4a940;
+}
+
+.hero-subtitle{
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* HERO BUTTON */
+.primary-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    margin-top: 40px;
+    padding: 18px 38px;
+    background: #111;
+    color: white;
+    text-decoration: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.primary-btn:hover{
+    transform: scale(1.05);
+}
+
+
+/* HERO RIGHT */
+.hero-right{
+    width: 45%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* LID FLOAT SHAKE */
+.hero-lid{
+    width: 420px;
+    animation: lidShake 2s ease-in-out infinite;
+    will-change: transform;
+    filter: drop-shadow(0px 20px 40px rgba(0,0,0,0.2));
+}
+
+
+@keyframes lidShake{
+    0%{
+        transform: rotate(-4deg) translateY(0px);
+    }
+    25%{
+        transform: rotate(4deg) translateY(-6px);
+    }
+    50%{
+        transform: rotate(-3deg) translateY(0px);
+    }
+    75%{
+        transform: rotate(3deg) translateY(-4px);
+    }
+    100%{
+        transform: rotate(-4deg) translateY(0px)
+    }
+}
+
+/* HORIZONTAL STRIP */
+.horizontal-strip{
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    align-items: center;
+}
+
+.strip-track{
+    display: flex;
+    gap: 80px;
+    width: max-content;
+    height: 50px;
+    animation: marquee 18s linear infinite;
+    background-color: #ffed9b;
+}
+
+.strip-track span{
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f4a940;
+    white-space: nowrap;
+}
+
+
+@keyframes marquee{
+    from{
+        transform: translateX(0);
+    }
+    to{
+        transform: translateX(-50%);
+    }
+}
+
+
+/* =========================================================
+   INGREDIENT SCENE
+========================================================= */
+.ingredient-scene{
+    padding: 100px 6%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 80px;
+}
+
+
+/* TOP INGREDIENT BUTTONS */
+.ingredient-selector{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+
+/* INGREDIENT CIRCLE */
+.ingredient-btn{
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 3px solid #111;
+    background: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 6px 6px 0px #f4c542;
+}
+
+.ingredient-btn:hover{
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0px #f4c542;
+}
+
+/* CUTTING AREA */
+.chopping-scene{
+    position: relative;
+    width: 100%;
+    height: 520px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* =========================================================
+   SHOWCASE SCENE
+========================================================= */
+.showcase-scene{
+    padding: 1px 2%;
+}
+
+/* TITLE */
+.scene-title{
+    font-size: 4rem;
+    margin-bottom: 50px;
+    font-weight: 800;
+}
+
+/* FOOD SLIDER */
+.food-showcase{
+    display: flex;
+    gap: 30px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    scroll-snap-type: x mandatory;
+}
+
+/* SCROLLBAR */
+.food-showcase::-webkit-scrollbar{
+    height: 10px;
+}
+
+.food-showcase::-webkit-scrollbar-thumb{
+    background: #f4c542;
+    border-radius: 20px;
+}
+
+/* FOOD CARD */
+.food-card{
+    min-width: 320px;
+    background: white;
+    border: 3px solid #111;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: black;
+    transition: 0.3s;
+    box-shadow: 8px 8px 0px #f4c542;
+    scroll-snap-align: start;
+}
+
+.food-card:hover{
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px #f4c542;
+}
+
+/* CARD IMAGE */
+.food-card img{
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-bottom: 3px solid #111;
+}
+
+/* CARD BODY */
+.food-card-body{
+    padding: 20px;
+}
+
+/* CARD TITLE */
+.food-card-title{
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* SAVED BADGE */
+.saved-badge{
+    display: inline-block;
+    padding: 8px 14px;
+    background: #fff3d7;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* ========================================================
+   COOKING SCENE
+========================================================= */
+.cooking-scene{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+}
+/* POT WRAPPER */
+.pot-wrapper{
+    position: relative;
+    width: 700px;
+    height: 700px;
+}
+
+/* POT */
+.pot{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+/* POT LID */
+.pot-lid{
+    position: absolute;
+    width: 520px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    z-index: 3;
+}
+
+/* INGREDIENT RAIN */
+.ingredient-rain{
+    position: absolute;
+    width: 100%;
+    top: -150px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 1;
+}
+
+.ingredient-rain img{
+    width: 100px;
+}
+
+/* FIRE */
+.fire-effect{
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    height: 90px;
+    background: orange;
+    border-radius: 50%;
+    filter: blur(10px);
+    opacity: 0;
+}
+
+/* =========================================================
+   SPINNER SCENE
+========================================================= */
+.spinner-scene{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff8f2;
+    padding: 100px 6%;
+}
+
+/* FEATURE BLOCK */
+.story-section{
+    text-align: center;
+}
+
+.story-section h2{
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.story-section p{
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+/* =========================================================
+   OUTRO SCENE
+========================================================= */
+.outro-scene{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 100px 8%;
+}
+
+.outro-scene h2{
+    font-size: 5rem;
+    margin-bottom: 20px;
+}
+
+.outro-scene p{
+    font-size: 1.3rem;
+    color: #666;
+    max-width: 700px;
+    line-height: 1.8;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 1100px){
+    .hero-title{
+        font-size: 4rem;
+    }
+    .hero-lid{
+        width: 320px;
+    }
+    .board{
+        width: 90%;
+    }
+}
+
+
+@media (max-width: 900px){
+    .intro-scene{
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        padding: 80px 6%;
+    }
+    .hero-left,
+    .hero-right{
+
+        width: 100%;
+    }
+    .hero-title{
+
+        font-size: 3.5rem;
+    }
+    .hero-subtitle{
+
+        margin: auto;
+    }
+    .hero-lid{
+
+        width: 280px;
+
+        margin-top: 50px;
+    }
+    .ingredient-btn{
+
+        width: 100px;
+        height: 100px;
+    }
+    .knife{
+
+        width: 130px;
+
+        right: 5%;
+    }
+    .scene-title{
+
+        font-size: 3rem;
+    }
+    .story-section h2{
+
+        font-size: 3rem;
+    }
+    .outro-scene h2{
+
+        font-size: 3.5rem;
+    }
+}
+
+
+@media (max-width: 600px){
+    .hero-title{
+        font-size: 2.8rem;
+    }
+    .hero-subtitle{
+        font-size: 1rem;
+    }
+    .primary-btn{
+
+        padding: 14px 28px;
+    }
+    .horizontal-strip{
+
+        bottom: 20px;
+    }
+    .strip-track span{
+
+        font-size: 1.2rem;
+    }
+    .ingredient-btn{
+
+        width: 85px;
+        height: 85px;
+
+        font-size: 0.8rem;
+    }
+    .scene-title{
+
+        font-size: 2.3rem;
+    }
+    .food-card{
+
+        min-width: 260px;
+    }
+    .story-section h2{
+
+        font-size: 2.2rem;
+    }
+    .outro-scene h2{
+
+        font-size: 2.5rem;
+    }
+}

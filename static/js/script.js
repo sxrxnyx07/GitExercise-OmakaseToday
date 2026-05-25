@@ -189,20 +189,6 @@ let autoFlip = setInterval(() => {
 function goLogin(){
     window.location.href = "/login"
 }
-
-function slideLeft() {
-    document.getElementById("slider").scrollBy({
-        left: -220,
-        behavior: "smooth"
-    });
-}
-
-function slideRight() {
-    document.getElementById("slider").scrollBy({
-        left: 220,
-        behavior: "smooth"
-    });
-}
 function showSidebar() {
     const sidebar = document.querySelector(".sidebar")
     if (sidebar) {
@@ -676,3 +662,262 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+/* =========================================================
+   GSAP
+========================================================= */
+gsap.registerPlugin(ScrollTrigger);
+
+
+/* =========================================================
+   HERO LID ZOOM EFFECT
+========================================================= */
+gsap.to("#heroLid", {
+    scale: 7,
+    rotation: 720,
+    scrollTrigger: {
+        trigger: ".intro-scene",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
+    }
+});
+
+
+/* =========================================================
+   INGREDIENT SYSTEM
+========================================================= */
+const selectedIngredients = [];
+/* INGREDIENT BUTTONS */
+const ingredientButtons =
+    document.querySelectorAll(".ingredient-btn");
+ingredientButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        const ingredient = btn.dataset.name;
+        if (!selectedIngredients.includes(ingredient)) {
+            selectedIngredients.push(ingredient);
+            dropIngredient(ingredient);
+            animateKnife();
+            createCutPieces(ingredient);
+            btn.classList.add("active");
+        }
+    });
+});
+
+/* =========================================================
+   DROP INGREDIENT
+========================================================= */
+function dropIngredient(name){
+    const item = document.createElement("img");
+    item.src = `/static/css/picture/${name}.png`;
+    item.classList.add("falling-ingredient");
+    item.style.left =
+        `${Math.random() * 200 + 120}px`;
+    document
+        .getElementById("ingredientDropZone")
+        .appendChild(item);
+    gsap.fromTo(item,
+        {
+            y: -350,
+            opacity: 0,
+            scale: 0.5,
+            rotation: -20
+        },
+        {
+            y: 80,
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 1,
+            ease: "bounce.out"
+        }
+    );
+}
+
+/* =========================================================
+   KNIFE ANIMATION
+========================================================= */
+function animateKnife(){
+    gsap.to(".knife", {
+        rotation: -25,
+        y: 40,
+        duration: 0.15,
+        repeat: 3,
+        yoyo: true,
+        ease: "power1.inOut"
+    });
+}
+
+/* =========================================================
+   CREATE CUT PIECES
+========================================================= */
+function createCutPieces(name){
+    setTimeout(() => {
+        const pieces = document.createElement("img");
+        pieces.src =
+            `/static/css/picture/${name}-chopped.png`;
+        pieces.classList.add("cut-piece");
+        pieces.style.position = "absolute";
+        pieces.style.width = "110px";
+        pieces.style.left =
+            `${Math.random() * 200 + 150}px`;
+        pieces.style.top =
+            `${Math.random() * 100 + 120}px`;
+        pieces.style.zIndex = "5";
+        document
+            .getElementById("ingredientDropZone")
+            .appendChild(pieces);
+        gsap.fromTo(pieces,
+            {
+                opacity: 0,
+                scale: 0
+            },
+
+            {
+                opacity: 1,
+                scale: 1,
+                duration: 0.4
+            }
+        );
+    }, 500);
+}
+/* =========================================================
+   AUTO DROP
+========================================================= */
+let autoDropPlayed = false;
+ScrollTrigger.create({
+    trigger: ".ingredient-scene",
+    start: "top center",
+    once: true,
+    onEnter: () => {
+        if (
+            selectedIngredients.length === 0
+            &&
+            !autoDropPlayed
+        ){
+            autoDropPlayed = true;
+            const autoIngredients = [
+                "tomato",
+                "onion",
+                "garlic",
+                "chili"
+            ];
+            autoIngredients.forEach((item, index) => {
+                setTimeout(() => {
+                    dropIngredient(item);
+                    animateKnife();
+                    createCutPieces(item);
+                }, index * 900);
+            });
+        }
+    }
+});
+
+/* =========================================================
+   COOKING SCENE
+========================================================= */
+const cookingTimeline = gsap.timeline({
+    scrollTrigger: {
+        trigger: ".cooking-scene",
+        start: "top center",
+        end: "bottom center",
+        scrub: true
+    }
+});
+cookingTimeline
+.to(".ingredient-rain", {
+    y: 280,
+    opacity: 1
+})
+.to(".pot-lid", {
+    y: 160
+})
+.to(".fire-effect", {
+    opacity: 1,
+    scale: 1.2
+});
+
+/* =========================================================
+   FIRE EFFECT
+========================================================= */
+gsap.to(".fire-effect", {
+    scale: 1.1,
+    duration: 0.6,
+    repeat: -1,
+    yoyo: true
+});
+
+/* =========================================================
+   REVEAL SCENE
+========================================================= */
+const revealTimeline = gsap.timeline({
+    scrollTrigger: {
+        trigger: ".reveal-scene",
+        start: "top center",
+        end: "bottom center",
+        scrub: true
+    }
+});
+revealTimeline
+.to(".reveal-lid", {
+    y: -260,
+    rotation: -20
+})
+
+.from(".reveal-food", {
+    opacity: 0,
+    scale: 0.5,
+    y: 100
+})
+
+.from(".reveal-plate", {
+    opacity: 0,
+    scale: 0.8
+});
+
+
+/* =========================================================
+   FLOATING EMOJI PARALLAX
+========================================================= */
+window.addEventListener("scroll", () => {
+    const scrollY = window.scrollY;
+    gsap.to(".food1", {
+        y: scrollY * 0.03
+    });
+    gsap.to(".food2", {
+        y: scrollY * 0.05
+    });
+    gsap.to(".food3", {
+        y: scrollY * 0.04
+    });
+    gsap.to(".food4", {
+        y: scrollY * 0.06
+    });
+});
+
+/* =========================================================
+   FOOD CARD FADE
+========================================================= */
+gsap.utils.toArray(".food-card").forEach(card => {
+    gsap.from(card, {
+        opacity: 0,
+        y: 80,
+        duration: 1,
+        scrollTrigger: {
+            trigger: card,
+            start: "top 90%"
+        }
+    });
+});
+
+gsap.from(".hero-title", {
+    y: 80,
+    opacity: 0,
+    duration: 1
+})
+
+gsap.from(".hero-subtitle", {
+    y: 80,
+    opacity: 0,
+    duration: 1,
+    delay: 0.3
+})
