@@ -13,6 +13,7 @@ from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
 from flask import Flask, render_template, request, jsonify
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask import request, render_template, jsonify, redirect, url_for
 
 
 
@@ -89,6 +90,33 @@ def init_db():
         role TEXT DEFAULT 'user'
     )
     """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS saved_recipes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,    
+        user_email TEXT,
+        recipe_id INTEGER
+    )
+    """)
+    #id = the save record number (system-generated log ID)
+    #user_email = who saved it
+    #recipe_id = what recipe was saved
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        message TEXT,
+        is_read INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS search_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        keyword TEXT,
+        searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     conn.commit()
     conn.close()
 
@@ -118,7 +146,39 @@ add_reset_columns()
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
-    return render_template("home.html")
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT recipe_id, COUNT(*) as total_saved
+        FROM saved_recipes
+        GROUP BY recipe_id
+        ORDER BY total_saved DESC
+        LIMIT 6
+    """)
+
+    popular_data = c.fetchall()
+
+    conn.close()
+
+    popular_recipes = []
+
+    for recipe_id, total_saved in popular_data:
+
+        recipe = Recipe.query.get(recipe_id)
+
+        if recipe:
+            popular_recipes.append({
+                "id": recipe.id,
+                "name": recipe.name,
+                "image": recipe.image,
+                "saved_count": total_saved
+            })
+
+    return render_template(
+        "home.html",
+        popular_recipes=popular_recipes
+    )
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -136,7 +196,7 @@ def register():
 
         hashed_pw = generate_password_hash(password)
         try:
-            with sqlite3.connect("users.db") as conn:
+            with sqlite3.connect(DB_PATH) as conn:
                 c = conn.cursor()
                 c.execute("INSERT INTO users (email, username, password, bio) VALUES (?, ?, ?, ?)", (email, username, hashed_pw, ""))
 
@@ -222,11 +282,50 @@ def profile():
     """, (email,))
     saved_ids = [row[0] for row in c.fetchall()]
 
+    # =========================
+    # recommendation logic
+    # =========================
+
+    c.execute("""
+        SELECT keyword, COUNT(*) as total
+        FROM search_history
+        WHERE user_email = ?
+        GROUP BY keyword
+        ORDER BY total DESC
+        LIMIT 3
+    """, (email,))
+
+    top_keywords = [row[0] for row in c.fetchall()]
+
     conn.close()
 
-    saved_recipes = Recipe.query.filter(Recipe.id.in_(saved_ids)).all() if saved_ids else []
-    suggested_recipes = Recipe.query.limit(3).all()
+    saved_recipes = Recipe.query.filter(
+        Recipe.id.in_(saved_ids)
+    ).all() if saved_ids else []
 
+    suggested_recipes = []
+
+    for keyword in top_keywords:
+        recipes = Recipe.query.filter(
+            Recipe.name.ilike(f"%{keyword}%")
+        ).limit(3).all()
+
+        for recipe in recipes:
+            if recipe.id not in saved_ids:
+                suggested_recipes.append(recipe)
+
+    # remove duplicates
+    unique_recipes = []
+    seen_ids = set()
+
+    for recipe in suggested_recipes:
+        if recipe.id not in seen_ids:
+            unique_recipes.append(recipe)
+            seen_ids.add(recipe.id)
+
+    suggested_recipes = unique_recipes[:6]
+    if not suggested_recipes:
+        suggested_recipes = Recipe.query.limit(6).all()
     return render_template(
         "profile.html",
         username=user[0],
@@ -743,7 +842,7 @@ def inject_notifications():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # 取最近通知
+
     c.execute("""
         SELECT message, is_read, created_at
         FROM notifications
@@ -754,10 +853,9 @@ def inject_notifications():
 
     rows = c.fetchall()
 
-    # 🔥 分组（重点）
-    new_notifs = [n for n in rows if n[1] == 0]  # 未读
-    old_notifs = [n for n in rows if n[1] == 1]  # 已读
-
+    # 
+    new_notifs = [n for n in rows if n[1] == 0]  
+    old_notifs = [n for n in rows if n[1] == 1]  
     # unread count（红点）
     c.execute("""
         SELECT COUNT(*) FROM notifications
@@ -842,7 +940,7 @@ def delete_my_account():
         # send email BEFORE delete
         msg = Message(
             subject="Your account has been deleted",
-            sender=app.config['MAIL_USERNAME'],   # ✅ 加这一行
+            sender=app.config['MAIL_USERNAME'],   # 
             recipients=[email]
         )
         msg.body = f"""
@@ -888,38 +986,40 @@ def check_password():
         return {"valid": True}
     else:
         return {"valid": False}
-class SavedRecipe(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_email = db.Column(db.String(120), nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
-    recipe = db.relationship('Recipe', backref='saved_by')
     
-@app.route('/toggle-save', methods=['POST'])
-def toggle_save():
-    user_email = session.get('user')
-    if not user_email:
-        return jsonify({"error": "Login required"}), 401
-    
-    data = request.get_json()
-    recipe_id = data.get('recipe_id')
-    
-    existing_save = SavedRecipe.query.filter_by(user_email=user_email, recipe_id=recipe_id).first()
-    
-    if existing_save:
-        db.session.delete(existing_save)
-        db.session.commit()
-        return jsonify({"status": "unfilled", "message": "Removed"})
-    else:
-        new_save = SavedRecipe(user_email=user_email, recipe_id=recipe_id)
-        db.session.add(new_save)
-        db.session.commit()
-        return jsonify({"status": "filled", "message": "Saved"})
+def get_saved_set(user_email):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+
+    rows = conn.execute(
+        "SELECT recipe_id FROM saved_recipes WHERE user_email=?",
+        (user_email,)
+    ).fetchall()
+
+    conn.close()
+
+    return {r["recipe_id"] for r in rows}
+
+
+
 
 @app.route('/categories')
 def category_index():
     search_query = request.args.get('search', '').strip().lower()
 
-    # 1. Get all unique tags 
+    tag_descriptions = {
+        "Halal": "Delicious recipes prepared with 100% Halal-certified ingredients and methods.",
+        "Non-Halal": "Dishes that may contain alcohol, pork, or other non-halal ingredients.",
+        "Vegetarian": "Meat-free delights focusing on fresh vegetables, hearty grains, and dairy.",
+        "Air Fryer": "Get that perfect crunch with less oil using these quick and healthy air fryer favorites.",
+        "Slow & Hearty": "Comfort food that takes its time—think tender stews and slow-cooked classics.",
+        "Swift & Easy": "Delicious, stress-free meals ready to serve in 30 minutes or less.",
+        "Non-Vegetarian": "Satisfying protein-packed dishes featuring poultry, beef, and lamb.",
+        "Seafood": "Fresh from the ocean: a variety of grilled, steamed, and pan-seared fish and shellfish.",
+        "Fruit-Forward": "Refreshing recipes that celebrate the natural sweetness and tang of seasonal fruits.",
+        "Default": "Explore our hand-picked selection of culinary delights tailored to your taste!"
+    }
+
     all_recipes = Recipe.query.with_entities(Recipe.special_tag).all()
     unique_tags = set()
     for r in all_recipes:
@@ -927,72 +1027,102 @@ def category_index():
             tags = [t.strip() for t in r.special_tag.split(',')]
             unique_tags.update(tags)
 
+    if search_query:
+        for tag in unique_tags:
+            if search_query == tag.lower():
+                return redirect(url_for('category_results', tag=tag))
+
     categories_with_images = []
     used_recipe_ids = set()
-
-    # 2. Filter the tags based on search BEFORE building the list 
     filtered_tags = [t for t in sorted(list(unique_tags)) if search_query in t.lower()]
 
     for tag in filtered_tags:
-        # Your existing duplicate-prevention logic 
-        sample_recipe = Recipe.query.filter(
-            Recipe.special_tag.ilike(f"%{tag}%"),
-            Recipe.id.notin_(used_recipe_ids)
-        ).first()
-        
+        sample_recipe = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"), Recipe.id.notin_(used_recipe_ids)).first()
         if not sample_recipe:
             sample_recipe = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%")).first()
 
         if sample_recipe:
             used_recipe_ids.add(sample_recipe.id)
+            description = tag_descriptions.get(tag, tag_descriptions["Default"])
             categories_with_images.append({
                 'name': tag,
-                'image': sample_recipe.image
+                'image': sample_recipe.image,
+                'description': description
             })
 
-    # If the user searched "Spicy" and nothing matches, 
-    # categories_with_images will be empty, triggering the 'No Match' in HTML.
-    return render_template('category.html', 
-                           categories=categories_with_images, 
-                           search_query=search_query)
+    return render_template('category.html', categories=categories_with_images, search_query=search_query)
 
 
 @app.route('/categories/<tag>')
 def category_results(tag):
     search_query = request.args.get('search', '').strip()
+    selected_category = request.args.get('category', 'all').strip().lower()
 
-    # Filter recipes by the specific tag 
+
+    tag_descriptions = {
+        "Halal": "Delicious recipes prepared with 100% Halal-certified ingredients and methods.",
+        "Non-Halal": "Dishes that may contain alcohol, pork, or other non-halal ingredients.",
+        "Vegetarian": "Meat-free delights focusing on fresh vegetables, hearty grains, and dairy.",
+        "Air Fryer": "Get that perfect crunch with less oil using these quick and healthy air fryer favorites.",
+        "Slow & Hearty": "Comfort food that takes its time—think tender stews and slow-cooked classics.",
+        "Swift & Easy": "Delicious, stress-free meals ready to serve in 30 minutes or less.",
+        "Non-Vegetarian": "Satisfying protein-packed dishes featuring poultry, beef, and lamb.",
+        "Seafood": "Fresh from the ocean: a variety of grilled, steamed, and pan-seared fish and shellfish.",
+        "Fruit-Forward": "Refreshing recipes that celebrate the natural sweetness and tang of seasonal fruits.",
+        "Default": "Explore our hand-picked selection of culinary delights tailored to your taste!"
+    }
+    
+    
+    active_description = tag_descriptions.get(tag, tag_descriptions["Default"])
+    
+
     recipes_query = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
 
     if search_query:
         recipes_query = recipes_query.filter(Recipe.name.ilike(f"%{search_query}%"))
+        
+    if selected_category and selected_category != 'all':
+        recipes_query = recipes_query.filter(Recipe.flavor_type.ilike(selected_category))
 
     results = recipes_query.all()
 
-    # This MUST point to category_results.html 
+    results_count = len(results)
+
     return render_template(
         'category_results.html',
         results=results,
         active_tag=tag,
-        search_query=search_query
+        search_query=search_query,
+        active_category=selected_category,
+        active_description=active_description ,
+        results_count=results_count,
     )
 
-# Keeping your suggestions route as is
 @app.route('/get_cat_suggestions')
 def get_cat_suggestions():
     q = request.args.get('q', '').strip().lower()
+
     if not q:
         return jsonify([])
+
     all_tags = set()
-    recipes = Recipe.query.with_entities(Recipe.special_tag).all()
+
+    recipes = Recipe.query.with_entities(
+        Recipe.special_tag
+    ).all()
+
     for r in recipes:
         if r.special_tag:
-            tags = [t.strip() for t in r.special_tag.split(',')]
+            tags = [
+                t.strip()
+                for t in r.special_tag.split(',')
+            ]
+
             for tag in tags:
                 if q in tag.lower():
                     all_tags.add(tag)
-    return jsonify(sorted(list(all_tags))[:10])
 
+    return jsonify(sorted(list(all_tags))[:10])
 
 @app.route('/all_recipes')
 def all_recipes():
@@ -1007,20 +1137,35 @@ def all_recipes():
         query = query.filter(Recipe.flavor_type == active_flavor.capitalize())
 
     if search_query:
-        
+
         query = query.filter(Recipe.name.ilike(f"%{search_query}%"))
 
+        if "user" in session:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+
+            c.execute("""
+                INSERT INTO search_history (user_email, keyword)
+                VALUES (?, ?)
+            """, (session["user"], search_query))
+
+            conn.commit()
+            conn.close()
+
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    saved_ids = set()
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
 
     return render_template(
         'all_recipes.html',
         results=pagination.items,
         pagination=pagination,
         search_query=search_query,
-        active_flavor=active_flavor
+        active_flavor=active_flavor,
+        saved_ids=saved_ids
     )
-
-
 @app.route('/get_suggestions')
 def get_suggestions():
     q = request.args.get('q', '').strip()
@@ -1032,7 +1177,7 @@ def get_suggestions():
     suggestion_list = [r.name for r in results]
     
     return jsonify(suggestion_list)
-# ---------------- YOUR INGREDIENT LOGIC ----------------
+
 
 @app.route("/ingredient-search")  
 def ingredient_index():
@@ -1108,6 +1253,7 @@ def search():
                     "id": recipe.id,
                     "name": recipe.name,
                     "image": recipe.image,
+                    "meal_category": recipe.meal_category,
                     "rating": recipe.rating,
                     "match": percent,
                     "missing_names": display_missing,
@@ -1115,10 +1261,20 @@ def search():
                 })
 
     results = sorted(results, key=lambda x: x['match'], reverse=True)
-    return render_template('result.html', results=results, selected=user_input)
+    saved_ids = set()
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+    return render_template(
+        'result.html',
+        results=results,
+        selected=user_input,
+        saved_ids=saved_ids
+    )
 
 def get_db_connection():
-    conn = sqlite3.connect('omakase.db')
+    conn = sqlite3.connect(
+        os.path.join(BASE_DIR, 'omakase.db')
+    )
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -1144,7 +1300,7 @@ def breakfast():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Breakfast",)
     ).fetchall()
 
@@ -1156,7 +1312,7 @@ def lunch():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Lunch",)
     ).fetchall()
 
@@ -1168,7 +1324,7 @@ def dinner():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Dinner",)
     ).fetchall()
 
@@ -1180,7 +1336,7 @@ def dessert():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Dessert",)
     ).fetchall()
 
@@ -1192,7 +1348,7 @@ def drinks():
     conn = get_db_connection()
 
     recipes = conn.execute(
-        "SELECT id, name, image FROM recipe WHERE meal_category = ?",
+        "SELECT id, name, image, rating FROM recipe WHERE meal_category = ?",
         ("Drinks",)
     ).fetchall()
 
@@ -1200,6 +1356,10 @@ def drinks():
     return render_template('drinks.html', recipes=recipes)
 
 @app.route('/random')
+def random_recipe():
+    return render_template('random.html')
+
+@app.route('/random-recipe')
 def get_random_recipe():
 
     category = request.args.get('category')
@@ -1210,7 +1370,7 @@ def get_random_recipe():
     conn = get_db_connection()
 
     recipe = conn.execute("""
-        SELECT id, name, image
+        SELECT id, name, image, rating
         FROM recipe
         WHERE LOWER(meal_category) = LOWER(?)
         ORDER BY RANDOM()
@@ -1225,7 +1385,8 @@ def get_random_recipe():
     return jsonify({
         "id": recipe["id"],
         "name": recipe["name"],
-        "image": recipe["image"]
+        "image": recipe["image"],
+        "rating": recipe["rating"]
     })
 
 @app.route('/random-multiple')
@@ -1236,7 +1397,7 @@ def get_multiple_recipes():
     conn = get_db_connection()
 
     recipes = conn.execute("""
-        SELECT id, name, image
+        SELECT id, name, image, rating
         FROM recipe
         WHERE LOWER(meal_category) = LOWER(?)
         ORDER BY RANDOM()
@@ -1267,5 +1428,6 @@ def test_foodtype():
     conn.close()
 
     return jsonify([dict(row) for row in rows])
+
 if __name__ == "__main__":
     app.run(debug=True)

@@ -5,6 +5,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
+{% extends "base.html" %}
+
+{% block title %}Recipe{% endblock %}
+
+{% block content %}
+
 <body class="recipe-bg">
 
 <div class="recipe-bg-wrap">
@@ -53,6 +59,8 @@
             </p>
             <div class="ingredient-grid">
                 {% for item in recipe['clean_ingredients'].split(',') %}
+
+                <!-- call out the google for ingredients, not manually -->
                     <a class="ingredient-link"
                         href="https://www.google.com/search?q={{ item.strip() }}"
                         target="_blank">
@@ -106,9 +114,18 @@
         <span>🌶 {{ recipe['flavor_type'] }}</span>
     </div>
 
+<div class="nav-section recipe-nav">
+    <a href="/" class="home-btn">🏠 Home</a>
+
+    <a href="/{{ recipe['meal_category'] | lower }}" class="back-btn">
+        ← Back to {{ recipe['meal_category'] }}
+    </a>
+</div>
+
 </div>
 
 </div>
 
 </body>
 </html>
+{% endblock %}

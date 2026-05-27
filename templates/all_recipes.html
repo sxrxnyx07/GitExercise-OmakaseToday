@@ -29,7 +29,7 @@
                        style="padding-right: 80px;"> 
                 
                 <span id="clearSearch" class="clear-btn" 
-                      style="position: absolute; right: 55px; cursor: pointer; display: none; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10;">
+                      style="position: absolute !important; right: 50px !important; top: 50% !important; transform: translateY(-50%) !important; display: none; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10000 !important; line-height: 1 !important; height: auto !important;">
                     ✖
                 </span>
 
@@ -78,12 +78,24 @@
             </div>
         </div>
     </div>
-    {% else %}
-    <div class="no-results-centered">
-        <h2 class="no-match-title">😕 No Matches Found !</h2>
-        <p>We couldn't find any <strong>{{ active_flavor if active_flavor != 'ALL' else '' }}</strong> recipes matching "<strong>{{ search_query }}</strong>".</p>
-        <br>
-        <a href="{{ url_for('all_recipes') }}" class="view-all-link">View All Recipes</a>
+{% else %}
+    <div class="no-results-centered" style="text-align: center; margin-top: 50px; width: 100%;">
+        <h1 class="no-match-title" style="font-size: 3rem; margin-bottom: 20px;">
+            😕 No Matches Found !
+        </h1>
+        
+        <p style="font-size: 1.2rem; color: #222;">
+            We couldn't find any 
+            <strong>{{ active_flavor|upper if active_flavor and active_flavor != 'ALL' else '' }}</strong> 
+            recipes 
+            {% if search_query %} matching "<strong>{{ search_query }}</strong>"{% endif %}.
+        </p>
+
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('all_recipes') }}" class="view-all-link" style="color: #ff6b6b; text-decoration: underline; font-weight: bold; font-size: 1.1rem;">
+                View All Recipes
+            </a>
+        </div>
     </div>
     {% endfor %}
 </div>
@@ -112,7 +124,7 @@
 {% endif %}
 
 <script>
-// ... (Script remains exactly the same as your provided code)
+
 const loginModal = document.getElementById('loginModal');
 
 function closeModal() {

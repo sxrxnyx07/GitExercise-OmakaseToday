@@ -15,7 +15,7 @@
         <strong>Curated collections for every palate. Dive into the flavors of Omakase ✨</strong>
     </p>
     <div class="search-container-bold">
-        <form action="{{ url_for('all_recipes') }}" method="GET" class="search-form-bold" id="searchForm">
+        <form action="{{ url_for('category_index') }}" method="GET" class="search-form-bold" id="searchForm">
             
             <div class="input-sticker-wrapper" style="position: relative; display: flex; align-items: center;">
                 <input type="text" 
@@ -28,7 +28,7 @@
                        style="padding-right: 80px;"> 
                 
                 <span id="clearSearch" class="clear-btn" 
-                      style="position: absolute; right: 55px; cursor: pointer; display: none; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10;">
+                      style="position: absolute !important; right: 50px !important; top: 50% !important; transform: translateY(-50%) !important; display: none; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; color: #888; font-size: 1.2rem; z-index: 10000 !important; line-height: 1 !important; height: auto !important;">
                     ✖
                 </span>
 
@@ -52,9 +52,11 @@
         {% endfor %}
     {% else %}
         <div class="empty-container" style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">
-            <h2 style="color: #1a3a5f;">😕 No Matches Found!</h2>
-            <p style="color: #666;">We couldn't find any category matching "{{ search_query }}".</p>
-            <a href="{{ url_for('category_index') }}" style="color: red; font-weight: bold; text-decoration: underline;">Show All Categories</a>
+            <h1 class="no-match-title" style="font-size: 3rem; margin-bottom: 20px;">😕 No Matches Found !</h1>
+            <p style="font-size: 1.2rem; color: #222 !important;">We couldn't find any category matching "<strong>{{ search_query }}</strong>".</p>
+            <div style="margin-top: 30px;">
+                <a href="{{ url_for('category_index') }}" style="color: #ff6b6b; text-decoration: underline; font-weight: bold; font-size: 1.1rem;">Show All Categories</a>
+            </div>
         </div>
     {% endif %}
     </div>
@@ -73,7 +75,7 @@
         wrapper.appendChild(suggestionsBox);
 
         function toggleClearBtn() {
-            clearBtn.style.display = searchInput.value.trim().length > 0 ? 'block' : 'none';
+            clearBtn.style.display = searchInput.value.trim().length > 0 ? 'flex' : 'none';
         }
 
         toggleClearBtn();
@@ -111,7 +113,15 @@
                         suggestionsBox.appendChild(div);
                     });
                 } else {
-                    suggestionsBox.style.display = "none";
+              
+                    suggestionsBox.style.display = "block";
+                    const noResult = document.createElement('div');
+                    noResult.className = 'suggestion-item';
+                    noResult.style.fontStyle = 'italic';
+                    noResult.style.color = '#888';
+                    noResult.style.cursor = 'default';
+                    noResult.innerText = "No category found...";
+                    suggestionsBox.appendChild(noResult);
                 }
             } catch (err) {
                 console.error("Suggestion Error:", err);
@@ -119,12 +129,14 @@
         });
 
         if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
+            clearBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 searchInput.value = '';
                 suggestionsBox.innerHTML = "";
                 suggestionsBox.style.display = "none";
                 toggleClearBtn();
-                searchInput.focus();
+                window.location.href = "{{ url_for('category_index') }}";
             });
         }
 
@@ -137,123 +149,6 @@
 })();
 </script>
 
-<style>
-body { background-color: #fdfae5; }
 
-.category-container {
-    max-width: 1200px;
-    margin: 60px auto;
-    padding: 0 30px;
-    text-align: center;
-}
-
-.category-main-title {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 800;
-    font-size: 2.8rem;
-    color: black;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-
-.category-subtitle {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.1rem;
-    color: black;
-    margin-bottom: 40px;
-}
-
-.input-sticker-wrapper {
-    position: relative;
-    overflow: visible !important;
-    z-index: 2000;
-}
-
-.suggestions-dropdown {
-    position: absolute;
-    top: 105%;
-    left: 0;
-    width: 100%;
-    background: white;
-    border: 3px solid #000;
-    border-radius: 10px;
-    box-shadow: 6px 6px 0px #000;
-    z-index: 9999 !important;
-    display: none;
-    max-height: 300px;
-    overflow-y: auto;
-    text-align: left;
-}
-
-.suggestion-item {
-    padding: 12px 15px;
-    cursor: pointer;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    border-bottom: 1px solid #eee;
-}
-
-.suggestion-item:hover { background: #D7D7D7; }
-
-.category-visual-grid {
-    display: grid;
-    /* Fixed 4 columns */
-    grid-template-columns: repeat(4, 1fr); 
-    /* Centers the items if the last row is incomplete */
-    justify-content: center;
-    gap: 40px;
-    margin-top: 50px;
-}
-
-.category-item { position: relative; z-index: 1; }
-
-.image-box {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    border: 3px solid #000;
-    border-radius: 15px;
-    background: white;
-    box-shadow: 8px 8px 0px #ffc107;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.image-box img { width: 100%; height: 100%; object-fit: cover; }
-
-/* The Text Label Styling */
-.category-text {
-    display: inline-block; /* Required for transform and margin to work smoothly */
-    font-weight: 800;
-    font-size: 1.2rem;
-    color: #1a3a5f;
-    margin-top: 15px;
-    text-decoration: none;
-    font-family: 'Montserrat', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease; /* Smooth transition for the hover effect */
-    border-bottom: 3px solid transparent; /* Hidden border that appears on hover */
-}
-
-/* Hover Effect: Card jumps and Text Underlines */
-.category-item:hover .image-box { 
-    transform: translate(-4px, -4px); 
-    box-shadow: 12px 12px 0px #ffc107; 
-}
-
-.category-item:hover .category-text {
-    color: #000;
-    border-bottom: 3px solid #1a3a5f; /* Underline effect using border */
-    transform: translateY(-2px); /* Slight lift */
-}
-
-a { text-decoration: none; }
-
-@media (max-width: 900px) {
-    .category-visual-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-</style>
 
 {% endblock %}

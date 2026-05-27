@@ -9,25 +9,79 @@
 
 <body>
 
-<div class="topbar">
-    <a href="/breakfast">Breakfast</a>
-    <a href="/lunch">Lunch</a>
-    <a href="/dinner">Dinner</a>
-    <a href="/dessert">Dessert</a>
-    <a href="/drinks">Drinks</a>
-</div>
+{% extends "base.html" %}
 
-<div class="container">
+{% block content %}
+
+<div class="randompage-container">
 
     <h1>🍽️ Welcome to Omakase Today</h1>
 
-    <p class="subtitle">
-        Not sure what to eat today?<br><br>
-        Let our gacha system decide for you! 🎲<br><br>
-        Choose a category from the top menu to get started.
+    <p class="subtitle1">
+        Not sure what to eat today?<br>
+        Let our gacha system decide for you! 🎲
     </p>
+
+    <!-- 🔥 NEW LAYOUT -->
+    <div class="layout">
+
+        <!-- LEFT SIDE -->
+        <div class="left">
+            <img src="{{ url_for('static', filename='image2/gacha.png') }}"
+                 class="gacha-img1">
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="right">
+
+            
+    <p class="subtitle2">
+        Choose a category below 👇
+    </p>
+
+            <div class="category-buttons">
+                <a href="/breakfast">🍳 Breakfast</a>
+                <a href="/lunch">🍜 Lunch</a>
+                <a href="/dinner">🍖 Dinner</a>
+                <a href="/dessert">🍰 Dessert</a>
+                <a href="/drinks">🧃 Drinks</a>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 分界线 -->
+<div class="section-divider"></div>
+
+<!-- Importance of Meal in randompage ↓↓↓ -->
+
+<div class="info-section">
+
+    <h2 class="info-title">
+        🌟 Explore the Benefits of Every Meal 🍴
+    </h2>
+
+    <img src="{{ url_for('static', filename='image2/random1.png') }}"
+         class="info-img">
+
+    <img src="{{ url_for('static', filename='image2/random2.png') }}"
+         class="info-img">
+
+    <img src="{{ url_for('static', filename='image2/random3.png') }}"
+         class="info-img">
+
+    <img src="{{ url_for('static', filename='image2/random4.png') }}"
+         class="info-img">
+
+    <img src="{{ url_for('static', filename='image2/random5.png') }}"
+         class="info-img">
 
 </div>
 
 </body>
 </html>
+
+{% endblock %}

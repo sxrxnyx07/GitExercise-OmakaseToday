@@ -9,6 +9,10 @@
 
 <body>
 
+{% extends "base.html" %}
+
+{% block content %}
+
 <div class="topbar">
     <a href="/breakfast" class="active">Breakfast</a>
     <a href="/lunch">Lunch</a>
@@ -23,13 +27,13 @@
 
 <p class="subtitle">
     A great day begins with a great breakfast.  
-    Let’s spin and discover a perfect meal to start your day right ✨
+    Let's spin and discover a perfect meal to start your day right ✨
 </p>
 
 <div class="machine-wrapper">
 
     <img id="gachaImg" class="gacha-img fade-in"
-         src="{{ url_for('static', filename='gacha1.png') }}">   <!-- GACHA IMAGE -->
+         src="{{ url_for('static', filename='image2/gacha1.png') }}">   <!-- GACHA IMAGE -->
 
     <div class="balls-inside" id="ballsInside"></div>
 
@@ -83,7 +87,23 @@
         </h3>
 
         <div class="rating-stars">
-            ⭐⭐⭐⭐☆ <span>(4.0)</span>
+            {% set current_rating = r['rating']|default(0)|int %}
+
+            {% for i in range(5) %}
+                <span class="{% if i < current_rating %}filled-star{% else %}empty-star{% endif %}">
+                    ★
+                </span>
+            {% endfor %}
+
+                <span class="rating-count">
+                    ({{ r['rating']|default('0.0') }})
+                </span>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <a href="/recipe/{{ r.id }}" class="view-recipe-btn">
+                View Recipe
+            </a>
         </div>
 
     </div>
@@ -202,7 +222,7 @@ function spin() {
         const category = "Breakfast"; // ⭐ 每个页面改这里
 
         Promise.all([
-            fetch('/random?category=' + category).then(res => res.json()),
+            fetch('/random-recipe?category=' + category).then(res => res.json()),
             fetch('/random-multiple?category=' + category).then(res => res.json())
         ])
         .then(([mainData, listData]) => {
@@ -227,9 +247,13 @@ function spin() {
                         </div>
                         <div class="detail-content">
                             <h2 class="detail-title">${mainData.name}</h2>
-                            <div class="winner-rating">
-                                ⭐⭐⭐⭐☆ <span>(4.0)</span>
-                            </div>
+                        <div class="winner-rating">
+                            ${'<span class="filled-star">★</span>'.repeat(Math.floor(mainData.rating))}
+                            ${'<span class="empty-star">★</span>'.repeat(5 - Math.floor(mainData.rating))}
+                            <span class="rating-count">
+                                (${mainData.rating})
+                            </span>
+                        </div>
                             <a href="/recipe/${mainData.id}" class="view-btn">View Recipe →</a>
                         </div>
                     </div>
@@ -255,7 +279,17 @@ function spin() {
                         </h3>
 
                         <div class="rating-stars">
-                            ⭐⭐⭐⭐☆ <span>(4.0)</span>
+                            ${'<span class="filled-star">★</span>'.repeat(Math.floor(r.rating))}
+                            ${'<span class="empty-star">★</span>'.repeat(5 - Math.floor(r.rating))}
+                            <span class="rating-count">
+                                (${r.rating})
+                            </span>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <a href="/recipe/${r.id}" class="view-recipe-btn">
+                                View Recipe
+                            </a>
                         </div>
 
                         </div>
@@ -319,3 +353,5 @@ function backToAllRecipes() {
 
 </body>
 </html>
+
+{% endblock %}
