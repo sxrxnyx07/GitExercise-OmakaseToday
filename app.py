@@ -116,6 +116,16 @@ def init_db():
         searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    #sidney member 2
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipe_id INTEGER,
+        user_email TEXT,
+        content TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     conn.commit()
     conn.close()
 
@@ -1509,6 +1519,56 @@ def toggle_save():
         "success": True,
         "saved": saved
     })
+
+@app.route("/comment/add", methods=["POST"])
+def add_comment():
+    if "user" not in session:
+        return jsonify({"error": "login required"}), 401
+
+    data = request.get_json()
+    recipe_id = data["recipe_id"]
+    content = data["content"]
+
+    # ✅ 这里加防空评论
+    if not content.strip():
+        return jsonify({"error": "empty comment"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        INSERT INTO comments (recipe_id, user_email, content)
+        VALUES (?, ?, ?)
+    """, (recipe_id, session["user"], content))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True})
+
+@app.route("/comment/<int:recipe_id>")
+def get_comments(recipe_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT user_email, content, created_at
+        FROM comments
+        WHERE recipe_id=?
+        ORDER BY created_at DESC
+    """, (recipe_id,))
+
+    comments = c.fetchall()
+    conn.close()
+
+    return jsonify([
+        {
+            "user_email": c[0],
+            "content": c[1],
+            "created_at": c[2]
+        }
+        for c in comments
+    ])
 
 if __name__ == "__main__":
     app.run(debug=True)

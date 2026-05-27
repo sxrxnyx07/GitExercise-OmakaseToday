@@ -325,6 +325,21 @@ reviewForm.addEventListener("submit", function(e) {
 
     const stars = "⭐".repeat(rating);
 
+    fetch("/comment/add", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            recipe_id: window.location.pathname.split("/").pop(),
+            content: comment
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+    if (data.success) {
+
     const commentHTML = `
         <div class="single-comment">
             <div class="comment-top">
@@ -343,7 +358,11 @@ reviewForm.addEventListener("submit", function(e) {
     successMessage.style.display = "block";
     setTimeout(() => { successMessage.style.display = "none"; }, 3000);
     reviewForm.reset();
+
+    }
+    });
 });
+
 </script>
 
 </body>
