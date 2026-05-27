@@ -1020,16 +1020,13 @@ def category_index():
         "Default": "Explore our hand-picked selection of culinary delights tailored to your taste!"
     }
 
-    # 1. Get all unique tags
     all_recipes = Recipe.query.with_entities(Recipe.special_tag).all()
     unique_tags = set()
-
     for r in all_recipes:
         if r.special_tag:
             tags = [t.strip() for t in r.special_tag.split(',')]
             unique_tags.update(tags)
 
-    # 2. Redirect if exact search match
     if search_query:
         for tag in unique_tags:
             if search_query == tag.lower():
@@ -1037,76 +1034,69 @@ def category_index():
 
     categories_with_images = []
     used_recipe_ids = set()
+    filtered_tags = [t for t in sorted(list(unique_tags)) if search_query in t.lower()]
 
-    # 3. Filter tags based on search
-    filtered_tags = [
-        t for t in sorted(list(unique_tags))
-        if search_query in t.lower()
-    ]
-
-    # 4. Build the category list with images and descriptions
     for tag in filtered_tags:
-        sample_recipe = Recipe.query.filter(
-            Recipe.special_tag.ilike(f"%{tag}%"),
-            Recipe.id.notin_(used_recipe_ids)
-        ).first()
-
+        sample_recipe = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"), Recipe.id.notin_(used_recipe_ids)).first()
         if not sample_recipe:
-            sample_recipe = Recipe.query.filter(
-                Recipe.special_tag.ilike(f"%{tag}%")
-            ).first()
+            sample_recipe = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%")).first()
 
         if sample_recipe:
             used_recipe_ids.add(sample_recipe.id)
-            
-            # Look up description here (inside the loop)
             description = tag_descriptions.get(tag, tag_descriptions["Default"])
-
             categories_with_images.append({
                 'name': tag,
                 'image': sample_recipe.image,
                 'description': description
             })
 
-    return render_template(
-        'category.html',
-        categories=categories_with_images,
-        search_query=search_query,
-        active_description=tag_descriptions,
-    )
+    return render_template('category.html', categories=categories_with_images, search_query=search_query)
+
 
 @app.route('/categories/<tag>')
 def category_results(tag):
     search_query = request.args.get('search', '').strip()
-    
-
     selected_category = request.args.get('category', 'all').strip().lower()
 
-    recipes_query = Recipe.query.filter(
-        Recipe.special_tag.ilike(f"%{tag}%")
-    )
+
+    tag_descriptions = {
+        "Halal": "Delicious recipes prepared with 100% Halal-certified ingredients and methods.",
+        "Non-Halal": "Dishes that may contain alcohol, pork, or other non-halal ingredients.",
+        "Vegetarian": "Meat-free delights focusing on fresh vegetables, hearty grains, and dairy.",
+        "Air Fryer": "Get that perfect crunch with less oil using these quick and healthy air fryer favorites.",
+        "Slow & Hearty": "Comfort food that takes its time—think tender stews and slow-cooked classics.",
+        "Swift & Easy": "Delicious, stress-free meals ready to serve in 30 minutes or less.",
+        "Non-Vegetarian": "Satisfying protein-packed dishes featuring poultry, beef, and lamb.",
+        "Seafood": "Fresh from the ocean: a variety of grilled, steamed, and pan-seared fish and shellfish.",
+        "Fruit-Forward": "Refreshing recipes that celebrate the natural sweetness and tang of seasonal fruits.",
+        "Default": "Explore our hand-picked selection of culinary delights tailored to your taste!"
+    }
+    
+    
+    active_description = tag_descriptions.get(tag, tag_descriptions["Default"])
+    
+
+    recipes_query = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
 
     if search_query:
-        recipes_query = recipes_query.filter(
-            Recipe.name.ilike(f"%{search_query}%")
-        )
+        recipes_query = recipes_query.filter(Recipe.name.ilike(f"%{search_query}%"))
         
-
     if selected_category and selected_category != 'all':
-        recipes_query = recipes_query.filter(
-            Recipe.flavor_type.ilike(selected_category)
-        )
+        recipes_query = recipes_query.filter(Recipe.flavor_type.ilike(selected_category))
 
     results = recipes_query.all()
+
+    results_count = len(results)
 
     return render_template(
         'category_results.html',
         results=results,
         active_tag=tag,
         search_query=search_query,
-        active_category=selected_category 
+        active_category=selected_category,
+        active_description=active_description ,
+        results_count=results_count,
     )
-
 
 @app.route('/get_cat_suggestions')
 def get_cat_suggestions():

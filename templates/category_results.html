@@ -15,6 +15,14 @@
 </p>
 </div>
 
+<div class="results-counter">
+    <span class="count-number">{{ results_count }}</span> 
+    <span class="count-text">
+        Culinary Delights Found For You ✨
+    </span>
+</div>
+
+
 <div class="filter-container">
     {% set categories = ['ALL', 'LIGHT', 'SOUR', 'SPICY', 'SWEET'] %}
     {% for cat in categories %}
@@ -139,4 +147,5 @@
         window.location.href = url.toString();
     }
 </script>
+
 {% endblock %}
