@@ -128,6 +128,102 @@
         <span>🌶 {{ recipe['flavor_type'] }}</span>
     </div>
 
+<!-- REVIEW SECTION -->
+<div class="review-section">
+
+    <div class="review-card">
+
+        <h2 class="review-title">
+            ⭐ Recipe Reviews
+        </h2>
+
+        <p class="review-subtitle">
+            Share your cooking experience with others 🍳
+        </p>
+
+        <!-- SUCCESS MESSAGE -->
+        <div id="successMessage" class="success-message">
+            ✅ Thank you! Your review has been submitted.
+        </div>
+
+        <!-- FORM -->
+        <form id="reviewForm">
+
+            <div class="review-input-grid">
+
+                <input 
+                    type="text"
+                    id="username"
+                    placeholder="Your Name"
+                    required
+                >
+
+                <input 
+                    type="email"
+                    id="email"
+                    placeholder="Your Email"
+                    required
+                >
+
+            </div>
+
+            <!-- RATING -->
+            <div class="rating-select">
+
+                <label>Recipe Rating ⭐</label>
+
+                <select id="rating" required>
+                    <option value="">Choose Rating</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                    <option value="4">⭐⭐⭐⭐ Great</option>
+                    <option value="3">⭐⭐⭐ Good</option>
+                    <option value="2">⭐⭐ Fair</option>
+                    <option value="1">⭐ Poor</option>
+                </select>
+
+            </div>
+
+            <!-- COMMENT -->
+            <textarea
+                id="comment"
+                placeholder="Share your cooking experience..."
+                required
+            ></textarea>
+
+<!-- EMAIL NOTIFY -->
+<div class="notify-wrapper">
+    <span class="notify-icon">🔔</span>
+    <label>
+        <input type="checkbox" class="notify-checkbox">
+        Notify me by email when someone replies
+    </label>
+</div>
+
+            <button type="submit" class="submit-review-btn">
+                Submit Review ✨
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- COMMENT LIST -->
+    <div class="comment-display-card">
+
+        <h3 class="comment-count-title">
+            💬 Total Reviews (<span id="commentCount">0</span>)
+        </h3>
+
+        <div id="commentList">
+
+            <!-- COMMENTS WILL APPEAR HERE -->
+
+        </div>
+
+    </div>
+
+</div>
+
 <div class="nav-section recipe-nav">
     <a href="/" class="home-btn">🏠 Home</a>
 
@@ -166,6 +262,77 @@ async function toggleWakeLock() {
 }
 
 wakeToggle.addEventListener("change", toggleWakeLock);
+
+const reviewForm = document.getElementById("reviewForm");
+const commentList = document.getElementById("commentList");
+const commentCount = document.getElementById("commentCount");
+const successMessage = document.getElementById("successMessage");
+
+let totalComments = 0;
+
+reviewForm.addEventListener("submit", function(e) {
+
+    e.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const rating = document.getElementById("rating").value;
+    const comment = document.getElementById("comment").value;
+
+    // EMAIL VALIDATION
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
+
+    totalComments++;
+
+    commentCount.innerText = totalComments;
+
+    const stars = "⭐".repeat(rating);
+
+    const commentHTML = `
+        <div class="single-comment">
+
+            <div class="comment-top">
+
+                <div>
+                    <h4>${username}</h4>
+                    <div class="comment-stars">${stars}</div>
+                </div>
+
+                <span class="comment-date">
+                    Just now
+                </span>
+
+            </div>
+
+            <p class="comment-text">
+                ${comment}
+            </p>
+
+            <button class="reply-btn">
+                Reply
+            </button>
+
+        </div>
+    `;
+
+    commentList.innerHTML =
+        commentHTML + commentList.innerHTML;
+
+    successMessage.style.display = "block";
+
+    setTimeout(() => {
+        successMessage.style.display = "none";
+    }, 3000);
+
+    reviewForm.reset();
+
+});
+
 </script>
 
 </body>

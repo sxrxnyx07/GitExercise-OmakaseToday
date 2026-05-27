@@ -1460,3 +1460,207 @@ button:disabled {
 .toggle-switch input:checked ~ .toggle-label span:last-child {
     opacity: 1;
 }
+
+/* ===== REVIEW SECTION ===== */
+
+.review-section {
+    margin-top: 50px;
+}
+
+.review-card,
+.comment-display-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 35px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.review-title {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.review-subtitle {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.review-input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-bottom: 20px;
+}
+
+.review-input-grid input,
+.rating-select select,
+textarea {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+}
+
+textarea {
+    min-height: 140px;
+    resize: vertical;
+    margin-top: 20px;
+}
+
+.rating-select label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+/* ===== EMAIL NOTIFY TOGGLE ===== */
+.notify-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 15px 25px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.notify-wrapper label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* ===== EMAIL NOTIFY - NICE CHECKBOX ===== */
+.notify-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #fff8e7, #ffe8cc);
+    border-radius: 15px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    border: 2px solid #ffb703;
+}
+
+.notify-wrapper label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Nice styled checkbox */
+.notify-checkbox {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.notify-checkbox:checked {
+    background: #4caf50;
+    border-color: #4caf50;
+}
+
+.notify-checkbox:checked::after {
+    content: "✓";
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.notify-checkbox:hover {
+    border-color: #ffb703;
+    transform: scale(1.1);
+}
+
+/* Bell icon */
+.notify-icon {
+    font-size: 18px;
+}
+
+.submit-review-btn {
+    margin-top: 25px;
+    background: black;
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 999px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.submit-review-btn:hover {
+    transform: translateY(-2px);
+}
+
+.success-message {
+    display: none;
+    background: #dff6dd;
+    color: #1e7d34;
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.single-comment {
+    background: rgba(255,255,255,0.6);
+    border-radius: 18px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.comment-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment-stars {
+    margin-top: 5px;
+}
+
+.comment-text {
+    margin-top: 15px;
+    line-height: 1.7;
+}
+
+.reply-btn {
+    margin-top: 15px;
+    background: #f3f3f3;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+}
