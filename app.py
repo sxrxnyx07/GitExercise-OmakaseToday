@@ -656,6 +656,7 @@ def add_recipe():
     timing = request.form.get("timing")
     category = request.form.get("meal_category")
     flavor = request.form.get("flavor_type")
+    special = request.form.get("special")
 
     file = request.files.get("image_file")
 
@@ -676,7 +677,8 @@ def add_recipe():
         directions=directions,
         timing=timing,
         meal_category=category,
-        flavor_type=flavor
+        flavor_type=flavor,
+        special=special
     )
 
     db.session.add(new_recipe)
@@ -748,6 +750,7 @@ def update_recipe(id):
         recipe.timing = request.form.get("timing")
         recipe.meal_category = request.form.get("meal_category")
         recipe.flavor_type = request.form.get("flavor_type")
+        recipe.special = request.form.get("special")
 
         file = request.files.get("image_file")
 

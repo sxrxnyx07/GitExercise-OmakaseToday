@@ -350,6 +350,7 @@ function openAddModal() {
     document.getElementById("edit-timing").value = "";
     document.getElementById("edit-category").value = "";
     document.getElementById("edit-flavor").value = "";
+    document.getElementById("edit-special").value = "";
     const preview = document.getElementById("imagePreview");
     if (preview) {
         preview.src = "";
@@ -357,7 +358,7 @@ function openAddModal() {
     }
 }
 
-function openEditModal(id, name, rating, clean, full, directions, timing, category, flavor) {
+function openEditModal(id, name, rating, clean, full, directions, timing, category, flavor, special) {
 
     document.getElementById("editModal").style.display = "block";
     document.getElementById("editForm").action = `/admin/recipes/update/${id}`;
@@ -371,6 +372,7 @@ function openEditModal(id, name, rating, clean, full, directions, timing, catego
     document.getElementById("edit-timing").value = timing;
     document.getElementById("edit-category").value = category;
     document.getElementById("edit-flavor").value = flavor;
+    document.getElementById("edit-special").value = special;
 }
 
 

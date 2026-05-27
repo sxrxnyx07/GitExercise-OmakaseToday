@@ -54,11 +54,10 @@
     <div class="recipe-card">
         <div class="image-container">
             <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
-            {% if r.image and r.image.startswith('http') %}
-                <img src="{{ r.image }}" alt="{{ r.name }}">
-            {% else %}
-                <img src="{{ url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
-            {% endif %}
+            <img
+                src="{{ r.image if r.image else url_for('static', filename='css/picture/default.jpg') }}"
+                alt="{{ r.name }}"
+            >
         </div>
         
         <div class="card-meta">

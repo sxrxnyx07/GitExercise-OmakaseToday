@@ -51,7 +51,8 @@
                             `{{ r.directions }}`,
                             `{{ r.timing }}`,
                             `{{ r.meal_category }}`,
-                            `{{ r.flavor_type }}`
+                            `{{ r.flavor_type }}`,
+                            `{{ r.special }}`
                         )">
                         Edit
                     </button>
@@ -98,7 +99,6 @@
                     <span class="view">{{ r.flavor_type }}</span>
                     <input class="edit" type="text" name="flavor_type" value="{{ r.flavor_type }}" hidden>
                 </td>
-
                 </form>
             </tr>
             {% endfor %}
@@ -178,18 +178,31 @@
                         <option value="Breakfast">Breakfast</option>
                         <option value="Lunch">Lunch</option>
                         <option value="Dinner">Dinner</option>
-                        <option value="Snack">Snack</option>
+                        <option value="Dessert">Dessert</option>
+                        <option value="Drinks">Drinks</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>Flavor Type</label>
                     <select name="flavor_type" id="edit-flavor">
-                        <option value="Sweet">Sweet</option>
-                        <option value="Savory">Savory</option>
-                        <option value="Spicy">Spicy</option>
+                        <option value="Light">Light</option>
                         <option value="Sour">Sour</option>
-                        <option value="Umami">Umami</option>
+                        <option value="Spicy">Spicy</option>
+                        <option value="Sweet">Sweet</option>        
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Special Tag</label>
+                    <select name="special_tag" id="editSpecialTag">
+                        <option value="Air Fryer">Air Fryer</option>
+                        <option value="Fruit-Forward">Fruit-Forward</option>
+                        <option value="Halal">Halal</option>
+                        <option value="Non-Halal">Non-Halal</option>
+                        <option value="Seafood">Seafood</option>
+                        <option value="Slow & Hearty">Slow & Hearty</option>
+                        <option value="Swift & Easy">Swift & Easy</option>
+                        <option value="Vegetarian">Vegetarian</option>
                     </select>
                 </div>
             </div>
