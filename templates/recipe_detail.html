@@ -167,21 +167,32 @@
 
             </div>
 
-            <!-- RATING -->
-            <div class="rating-select">
-
-                <label>Recipe Rating ⭐</label>
-
-                <select id="rating" required>
-                    <option value="">Choose Rating</option>
-                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                    <option value="4">⭐⭐⭐⭐ Great</option>
-                    <option value="3">⭐⭐⭐ Good</option>
-                    <option value="2">⭐⭐ Fair</option>
-                    <option value="1">⭐ Poor</option>
-                </select>
-
-            </div>
+<!-- RATING - CLICKABLE STARS -->
+<div class="rating-select">
+    <label class="rating-label">Recipe Rating ⭐</label>
+        <p id="ratingText" style="text-align: center; margin-top: 10px; color: #6d819e; font-size: 14px;">
+            Click to rate
+        </p>
+</div>
+    
+    <!-- 反转数值！-->
+<div class="star-rating-container">
+    <!-- 反过来：5 在左边，1 在右边 -->
+    <input type="radio" name="rating" id="star1" class="star-rating-input" value="5">
+    <label for="star1" class="star-rating-label">★</label>
+    
+    <input type="radio" name="rating" id="star2" class="star-rating-input" value="4">
+    <label for="star2" class="star-rating-label">★</label>
+    
+    <input type="radio" name="rating" id="star3" class="star-rating-input" value="3">
+    <label for="star3" class="star-rating-label">★</label>
+    
+    <input type="radio" name="rating" id="star4" class="star-rating-input" value="2">
+    <label for="star4" class="star-rating-label">★</label>
+    
+    <input type="radio" name="rating" id="star5" class="star-rating-input" value="1">
+    <label for="star5" class="star-rating-label">★</label>
+</div>
 
             <!-- COMMENT -->
             <textarea
@@ -190,14 +201,14 @@
                 required
             ></textarea>
 
-<!-- EMAIL NOTIFY -->
-<div class="notify-wrapper">
-    <span class="notify-icon">🔔</span>
-    <label>
-        <input type="checkbox" class="notify-checkbox">
-        Notify me by email when someone replies
-    </label>
-</div>
+        <!-- EMAIL NOTIFY -->
+        <div class="notify-wrapper">
+            <span class="notify-icon">🔔</span>
+            <label>
+                <input type="checkbox" class="notify-checkbox">
+                Notify me by email when someone replies
+            </label>
+        </div>
 
             <button type="submit" class="submit-review-btn">
                 Submit Review ✨
@@ -237,6 +248,25 @@
 </div>
 
 <script>
+// Star rating click handler - 放在最前面！
+const starInputs = document.querySelectorAll('.star-rating-input');
+const ratingText = document.getElementById('ratingText');
+
+const ratingMessages = {
+    "1": "😡Poor😡",
+    "2": "😐Fair😐", 
+    "3": "🤗Good🤗",
+    "4": "👍🏻Great👍🏻",
+    "5": "❤️Excellent❤️"
+};
+
+starInputs.forEach(input => {
+    input.addEventListener('change', function() {
+        ratingText.innerText = ratingMessages[this.value];
+    });
+});
+
+// Wake lock
 let wakeLock = null;
 let isAwake = false;
 
@@ -256,13 +286,13 @@ async function toggleWakeLock() {
         }
     } catch (err) {
         console.log(err);
-        // 如果不支持，保持关闭状态
         wakeToggle.checked = false;
     }
 }
 
 wakeToggle.addEventListener("change", toggleWakeLock);
 
+// Form submit
 const reviewForm = document.getElementById("reviewForm");
 const commentList = document.getElementById("commentList");
 const commentCount = document.getElementById("commentCount");
@@ -271,15 +301,18 @@ const successMessage = document.getElementById("successMessage");
 let totalComments = 0;
 
 reviewForm.addEventListener("submit", function(e) {
-
     e.preventDefault();
 
     const username = document.getElementById("username").value;
     const email = document.getElementById("email").value;
-    const rating = document.getElementById("rating").value;
+    
+    // 修复！用 querySelector 获取 checked radio
+    const ratingInput = document.querySelector('input[name="rating"]:checked');
+    const rating = ratingInput ? ratingInput.value : 0;
+    
     const comment = document.getElementById("comment").value;
 
-    // EMAIL VALIDATION
+    // Email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email)) {
@@ -288,51 +321,29 @@ reviewForm.addEventListener("submit", function(e) {
     }
 
     totalComments++;
-
     commentCount.innerText = totalComments;
 
     const stars = "⭐".repeat(rating);
 
     const commentHTML = `
         <div class="single-comment">
-
             <div class="comment-top">
-
                 <div>
                     <h4>${username}</h4>
                     <div class="comment-stars">${stars}</div>
                 </div>
-
-                <span class="comment-date">
-                    Just now
-                </span>
-
+                <span class="comment-date">Just now</span>
             </div>
-
-            <p class="comment-text">
-                ${comment}
-            </p>
-
-            <button class="reply-btn">
-                Reply
-            </button>
-
+            <p class="comment-text">${comment}</p>
+            <button class="reply-btn">Reply</button>
         </div>
     `;
 
-    commentList.innerHTML =
-        commentHTML + commentList.innerHTML;
-
+    commentList.innerHTML = commentHTML + commentList.innerHTML;
     successMessage.style.display = "block";
-
-    setTimeout(() => {
-        successMessage.style.display = "none";
-    }, 3000);
-
+    setTimeout(() => { successMessage.style.display = "none"; }, 3000);
     reviewForm.reset();
-
 });
-
 </script>
 
 </body>

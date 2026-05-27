@@ -1461,7 +1461,7 @@ button:disabled {
     opacity: 1;
 }
 
-/* ===== REVIEW SECTION ===== */
+/* ===== REVIEW & COMMENT SECTION ===== */
 
 .review-section {
     margin-top: 50px;
@@ -1494,26 +1494,43 @@ button:disabled {
     margin-bottom: 20px;
 }
 
+/* ===== STAR RATING - CLICK ONLY ===== */
 .review-input-grid input,
-.rating-select select,
-textarea {
-    width: 100%;
-    padding: 14px;
-    border-radius: 14px;
-    border: 1px solid #ddd;
-    font-size: 15px;
-}
-
-textarea {
-    min-height: 140px;
-    resize: vertical;
-    margin-top: 20px;
-}
-
-.rating-select label {
+.rating-label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     font-weight: bold;
+    font-size: 16px;
+}
+
+.star-rating-container {
+    display: flex;
+    flex-direction: row-reverse;  /* ⬅️ 反过来 */
+    gap: 8px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.star-rating-input {
+    display: none;
+}
+
+.star-rating-label {
+    font-size: 38px;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover - 悬停变金 */
+.star-rating-label:hover {
+    color: #ffc107;
+    transform: scale(1.2);
+}
+
+/* ⭐ 关键！点击的星 + 右边全部都变金 */
+.star-rating-input:checked ~ .star-rating-label {
+    color: #ffc107;
 }
 
 /* ===== EMAIL NOTIFY TOGGLE ===== */
