@@ -298,7 +298,37 @@ const commentList = document.getElementById("commentList");
 const commentCount = document.getElementById("commentCount");
 const successMessage = document.getElementById("successMessage");
 
-let totalComments = 0;
+function loadComments() {
+
+    const recipeId = window.location.pathname.split("/").pop();
+
+    fetch(`/comment/${recipeId}`)
+        .then(res => res.json())
+        .then(data => {
+
+            commentList.innerHTML = "";
+
+            data.forEach(c => {
+
+                const commentHTML = `
+                    <div class="single-comment">
+                        <div class="comment-top">
+                            <div>
+                                <h4>${c.user_email}</h4>
+                                <div class="comment-stars">⭐</div>
+                            </div>
+                            <span class="comment-date">${c.created_at}</span>
+                        </div>
+                        <p class="comment-text">${c.content}</p>
+                    </div>
+                `;
+
+                commentList.innerHTML += commentHTML;
+            });
+
+            commentCount.innerText = data.length;
+        });
+}
 
 reviewForm.addEventListener("submit", function(e) {
     e.preventDefault();
@@ -320,8 +350,10 @@ reviewForm.addEventListener("submit", function(e) {
         return;
     }
 
-    totalComments++;
-    commentCount.innerText = totalComments;
+    if (!emailPattern.test(email)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
 
     const stars = "⭐".repeat(rating);
 
@@ -332,7 +364,8 @@ reviewForm.addEventListener("submit", function(e) {
         },
         body: JSON.stringify({
             recipe_id: window.location.pathname.split("/").pop(),
-            content: comment
+            content: comment,
+            email: email
         })
     })
     .then(res => res.json())
@@ -358,10 +391,13 @@ reviewForm.addEventListener("submit", function(e) {
     successMessage.style.display = "block";
     setTimeout(() => { successMessage.style.display = "none"; }, 3000);
     reviewForm.reset();
+    ratingText.innerText = "Click to rate";
 
     }
     });
 });
+
+loadComments();
 
 </script>
 

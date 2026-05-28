@@ -1522,14 +1522,13 @@ def toggle_save():
 
 @app.route("/comment/add", methods=["POST"])
 def add_comment():
-    if "user" not in session:
-        return jsonify({"error": "login required"}), 401
 
     data = request.get_json()
+
     recipe_id = data["recipe_id"]
     content = data["content"]
+    user_email = data["email"]
 
-    # ✅ 这里加防空评论
     if not content.strip():
         return jsonify({"error": "empty comment"}), 400
 
@@ -1539,7 +1538,7 @@ def add_comment():
     c.execute("""
         INSERT INTO comments (recipe_id, user_email, content)
         VALUES (?, ?, ?)
-    """, (recipe_id, session["user"], content))
+    """, (recipe_id, user_email, content))
 
     conn.commit()
     conn.close()
