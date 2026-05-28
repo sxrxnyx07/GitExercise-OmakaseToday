@@ -2,9 +2,7 @@
 <html>
 <head>
     <title>Recipe Detail | Omakase Today</title>
-
     <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
-
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -25,8 +23,6 @@
         <h1 class="hero-title">{{ recipe['name'].upper() }}</h1>
         <p class="hero-sub">FAST AND DELICIOUS FOR WHOLE FAMILY</p>
         <p class="hero-sub small">LET'S DO IT TOGETHER ✨</p>
-
-        <!-- SCREEN WAKE BUTTON 不熄屏 -->
         <div class="wake-wrapper">
             <label class="toggle-switch">
                 <input type="checkbox" id="wakeToggle">
@@ -41,16 +37,11 @@
 
     <!-- TOP GRID -->
     <div class="top-grid">
-
-        <!-- IMAGE -->
         <div class="image-box">
             <img src="{{ recipe['image'] }}">
         </div>
-
-        <!-- WHY -->
         <div class="card why-card">
             <h3 class="why-title">💛 Why You'll Love This ??</h3>
-
             <ul class="why-list">
                 <li>☑️Quick and easy</li>
                 <li>☑️Rich and flavorful</li>
@@ -58,67 +49,50 @@
                 <li>☑️Great for anyday</li>
             </ul>
         </div>
-
     </div>
 
-<!-- MIDDLE GRID -->
-<div class="mid-grid">
-
-    <!-- 🔥 左侧：Ingredients + Highlights -->
-    <div class="left-column">
-        <div class="card ingredient-card">
-            <h3>🥕 Ingredients</h3>
-            <p class="ingredient-hint">
-            🌟 If you're unsure about any ingredient, feel free to click and explore more 🔍
-            </p>
-            <div class="ingredient-grid">
-                {% for item in recipe['clean_ingredients'].split(',') %}
-
-                <!-- Call out the Google for ingredients, not manually -->
-                    <a class="ingredient-link"
-                        href="https://www.google.com/search?q={{ item.strip() }}"
-                        target="_blank">
+    <!-- MIDDLE GRID -->
+    <div class="mid-grid">
+        <div class="left-column">
+            <div class="card ingredient-card">
+                <h3>🥕 Ingredients</h3>
+                <p class="ingredient-hint">🌟 If you're unsure about any ingredient, feel free to click and explore more 🔍</p>
+                <div class="ingredient-grid">
+                    {% for item in recipe['clean_ingredients'].split(',') %}
+                    <a class="ingredient-link" href="https://www.google.com/search?q={{ item.strip() }}" target="_blank">
                         {{ item.strip() }}
                     </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="ingredient-highlight">
+                <h4>✨ Ingredients Highlights</h4>
+                <ul class="highlight-list">
+                    <li>🥑 Fresh & Natural</li>
+                    <li>🍃 Nutrient-Rich</li>
+                    <li>🔥 Easy to Find</li>
+                </ul>
+            </div>
+        </div>
+        <div class="card required-card">
+            <h3>📏 Required Amount</h3>
+            <div class="ingredient-grid">
+                {% for item in recipe['full_ingredients'].split(',') %}
+                <div class="ingredient-line">{{ item.strip() }}</div>
                 {% endfor %}
             </div>
         </div>
-        
-        <!-- 🔥 Ingredients Highlights（左侧下方） -->
-        <div class="ingredient-highlight">
-            <h4>✨ Ingredients Highlights</h4>
-            <ul class="highlight-list">
-                <li>🥑 Fresh & Natural</li>
-                <li>🍃 Nutrient-Rich</li>
-                <li>🔥 Easy to Find</li>
-            </ul>
-        </div>
     </div>
 
-    <!-- 🔥 右侧：Required Amount（不变） -->
-    <div class="card required-card">
-        <h3>📏 Required Amount</h3>
-        <div class="ingredient-grid">
-            {% for item in recipe['full_ingredients'].split(',') %}
-                <div class="ingredient-line">{{ item.strip() }}</div>
-            {% endfor %}
-        </div>
-    </div>
-
-</div>
-
-</div>
-
-    <!-- DIRECTIONS FULL WIDTH -->
+    <!-- DIRECTIONS -->
     <div class="card full">
         <h3>📖 Directions</h3>
-
         {% set steps = recipe['directions'].split('.') %}
         {% for step in steps if step.strip() %}
-            <div class="step">
-                <span class="step-num">{{ loop.index }}</span>
-                <span>{{ step.strip() }}</span>
-            </div>
+        <div class="step">
+            <span class="step-num">{{ loop.index }}</span>
+            <span>{{ step.strip() }}</span>
+        </div>
         {% endfor %}
     </div>
 
@@ -128,135 +102,83 @@
         <span>🌶 {{ recipe['flavor_type'] }}</span>
     </div>
 
-<!-- REVIEW SECTION -->
-<div class="review-section">
+    <!-- REVIEW SECTION -->
+    <div class="review-section">
+        <div class="review-card">
+            <h2 class="review-title">⭐ Recipe Reviews</h2>
+            <p class="review-subtitle">Share your cooking experience with others 🍳</p>
+            
+            <div id="successMessage" class="success-message">✅ Thank you! Your review has been submitted.</div>
 
-    <div class="review-card">
+            <!-- FORM -->
+            <form id="reviewForm">
+                <!-- ⭐ 新加：显示正在回复谁 -->
+                <div id="replyingTo" class="replying-to" style="display: none;">
+                    Replying to <span id="replyingToName"></span>
+                    <button type="button" onclick="cancelReply()">✕</button>
+                </div>
 
-        <h2 class="review-title">
-            ⭐ Recipe Reviews
-        </h2>
+                <div class="review-input-grid">
+                    <input type="text" id="username" placeholder="Your Name" required>
+                    <input type="email" id="email" placeholder="Your Email" required>
+                </div>
 
-        <p class="review-subtitle">
-            Share your cooking experience with others 🍳
-        </p>
+                <div class="rating-select">
+                    <label class="rating-label">Recipe Rating</label>
+                    <p id="ratingText" style="text-align: center; margin-top: 10px; color: #6d819e; font-size: 14px;">
+                        Click to rate
+                    </p>
+                </div>
+                
+                <div class="star-rating-container">
+                    <input type="radio" name="rating" id="star1" class="star-rating-input" value="5">
+                    <label for="star1" class="star-rating-label">★</label>
+                    <input type="radio" name="rating" id="star2" class="star-rating-input" value="4">
+                    <label for="star2" class="star-rating-label">★</label>
+                    <input type="radio" name="rating" id="star3" class="star-rating-input" value="3">
+                    <label for="star3" class="star-rating-label">★</label>
+                    <input type="radio" name="rating" id="star4" class="star-rating-input" value="2">
+                    <label for="star4" class="star-rating-label">★</label>
+                    <input type="radio" name="rating" id="star5" class="star-rating-input" value="1">
+                    <label for="star5" class="star-rating-label">★</label>
+                </div>
 
-        <!-- SUCCESS MESSAGE -->
-        <div id="successMessage" class="success-message">
-            ✅ Thank you! Your review has been submitted.
+                <textarea id="comment" class="comment-input" placeholder="Share your cooking experience..." required></textarea>
+
+                <div class="notify-wrapper">
+                    <span class="notify-icon">🔔</span>
+                    <label>
+                        <input type="checkbox" class="notify-checkbox">
+                        Notify me by email when someone replies
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-review-btn">Submit Review ✨</button>
+            </form>
         </div>
 
-        <!-- FORM -->
-        <form id="reviewForm">
-
-            <div class="review-input-grid">
-
-                <input 
-                    type="text"
-                    id="username"
-                    placeholder="Your Name"
-                    required
-                >
-
-                <input 
-                    type="email"
-                    id="email"
-                    placeholder="Your Email"
-                    required
-                >
-
-            </div>
-
-<!-- RATING - CLICKABLE STARS -->
-<div class="rating-select">
-    <label class="rating-label">Recipe Rating ⭐</label>
-        <p id="ratingText" style="text-align: center; margin-top: 10px; color: #6d819e; font-size: 14px;">
-            Click to rate
-        </p>
-</div>
-    
-    <!-- 反转数值！-->
-<div class="star-rating-container">
-    <!-- 反过来：5 在左边，1 在右边 -->
-    <input type="radio" name="rating" id="star1" class="star-rating-input" value="5">
-    <label for="star1" class="star-rating-label">★</label>
-    
-    <input type="radio" name="rating" id="star2" class="star-rating-input" value="4">
-    <label for="star2" class="star-rating-label">★</label>
-    
-    <input type="radio" name="rating" id="star3" class="star-rating-input" value="3">
-    <label for="star3" class="star-rating-label">★</label>
-    
-    <input type="radio" name="rating" id="star4" class="star-rating-input" value="2">
-    <label for="star4" class="star-rating-label">★</label>
-    
-    <input type="radio" name="rating" id="star5" class="star-rating-input" value="1">
-    <label for="star5" class="star-rating-label">★</label>
-</div>
-
-            <!-- COMMENT -->
-            <textarea
-                id="comment"
-                placeholder="Share your cooking experience..."
-                required
-            ></textarea>
-
-        <!-- EMAIL NOTIFY -->
-        <div class="notify-wrapper">
-            <span class="notify-icon">🔔</span>
-            <label>
-                <input type="checkbox" class="notify-checkbox">
-                Notify me by email when someone replies
-            </label>
+        <!-- COMMENT LIST -->
+        <div class="comment-display-card">
+            <h3 class="comment-count-title">💬 Total Reviews (<span id="commentCount">0</span>)</h3>
+            <div id="commentList"></div>
         </div>
-
-            <button type="submit" class="submit-review-btn">
-                Submit Review ✨
-            </button>
-
-        </form>
-
     </div>
 
-    <!-- COMMENT LIST -->
-    <div class="comment-display-card">
-
-        <h3 class="comment-count-title">
-            💬 Total Reviews (<span id="commentCount">0</span>)
-        </h3>
-
-        <div id="commentList">
-
-            <!-- COMMENTS WILL APPEAR HERE -->
-
-        </div>
-
+    <div class="nav-section recipe-nav">
+        <a href="/" class="home-btn">🏠 Home</a>
+        <a href="/{{ recipe['meal_category'] | lower }}" class="back-btn">← Back to {{ recipe['meal_category'] }}</a>
     </div>
-
-</div>
-
-<div class="nav-section recipe-nav">
-    <a href="/" class="home-btn">🏠 Home</a>
-
-    <a href="/{{ recipe['meal_category'] | lower }}" class="back-btn">
-        ← Back to {{ recipe['meal_category'] }}
-    </a>
-</div>
 
 </div>
 
 </div>
 
 <script>
-// ⭐ 生成星星的函数
+// 生成星星
 function getStarsHtml(rating) {
     let stars = "";
     for (let i = 1; i <= 5; i++) {
-        if (i <= rating) {
-            stars += "<span class='star-filled'>★</span>";
-        } else {
-            stars += "<span class='star-empty'>★</span>";
-        }
+        stars += i <= rating ? "<span class='star-filled'>★</span>" : "<span class='star-empty'>★</span>";
     }
     return stars;
 }
@@ -266,11 +188,7 @@ const starInputs = document.querySelectorAll('.star-rating-input');
 const ratingText = document.getElementById('ratingText');
 
 const ratingMessages = {
-    "1": "😡Poor😡",
-    "2": "😐Fair😐", 
-    "3": "🤗Good🤗",
-    "4": "👍🏻Great👍🏻",
-    "5": "❤️Excellent❤️"
+    "1": "Poor", "2": "Fair", "3": "Good", "4": "Great", "5": "Excellent"
 };
 
 starInputs.forEach(input => {
@@ -280,9 +198,7 @@ starInputs.forEach(input => {
 });
 
 // Wake lock
-let wakeLock = null;
-let isAwake = false;
-
+let wakeLock = null; let isAwake = false;
 const wakeToggle = document.getElementById("wakeToggle");
 
 async function toggleWakeLock() {
@@ -291,39 +207,40 @@ async function toggleWakeLock() {
             wakeLock = await navigator.wakeLock.request("screen");
             isAwake = true;
         } else {
-            if (wakeLock) {
-                await wakeLock.release();
-            }
-            wakeLock = null;
-            isAwake = false;
+            if (wakeLock) await wakeLock.release();
+            wakeLock = null; isAwake = false;
         }
-    } catch (err) {
-        console.log(err);
-        wakeToggle.checked = false;
-    }
+    } catch (err) { wakeToggle.checked = false; }
 }
-
 wakeToggle.addEventListener("change", toggleWakeLock);
 
-// Form submit
+// Form elements - ⭐ 更新版本
 const reviewForm = document.getElementById("reviewForm");
 const commentList = document.getElementById("commentList");
 const commentCount = document.getElementById('commentCount');
 const successMessage = document.getElementById("successMessage");
+const commentInput = document.getElementById('comment');
+const replyingTo = document.getElementById('replyingTo');
+const replyingToName = document.getElementById('replyingToName');
 
-// ⭐ 加载评论 - 用新格式
+// ⭐ 从 session 拿 user email
+const currentUserEmail = "{{ session.get('user', '') }}";
+
+// 加载评论
 function loadComments() {
-
     const recipeId = window.location.pathname.split("/").pop();
 
     fetch(`/comment/${recipeId}`)
         .then(res => res.json())
         .then(data => {
-
             commentList.innerHTML = "";
-
+            
             data.forEach(c => {
-                const name = c.username || "User";  // ⭐ 用 username
+                const name = c.username || "User";
+                // ⭐ 用 session 的 email 检查能不能删除
+                const canDelete = currentUserEmail && c.user_email === currentUserEmail;
+                const deleteBtn = canDelete ? `<button class="delete-btn" onclick="deleteComment(${c.id})">🗑️</button>` : '';
+                
                 const commentHTML = `
                     <div class="single-comment">
                         <div class="comment-avatar">${name.charAt(0).toUpperCase()}</div>
@@ -335,18 +252,48 @@ function loadComments() {
                             <p class="comment-text">${c.content}</p>
                             <div class="comment-footer">
                                 <span class="comment-date">${c.created_at || 'Just now'}</span>
-                                <button class="reply-btn">Reply</button>
+                                <button class="reply-btn" onclick="showReply(${c.id}, '${name}')">Reply</button>
+                                ${deleteBtn}
                             </div>
                         </div>
                     </div>
                 `;
                 commentList.innerHTML += commentHTML;
             });
-
             commentCount.innerText = data.length;
         });
 }
 
+// ⭐ 点击 Reply - 滚动到输入框
+function showReply(commentId, username) {
+    replyingTo.style.display = "flex";
+    replyingToName.innerText = username;
+    commentInput.dataset.replyTo = commentId;
+    commentInput.scrollIntoView({behavior: "smooth", block: "center"});
+    commentInput.focus();
+    commentInput.placeholder = `Replying to ${username}...`;
+}
+
+// ⭐ 取消回复
+function cancelReply() {
+    replyingTo.style.display = "none";
+    commentInput.dataset.replyTo = "";
+    commentInput.placeholder = "Share your cooking experience...";
+}
+
+// Delete comment
+function deleteComment(commentId) {
+    if (!confirm("Delete this comment?")) return;
+    fetch(`/comment/delete/${commentId}`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({comment_id: commentId})
+    })
+    .then(res => res.json())
+    .then(data => { if (data.success) loadComments(); });
+}
+
+// Submit form
 reviewForm.addEventListener("submit", function(e) {
     e.preventDefault();
 
@@ -354,42 +301,33 @@ reviewForm.addEventListener("submit", function(e) {
     const email = document.getElementById("email").value;
     
     const ratingInput = document.querySelector('input[name="rating"]:checked');
-    if (!ratingInput) {
-        alert("Please select a rating!");
-        return;
-    }
+    if (!ratingInput) { alert("Please select a rating!"); return; }
     const rating = parseInt(ratingInput.value);
-    
-    const comment = document.getElementById("comment").value;
+    const comment = commentInput.value;
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-        alert("Please enter a valid email address.");
-        return;
-    }
+    if (!emailPattern.test(email)) { alert("Please enter a valid email address."); return; }
 
     const recipeId = window.location.pathname.split("/").pop();
+    const parentId = commentInput.dataset.replyTo || null;
 
     fetch("/comment/add", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             recipe_id: recipeId,
             content: comment,
             email: email,
             username: username, 
-            rating: rating
+            rating: rating,
+            parent_id: parentId
         })
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            // ⭐ 成功！直接增加数量
             commentCount.innerText = parseInt(commentCount.innerText) + 1;
             
-            // ⭐ 显示新comment - 新格式
             const commentHTML = `
                 <div class="single-comment">
                     <div class="comment-avatar">${username.charAt(0).toUpperCase()}</div>
@@ -401,7 +339,7 @@ reviewForm.addEventListener("submit", function(e) {
                         <p class="comment-text">${comment}</p>
                         <div class="comment-footer">
                             <span class="comment-date">Just now</span>
-                            <button class="reply-btn">Reply</button>
+                            <button class="reply-btn" onclick="showReply(0, '${username}')">Reply</button>
                         </div>
                     </div>
                 </div>
@@ -410,18 +348,17 @@ reviewForm.addEventListener("submit", function(e) {
             
             successMessage.style.display = "block";
             setTimeout(() => { successMessage.style.display = "none"; }, 3000);
+            
+            // ⭐ 成功后清空 form
             reviewForm.reset();
             ratingText.innerText = "Click to rate";
+            commentInput.placeholder = "Share your cooking experience...";
+            replyingTo.style.display = "none";
         }
-    })
-    .catch(err => {
-        console.log(err);
-        alert("Error: " + JSON.stringify(err));
     });
 });
 
 loadComments();
-
 </script>
 
 </body>

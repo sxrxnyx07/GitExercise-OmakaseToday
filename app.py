@@ -123,6 +123,7 @@ def init_db():
         username TEXT,
         content TEXT,
         rating INTEGER,
+        parent_id INTEGER DEFAULT NULL,  
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -1533,6 +1534,7 @@ def add_comment():
     username = request.json.get('username')
     rating = request.json.get('rating')
     content = request.json.get('content')
+    parent_id = request.json.get('parent_id')  # ⭐ reply
     
     print("recipe_id:", recipe_id)
     print("email:", email)
@@ -1551,8 +1553,8 @@ def add_comment():
 
     # 简单写法
     c.execute(
-        "INSERT INTO comments (recipe_id, user_email, username, rating, content) VALUES (?, ?, ?, ?, ?)",
-        (recipe_id, email, username, rating, content)
+        "INSERT INTO comments (recipe_id, user_email, username, rating, content, parent_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (recipe_id, email, username, rating, content, parent_id)
     )
     
     print("SQL executed!")
@@ -1570,7 +1572,7 @@ def get_comments(recipe_id):
     c = conn.cursor()
 
     c.execute("""
-        SELECT user_email, username, content, created_at, rating
+        SELECT id, user_email, username, content, created_at, rating
         FROM comments
         WHERE recipe_id=?
         ORDER BY created_at DESC
@@ -1581,14 +1583,43 @@ def get_comments(recipe_id):
 
     return jsonify([
         {
-            "user_email": c[0],
-            "username": c[1],       # ⭐ 加这个
-            "content": c[2],
-            "created_at": c[3],
-            "rating": c[4]
+            "id": c[0],
+            "user_email": c[1],
+            "username": c[2],
+            "content": c[3],
+            "created_at": c[4],
+            "rating": c[5]
         }
         for c in comments
     ])
+
+@app.route("/comment/delete/<int:comment_id>", methods=["POST"])
+def delete_comment():
+    if "user" not in session:
+        return jsonify({"error": "login required"}), 401
+    
+    comment_id = request.json.get('comment_id')
+    user_email = session["user"]
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 检查是不是自己的comment
+    c.execute("SELECT user_email FROM comments WHERE id = ?", (comment_id,))
+    comment = c.fetchone()
+    
+    if not comment:
+        return jsonify({"error": "comment not found"}), 404
+    
+    # 只有自己能删除！
+    if comment[0] != user_email:
+        return jsonify({"error": "cannot delete others' comment"}), 403
+    
+    c.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"success": True})
 
 if __name__ == "__main__":
     app.run(debug=True)
