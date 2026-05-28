@@ -93,12 +93,12 @@
     const clearBtn = document.getElementById('clearSearch');
     const suggestionsBox = document.getElementById('suggestions');
 
-    // --- X BUTTON LOGIC ---
+    
     if (clearBtn) {
         clearBtn.addEventListener('click', function() {
-            searchInput.value = ''; // Only clear the input
-            suggestionsBox.style.display = "none"; // Hide suggestions
-            this.style.display = 'none'; // Hide the X itself
+            searchInput.value = ''; 
+            suggestionsBox.style.display = "none"; 
+            this.style.display = 'none'; 
             searchInput.focus();
         });
     }
