@@ -1570,7 +1570,7 @@ def get_comments(recipe_id):
     c = conn.cursor()
 
     c.execute("""
-        SELECT user_email, content, created_at, rating
+        SELECT user_email, username, content, created_at, rating
         FROM comments
         WHERE recipe_id=?
         ORDER BY created_at DESC
@@ -1582,9 +1582,10 @@ def get_comments(recipe_id):
     return jsonify([
         {
             "user_email": c[0],
-            "content": c[1],
-            "created_at": c[2],
-            "rating": c[3]
+            "username": c[1],       # ⭐ 加这个
+            "content": c[2],
+            "created_at": c[3],
+            "rating": c[4]
         }
         for c in comments
     ])

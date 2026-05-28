@@ -323,7 +323,7 @@ function loadComments() {
             commentList.innerHTML = "";
 
             data.forEach(c => {
-                const name = c.username || c.user_email || "User";
+                const name = c.username || "User";  // ⭐ 用 username
                 const commentHTML = `
                     <div class="single-comment">
                         <div class="comment-avatar">${name.charAt(0).toUpperCase()}</div>
