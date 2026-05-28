@@ -11,8 +11,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
-from flask import Flask, render_template, request, jsonify
-from flask import Flask, render_template, request, redirect, url_for, session
 
 
 
@@ -122,7 +120,9 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         recipe_id INTEGER,
         user_email TEXT,
+        username TEXT,
         content TEXT,
+        rating INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -1523,25 +1523,44 @@ def toggle_save():
 @app.route("/comment/add", methods=["POST"])
 def add_comment():
 
-    data = request.get_json()
+    # 直接打印看看
+    print("=== comment/add called ===")
+    print("JSON:", request.json)
+    print("Data:", request.get_json())
+    
+    recipe_id = request.json.get('recipe_id')
+    email = request.json.get('email')
+    username = request.json.get('username')
+    rating = request.json.get('rating')
+    content = request.json.get('content')
+    
+    print("recipe_id:", recipe_id)
+    print("email:", email)
+    print("username:", username)
+    print("rating:", rating)
+    print("content:", content)
 
-    recipe_id = data["recipe_id"]
-    content = data["content"]
-    user_email = data["email"]
-
-    if not content.strip():
+    if not content:
         return jsonify({"error": "empty comment"}), 400
+    
+    if not email:
+        return jsonify({"error": "email required"}), 400
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    c.execute("""
-        INSERT INTO comments (recipe_id, user_email, content)
-        VALUES (?, ?, ?)
-    """, (recipe_id, user_email, content))
+    # 简单写法
+    c.execute(
+        "INSERT INTO comments (recipe_id, user_email, username, rating, content) VALUES (?, ?, ?, ?, ?)",
+        (recipe_id, email, username, rating, content)
+    )
+    
+    print("SQL executed!")
 
     conn.commit()
     conn.close()
+    
+    print("Done!")
 
     return jsonify({"success": True})
 
@@ -1551,7 +1570,7 @@ def get_comments(recipe_id):
     c = conn.cursor()
 
     c.execute("""
-        SELECT user_email, content, created_at
+        SELECT user_email, content, created_at, rating
         FROM comments
         WHERE recipe_id=?
         ORDER BY created_at DESC
@@ -1564,7 +1583,8 @@ def get_comments(recipe_id):
         {
             "user_email": c[0],
             "content": c[1],
-            "created_at": c[2]
+            "created_at": c[2],
+            "rating": c[3]
         }
         for c in comments
     ])

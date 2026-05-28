@@ -315,7 +315,9 @@ function loadComments() {
                         <div class="comment-top">
                             <div>
                                 <h4>${c.user_email}</h4>
-                                <div class="comment-stars">⭐</div>
+                                <div class="comment-stars">
+                                    ⭐${"⭐".repeat(c.rating)}
+                                </div>
                             </div>
                             <span class="comment-date">${c.created_at}</span>
                         </div>
@@ -336,26 +338,24 @@ reviewForm.addEventListener("submit", function(e) {
     const username = document.getElementById("username").value;
     const email = document.getElementById("email").value;
     
-    // 修复！用 querySelector 获取 checked radio
+    // 确保有 rating
     const ratingInput = document.querySelector('input[name="rating"]:checked');
-    const rating = ratingInput ? ratingInput.value : 0;
+    if (!ratingInput) {
+        alert("Please select a rating!");
+        return;
+    }
+    const rating = parseInt(ratingInput.value);
     
     const comment = document.getElementById("comment").value;
 
-    // Email validation
+    // Email 格式检查
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!emailPattern.test(email)) {
         alert("Please enter a valid email address.");
         return;
     }
 
-    if (!emailPattern.test(email)) {
-        alert("Please enter a valid email address.");
-        return;
-    }
-
-    const stars = "⭐".repeat(rating);
+    const recipeId = window.location.pathname.split("/").pop();
 
     fetch("/comment/add", {
         method: "POST",
@@ -363,37 +363,39 @@ reviewForm.addEventListener("submit", function(e) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            recipe_id: window.location.pathname.split("/").pop(),
+            recipe_id: recipeId,
             content: comment,
-            email: email
+            email: email,           // 从 form 拿
+            username: username, 
+            rating: rating
         })
     })
     .then(res => res.json())
     .then(data => {
-
-    if (data.success) {
-
-    const commentHTML = `
-        <div class="single-comment">
-            <div class="comment-top">
-                <div>
-                    <h4>${username}</h4>
-                    <div class="comment-stars">${stars}</div>
+        if (data.success) {
+            // 成功！
+            const commentHTML = `
+                <div class="single-comment">
+                    <div class="comment-top">
+                        <div>
+                            <h4>${username}</h4>
+                            <div class="comment-stars">${"⭐".repeat(rating)}</div>
+                        </div>
+                        <span class="comment-date">Just now</span>
+                    </div>
+                    <p class="comment-text">${comment}</p>
                 </div>
-                <span class="comment-date">Just now</span>
-            </div>
-            <p class="comment-text">${comment}</p>
-            <button class="reply-btn">Reply</button>
-        </div>
-    `;
-
-    commentList.innerHTML = commentHTML + commentList.innerHTML;
-    successMessage.style.display = "block";
-    setTimeout(() => { successMessage.style.display = "none"; }, 3000);
-    reviewForm.reset();
-    ratingText.innerText = "Click to rate";
-
-    }
+            `;
+            commentList.innerHTML = commentHTML + commentList.innerHTML;
+            successMessage.style.display = "block";
+            setTimeout(() => { successMessage.style.display = "none"; }, 3000);
+            reviewForm.reset();
+            ratingText.innerText = "Click to rate";
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        alert("Error: " + JSON.stringify(err));  // ⭐ 显示错误！
     });
 });
 
