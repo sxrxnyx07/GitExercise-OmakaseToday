@@ -1320,10 +1320,6 @@ def db_test():
 def about():
     return render_template('about.html')
 
-@app.route('/random-page')
-def random_page():
-    return render_template('random.html')
-
 @app.route('/breakfast')
 def breakfast():
 
