@@ -486,7 +486,7 @@ button:disabled {
 
 .hero-sub.small {
     font-size: 14px;
-    color: #aaa;
+    color: #0067bb;
 }
 
 /* 图片 - 🔥 已优化 */
@@ -1307,4 +1307,501 @@ button:disabled {
 
 .info-img:hover {
     transform: scale(1.01);
+}
+
+/*_________ Heart Button _______*/
+
+.heart-btn{
+    position: absolute;
+    top: 15px;
+    right: 15px;
+
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(0,0,0,0.3);
+
+    border: none;
+    border-radius: 50%;
+
+    color: white;
+    -webkit-text-fill-color: white;
+
+    font-size: 24px;
+
+    z-index: 999;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    text-shadow: 0px 0px 8px rgba(0,0,0,0.8);
+
+    padding: 0;
+}
+
+.heart-btn.saved{
+    color: #ff4d6d;
+    -webkit-text-fill-color: #ff4d6d;
+
+    background: rgba(255,255,255,0.15);
+}
+
+.heart-btn:disabled{
+    opacity: 1;
+}
+
+.heart-btn:hover{
+    transform: scale(1.1);
+}
+
+.heart-btn.saved:hover {
+    transform: scale(1.1);
+}
+
+.recipe-card{
+    position: relative;
+}
+
+/*_________ Keep Screen Awake Button _______*/
+
+/* ===== TOGGLE SWITCH ===== */
+.wake-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 70px;
+    height: 36px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider track */
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #ccc;
+    border-radius: 36px;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* The circle knob */
+.toggle-slider::before {
+    content: "";
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* ON state - green */
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(45deg, #4caf50, #8bc34a);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(34px);
+}
+
+/* OFF state - gray */
+.toggle-switch input:not(:checked) + .toggle-slider {
+    background: linear-gradient(45deg, #9e9e9e, #bdbdbd);
+}
+
+/* Label text */
+.toggle-label {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    pointer-events: none;
+    z-index: 1;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    box-sizing: border-box;
+}
+
+.toggle-label span:first-child {
+    opacity: 0.5;
+}
+
+.toggle-label span:last-child {
+    opacity: 0;
+}
+
+.toggle-switch input:checked ~ .toggle-label span:first-child {
+    opacity: 0;
+}
+
+.toggle-switch input:checked ~ .toggle-label span:last-child {
+    opacity: 1;
+}
+
+/* ===== REVIEW & COMMENT SECTION ===== */
+
+.review-section {
+    margin-top: 50px;
+}
+
+.review-card,
+.comment-display-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 35px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.review-title {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.review-subtitle {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.review-input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-bottom: 20px;
+}
+
+/* ===== STAR RATING - CLICK ONLY ===== */
+.review-input-grid input,
+.rating-label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.star-rating-container {
+    display: flex;
+    flex-direction: row-reverse;  /* ⬅️ 反过来 */
+    gap: 8px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.star-rating-input {
+    display: none;
+}
+
+.star-rating-label {
+    font-size: 38px;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover - 悬停变金 */
+.star-rating-label:hover {
+    color: #ffc107;
+    transform: scale(1.2);
+}
+
+/* ⭐ 关键！点击的星 + 右边全部都变金 */
+.star-rating-input:checked ~ .star-rating-label {
+    color: #ffc107;
+}
+
+/* ===== EMAIL NOTIFY TOGGLE ===== */
+.notify-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 15px 25px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.notify-wrapper label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* ===== EMAIL NOTIFY - NICE CHECKBOX ===== */
+.notify-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #fff8e7, #ffe8cc);
+    border-radius: 15px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    border: 2px solid #ffb703;
+}
+
+.notify-wrapper label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Nice styled checkbox */
+.notify-checkbox {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.notify-checkbox:checked {
+    background: #4caf50;
+    border-color: #4caf50;
+}
+
+.notify-checkbox:checked::after {
+    content: "✓";
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.notify-checkbox:hover {
+    border-color: #ffb703;
+    transform: scale(1.1);
+}
+
+/* Bell icon */
+.notify-icon {
+    font-size: 18px;
+}
+
+.submit-review-btn {
+    margin-top: 25px;
+    background: black;
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 999px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.submit-review-btn:hover {
+    transform: translateY(-2px);
+}
+
+.success-message {
+    display: none;
+    background: #dff6dd;
+    color: #1e7d34;
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* ===== SINGLE COMMENT - GOOGLE STYLE ===== */
+.single-comment {
+    display: flex;
+    gap: 12px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 14px;
+}
+
+/* 头像 */
+.comment-avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4285f4, #34a853);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 主体 */
+.comment-body {
+    flex: 1;
+    min-width: 0;
+}
+
+/* 日期 - 在上面 */
+.comment-date {
+    font-size: 12px;
+    color: #5f6368;
+    margin-bottom: 2px;
+}
+
+/* 名字 */
+.comment-username {
+    font-weight: 500;
+    font-size: 14px;
+    color: #202124;
+    display: block;
+    margin-bottom: 4px;
+    margin-right: 900px;
+}
+
+/* 星星 */
+.comment-stars {
+    display: flex;
+    gap: 1px;
+}
+
+.star-filled {
+    color: #fbbc04;
+    font-size: 14px;
+}
+
+.star-empty {
+    color: #e0e0e0;
+    font-size: 14px;
+}
+
+/* Comment 文字 */
+.comment-text {
+    margin: 10px 0 0 0;
+    line-height: 1.5;
+    color: #4d5156;
+    font-size: 14px;
+    margin-right: 800px;
+}
+
+/* Footer */
+.comment-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Reply 显示区域 */
+.replying-to {
+    display: none;
+    background: #e3f2fd;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #1976d2;
+    align-items: center;
+    gap: 10px;
+}
+
+.replying-to button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+/* Comment 输入框 - 大一点 */
+.comment-input {
+    width: 100%;
+    min-height: 100px;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    font-size: 15px;
+    resize: vertical;
+    margin-top: 15px;
+}
+
+.comment-input:focus {
+    border-color: #ffb703;
+    outline: none;
+}
+
+/* Reply button */
+.reply-btn {
+    background: transparent;
+    border: none;
+    color: #1976d2;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.reply-btn:hover {
+    background: #e3f2fd;
+}
+
+/* Delete button */
+.delete-btn {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    opacity: 0.6;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+    background: #ffebee;
 }

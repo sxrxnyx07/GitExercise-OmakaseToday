@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gacha Recipe System</title>
+    <title>Breakfast | Omakase Today</title>
+
+    <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -33,7 +35,7 @@
 <div class="machine-wrapper">
 
     <img id="gachaImg" class="gacha-img fade-in"
-         src="{{ url_for('static', filename='image2/gacha1.png') }}">   <!-- GACHA IMAGE -->
+         src="{{ url_for('static', filename='image2/gacha1.png') }}">
 
     <div class="balls-inside" id="ballsInside"></div>
 
@@ -69,6 +71,15 @@
     {% for r in recipes %}
 
 <div class="recipe-card small-card">
+        <!-- Updated heart button with toggleSave -->
+    <button
+        type="button"
+        class="heart-btn {% if r.id in saved_ids %}saved{% endif %}"
+        data-id="{{ r['id'] }}"
+        onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)"
+        {% if r.id in saved_ids %}disabled{% endif %}>
+        ❤
+    </button>
 
     <div class="image-container">
         <img src="{{ r['image'] }}">
@@ -193,7 +204,7 @@ function spin() {
     // ⭐ reset ONLY state 
     ball.className = "ball";
 
-    // start animations
+    // start animation
     gachaImg.classList.add("shake");
     inside.classList.add("spin-inside");
 
@@ -219,7 +230,7 @@ function spin() {
         ball.classList.add(randomColor);
         ball.classList.add("drop");
 
-        const category = "Breakfast"; // ⭐ 每个页面改这里
+        const category = "Breakfast";
 
         Promise.all([
             fetch('/random-recipe?category=' + category).then(res => res.json()),
@@ -263,6 +274,9 @@ function spin() {
                 // ⭐ 5个推荐
                 let suggestionCards = listData.map(r => `
                     <div class="recipe-card small-card">
+                        <button type="button" class="heart-btn" 
+                            data-id="${r.id}"
+                            onclick="event.stopPropagation(); toggleSave(this)">❤</button>
 
                         <div class="image-container">
                             <img src="${r.image}">
@@ -349,6 +363,27 @@ function backToAllRecipes() {
     document.getElementById("warningMsg").innerText = "";
 }
 
+    function toggleSave(button) {
+
+        const recipeId = button.dataset.id;
+
+        fetch('/toggle-save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                recipe_id: recipeId
+            })
+        })
+        .then(response => {
+
+            if (response.ok) {
+                button.classList.toggle('saved');
+            }
+        })
+        .catch(error => console.log(error));
+    }
 </script>
 
 </body>

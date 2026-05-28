@@ -11,10 +11,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
-from flask import Flask, render_template, request, jsonify
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask import request, render_template, jsonify, redirect, url_for
-
 
 
 app = Flask(__name__)
@@ -115,6 +111,19 @@ def init_db():
         user_email TEXT,
         keyword TEXT,
         searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    #sidney member 2
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipe_id INTEGER,
+        user_email TEXT,
+        username TEXT,
+        content TEXT,
+        rating INTEGER,
+        parent_id INTEGER DEFAULT NULL,  
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
     conn.commit()
@@ -1326,7 +1335,17 @@ def breakfast():
     ).fetchall()
 
     conn.close()
-    return render_template('breakfast.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'breakfast.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/lunch')
 def lunch():
@@ -1338,7 +1357,17 @@ def lunch():
     ).fetchall()
 
     conn.close()
-    return render_template('lunch.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'lunch.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/dinner')
 def dinner():
@@ -1350,7 +1379,17 @@ def dinner():
     ).fetchall()
 
     conn.close()
-    return render_template('dinner.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'dinner.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/dessert')
 def dessert():
@@ -1362,7 +1401,17 @@ def dessert():
     ).fetchall()
 
     conn.close()
-    return render_template('dessert.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'dessert.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/drinks')
 def drinks():
@@ -1374,7 +1423,17 @@ def drinks():
     ).fetchall()
 
     conn.close()
-    return render_template('drinks.html', recipes=recipes)
+    
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'drinks.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/random')
 def random_recipe():
@@ -1451,6 +1510,149 @@ def test_foodtype():
     conn.close()
 
     return jsonify([dict(row) for row in rows])
+
+@app.route("/toggle-save", methods=["POST"])
+def toggle_save():
+
+    if "user" not in session:
+        return jsonify({"error": "login required"}), 401
+
+    data = request.get_json()
+    recipe_id = data.get("recipe_id")
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT * FROM saved_recipes
+        WHERE user_email=? AND recipe_id=?
+    """, (session["user"], recipe_id))
+
+    existing = c.fetchone()
+
+    if existing:
+        c.execute("""
+            DELETE FROM saved_recipes
+            WHERE user_email=? AND recipe_id=?
+        """, (session["user"], recipe_id))
+
+        saved = False
+
+    else:
+        c.execute("""
+            INSERT INTO saved_recipes (user_email, recipe_id)
+            VALUES (?, ?)
+        """, (session["user"], recipe_id))
+
+        saved = True
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "saved": saved
+    })
+
+@app.route("/comment/add", methods=["POST"])
+def add_comment():
+
+    # 直接打印看看
+    print("=== comment/add called ===")
+    print("JSON:", request.json)
+    print("Data:", request.get_json())
+    
+    recipe_id = request.json.get('recipe_id')
+    email = request.json.get('email')
+    username = request.json.get('username')
+    rating = request.json.get('rating')
+    content = request.json.get('content')
+    parent_id = request.json.get('parent_id')  # ⭐ reply
+    
+    print("recipe_id:", recipe_id)
+    print("email:", email)
+    print("username:", username)
+    print("rating:", rating)
+    print("content:", content)
+
+    if not content:
+        return jsonify({"error": "empty comment"}), 400
+    
+    if not email:
+        return jsonify({"error": "email required"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    # 简单写法
+    c.execute(
+        "INSERT INTO comments (recipe_id, user_email, username, rating, content, parent_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (recipe_id, email, username, rating, content, parent_id)
+    )
+    
+    print("SQL executed!")
+
+    conn.commit()
+    conn.close()
+    
+    print("Done!")
+
+    return jsonify({"success": True})
+
+@app.route("/comment/<int:recipe_id>")
+def get_comments(recipe_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT id, user_email, username, content, created_at, rating
+        FROM comments
+        WHERE recipe_id=?
+        ORDER BY created_at DESC
+    """, (recipe_id,))
+
+    comments = c.fetchall()
+    conn.close()
+
+    return jsonify([
+        {
+            "id": c[0],
+            "user_email": c[1],
+            "username": c[2],
+            "content": c[3],
+            "created_at": c[4],
+            "rating": c[5]
+        }
+        for c in comments
+    ])
+
+@app.route("/comment/delete/<int:comment_id>", methods=["POST"])
+def delete_comment():
+    if "user" not in session:
+        return jsonify({"error": "login required"}), 401
+    
+    comment_id = request.json.get('comment_id')
+    user_email = session["user"]
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 检查是不是自己的comment
+    c.execute("SELECT user_email FROM comments WHERE id = ?", (comment_id,))
+    comment = c.fetchone()
+    
+    if not comment:
+        return jsonify({"error": "comment not found"}), 404
+    
+    # 只有自己能删除！
+    if comment[0] != user_email:
+        return jsonify({"error": "cannot delete others' comment"}), 403
+    
+    c.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"success": True})
 
 if __name__ == "__main__":
     app.run(debug=True)
