@@ -1058,7 +1058,6 @@ def category_results(tag):
     search_query = request.args.get('search', '').strip()
     selected_category = request.args.get('category', 'all').strip().lower()
 
-
     tag_descriptions = {
         "Halal": "Delicious recipes prepared with 100% Halal-certified ingredients and methods.",
         "Non-Halal": "Dishes that may contain alcohol, pork, or other non-halal ingredients.",
@@ -1072,11 +1071,16 @@ def category_results(tag):
         "Default": "Explore our hand-picked selection of culinary delights tailored to your taste!"
     }
     
-    
     active_description = tag_descriptions.get(tag, tag_descriptions["Default"])
     
 
-    recipes_query = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
+    if tag == "Halal":
+        recipes_query = Recipe.query.filter(
+            Recipe.special_tag.ilike(f"%{tag}%"),
+            Recipe.special_tag.not_ilike("%Non-Halal%")
+        )
+    else:
+        recipes_query = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
 
     if search_query:
         recipes_query = recipes_query.filter(Recipe.name.ilike(f"%{search_query}%"))
@@ -1085,7 +1089,6 @@ def category_results(tag):
         recipes_query = recipes_query.filter(Recipe.flavor_type.ilike(selected_category))
 
     results = recipes_query.all()
-
     results_count = len(results)
 
     return render_template(
@@ -1094,7 +1097,7 @@ def category_results(tag):
         active_tag=tag,
         search_query=search_query,
         active_category=selected_category,
-        active_description=active_description ,
+        active_description=active_description,
         results_count=results_count,
     )
 
