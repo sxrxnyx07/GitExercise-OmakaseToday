@@ -48,33 +48,55 @@
                     <input name="bio" id="bio" type="text"
                         value="{{ bio }}" disabled>
                 </div>
-                <div class="profile-buttons">
+            <div class="profile-actions">
 
-                    <button type="button" class="edit-btn" onclick="enableEdit()">
-                        Edit Profile
-                    </button>
-
-                    <button type="submit" class="edit-btn" id="saveBtn" style="display:none;">
-                        Save
-                    </button>
-                    {% if role == 'admin' %}
-                    <a href="/admin" class="admin-access-btn">
-                        Admin Page
-                    </a>
-                    {% endif %}
-                    <a href="/logout" class="logout-btn">
-                        Logout
-                    </a>
-                </div>
-                <button type="button" class="delete-account-btn" onclick="openDeleteModal()">
-                    Delete Account
+                <button
+                    type="button"
+                    class="profile-action-btn edit-btn"
+                    onclick="enableEdit()"
+                >
+                    Edit Profile
                 </button>
 
-            </form>
+                <button
+                    type="submit"
+                    class="profile-action-btn edit-btn"
+                    id="saveBtn"
+                    style="display:none;"
+                >
+                    Save Changes
+                </button>
 
+                <div class="secondary-buttons">
+
+                    <button
+                        type="button"
+                        class="profile-action-btn delete-account-btn"
+                        onclick="openDeleteModal()"
+                    >
+                        Delete Account
+                    </button>
+
+                    <a
+                        href="/logout"
+                        class="profile-action-btn logout-btn"
+                    >
+                        Logout
+                    </a>
+
+                </div>
+
+            </div>
+
+            </form>
+        
 
         </div>
-
+        {% if role == 'admin' %}
+            <a href="/admin" class="admin-access-btn">
+            Admin Page
+            </a>
+        {% endif %}
     </div>
 
 </div>
@@ -165,8 +187,7 @@
                         data-id="{{ recipe.id }}"
                         data-name="{{ recipe.name }}"
                         data-image="{{ recipe.image }}"
-                        onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)"
-                        {% if recipe.id in saved_ids %}disabled{% endif %}>
+                        onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)">
                         ❤
                     </button>
                     <img src="{{ recipe.image if recipe.image and recipe.image.startswith('http') else url_for('static', filename=recipe.image or 'placeholder.png') }}"

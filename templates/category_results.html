@@ -36,9 +36,17 @@
 
             <div class="image-container">
 
-                <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
+                <button
+                    class="heart-btn {% if r.id in saved_ids %}saved{% endif %}"
+                    data-id="{{ r.id }}"
+                    data-name="{{ r.name }}"
+                    data-image="{{ r.image }}"
+                    onclick="event.stopPropagation(); toggleSave(this);"
+                >
+                    ❤
+                </button>
 
-                <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
+                <img src="{{ r.image if r.image else url_for('static', filename='css/picture/default.jpg') }}" alt="{{ r.name }}">
 
             </div>
 
@@ -129,46 +137,6 @@
     function closeModal() {
 
         if (loginModal) loginModal.style.display = 'none';
-
-    }
-
-
-
-    function toggleSave(recipeId, button) {
-
-        if (!button) return;
-
-
-
-        fetch('/toggle-save', {
-
-            method: 'POST',
-
-            headers: { 'Content-Type': 'application/json' },
-
-            body: JSON.stringify({ recipe_id: recipeId })
-
-        })
-
-        .then(response => {
-
-            if (response.status === 401) {
-
-                if (loginModal) loginModal.style.display = 'block';
-
-                return;
-
-            }
-
-            if (response.ok) {
-
-                button.classList.toggle('saved');
-
-            }
-
-        })
-
-        .catch(error => console.error('Error:', error));
 
     }
 

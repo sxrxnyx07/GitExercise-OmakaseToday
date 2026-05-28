@@ -923,3 +923,20 @@ gsap.from(".hero-subtitle", {
     duration: 1,
     delay: 0.3
 })
+function goToSearch(){
+
+    const keyword = document
+        .getElementById("homeSearch")
+        .value
+        .trim();
+
+    if(keyword === ""){
+
+        window.location.href = "/all_recipes";
+
+        return;
+    }
+
+    window.location.href =
+        `/all_recipes?search=${encodeURIComponent(keyword)}`;
+}

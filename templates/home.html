@@ -104,13 +104,12 @@
                     Select your ingredients and discover recipes instantly.
                 </p>
                 <div class="ingredient-tags">
-                    <button class="tag">Chicken</button>
-                    <button class="tag">Egg</button>
-                    <button class="tag">Rice</button>
-                    <button class="tag">Tomato</button>
-                    <button class="tag">Cheese</button>
-                    <button class="tag">Onion</button>
-                    <button class="tag">Noodles</button>
+                    <a class="tag" href="https://www.google.com/search?q=Clove" target="_blank">Clove</a>
+                    <a class="tag" href="https://www.google.com/search?q=Macadamia" target="_blank">Macadamia</a>
+                    <a class="tag" href="https://www.google.com/search?q=Nectarine" target="_blank">Nectarine</a>
+                    <a class="tag" href="https://www.google.com/search?q=Paprika" target="_blank">Paprika</a>
+                    <a class="tag" href="https://www.google.com/search?q=Raisin" target="_blank">Raisin</a>
+                    <a class="tag" href="https://www.google.com/search?q=Stevia" target="_blank">Stevia</a>
                 </div>
                 <a
                     href="{{ url_for('ingredient_index') }}"
@@ -175,15 +174,16 @@
                 </p>
                 <input
                     type="text"
+                    id="homeSearch"
                     class="search-box"
                     placeholder="Search recipes..."
                 >
-                <a
-                    href="{{ url_for('all_recipes') }}"
+                <button
                     class="btn-return"
+                    onclick="goToSearch()"
                 >
                     Go to Search →
-                </a>
+                </button>
             </div>
         </div>
     </section>

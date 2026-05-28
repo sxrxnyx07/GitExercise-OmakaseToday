@@ -656,7 +656,7 @@ def add_recipe():
     timing = request.form.get("timing")
     category = request.form.get("meal_category")
     flavor = request.form.get("flavor_type")
-    special = request.form.get("special")
+    special = request.form.get("special_tag")
 
     file = request.files.get("image_file")
 
@@ -678,7 +678,7 @@ def add_recipe():
         timing=timing,
         meal_category=category,
         flavor_type=flavor,
-        special=special
+        special_tag=special
     )
 
     db.session.add(new_recipe)
@@ -750,7 +750,7 @@ def update_recipe(id):
         recipe.timing = request.form.get("timing")
         recipe.meal_category = request.form.get("meal_category")
         recipe.flavor_type = request.form.get("flavor_type")
-        recipe.special = request.form.get("special")
+        recipe.special_tag = request.form.get("special_tag")
 
         file = request.files.get("image_file")
 
@@ -1007,6 +1007,8 @@ from flask import request, render_template, jsonify, redirect, url_for
 
 @app.route('/categories')
 def category_index():
+    if "user" not in session:
+        return redirect(url_for("login"))
     search_query = request.args.get('search', '').strip().lower()
 
     # 1. Get all unique tags
@@ -1079,14 +1081,17 @@ def category_results(tag):
         )
 
     results = recipes_query.all()
+    saved_ids = set()
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
 
     return render_template(
         'category_results.html',
         results=results,
         active_tag=tag,
-        search_query=search_query
+        search_query=search_query,
+        saved_ids=saved_ids
     )
-
 
 @app.route('/get_cat_suggestions')
 def get_cat_suggestions():
@@ -1116,6 +1121,8 @@ def get_cat_suggestions():
 
 @app.route('/all_recipes')
 def all_recipes():
+    if "user" not in session:
+        return redirect(url_for("login"))
     search_query = request.args.get('search', '').strip()
     active_flavor = request.args.get('flavor', 'ALL').strip()
     page = request.args.get('page', 1, type=int)
@@ -1171,6 +1178,8 @@ def get_suggestions():
 
 @app.route("/ingredient-search")  
 def ingredient_index():
+    if "user" not in session:
+        return redirect(url_for("login"))
     all_recipes = Recipe.query.all()
     ingredients_dict = {char: [] for char in string.ascii_uppercase}
     all_names_flat = set()
@@ -1346,6 +1355,8 @@ def drinks():
 
 @app.route('/random')
 def random_recipe():
+    if "user" not in session:
+        return redirect(url_for("login"))
     return render_template('random.html')
 
 @app.route('/random-recipe')
