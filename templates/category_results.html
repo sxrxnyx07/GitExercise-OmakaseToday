@@ -76,7 +76,7 @@
             </div>
         </div>
         {% endfor %}
-{% else %}
+    {% else %}
         <div class="empty-container" style="text-align: center; margin-top: 50px; width: 100%;">
             <h1 class="no-match-title" style="font-size: 3rem; margin-bottom: 20px;">
                 😕 No Matches Found !
@@ -90,12 +90,57 @@
                 in {{ active_tag }}.
             </p>
 
-            <div style="margin-top: 30px;">
+            <div style="margin-top: 30px; margin-bottom: 50px;">
                 <a href="{{ url_for('category_results', tag=active_tag) }}" 
                    style="color: #ff6b6b; text-decoration: underline; font-weight: bold; font-size: 1.1rem;">
-                    View All {{ active_tag }} Recipes
+                     View All {{ active_tag }} Recipes
                 </a>
             </div>
+
+            <!-- --- DYNAMIC RECOMMENDATION DIVIDER & GRID --- -->
+            <hr style="border: none; border-top: 2px dashed #f4c430; margin: 60px auto 40px; width: 80%;">
+            
+            <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.8rem; margin-bottom: 35px; color: #000; text-align: center;">
+                OTHER {{ active_tag|upper }} RECIPES YOU MIGHT LIKE 🔥
+            </h2>
+
+            <!-- MODIFIED: Strict 3x3 Grid Layout Configuration to stop cards from stretching to 4 columns -->
+            <div class="recommendation-recipe-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; max-width: 1200px; margin: 0 auto;">
+                {% for r in recommendations %}
+                <div class="recipe-card" style="width: 100%; box-sizing: border-box;">
+                    <div class="image-container">
+                        <button
+                            class="heart-btn {% if r.id in saved_ids %}saved{% endif %}"
+                            data-id="{{ r.id }}"
+                            data-name="{{ r.name }}"
+                            data-image="{{ r.image }}"
+                            onclick="event.stopPropagation(); toggleSave(this);"
+                        >
+                            ❤
+                        </button>
+                        <img src="{{ r.image if r.image.startswith('http') else url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
+                    </div>
+                    
+                    <div class="card-meta">
+                        <div class="meal-category">{{ r.meal_category|upper if r.meal_category else 'RECIPE' }}</div>
+                        <span class="recipe-title" style="display: block; font-weight: bold; margin-bottom: 10px; text-align: left;">{{ r.name }}</span>
+                        
+                        <div class="rating-stars" style="text-align: left;">
+                           {% set current_rating = r.rating|default(0)|int %}
+                           {% for i in range(5) %}
+                               <span style="color: {{ '#ffc107' if i < current_rating else '#e4e5e9' }};">★</span>
+                           {% endfor %}
+                           <span class="rating-count">({{ r.rating|default('0.0') }})</span>
+                        </div>
+
+                        <div style="margin-top: 15px; text-align: left;">
+                             <a href="/recipe/{{ r.id }}" class="btn-return" style="margin: 0; padding: 10px 25px; font-size: 1rem;">View Recipe</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- --- END OF RECOMMENDATION ENGINE GRID --- -->
         </div>
     {% endif %}
 </div>
@@ -118,7 +163,13 @@
         if (loginModal) loginModal.style.display = 'none';
     }
 
+    // Fixed JavaScript parameters to completely mirror original code block requirements
     function toggleSave(recipeId, button) {
+        // If first argument is an element (passed via 'this' in modified template items)
+        if (recipeId && typeof recipeId === 'object' && recipeId.nodeType) {
+            button = recipeId;
+            recipeId = button.getAttribute('data-id');
+        }
         if (!button) return;
 
         fetch('/toggle-save', {

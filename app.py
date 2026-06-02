@@ -1019,7 +1019,9 @@ def get_saved_set(user_email):
 def category_index():
     if "user" not in session:
         return redirect(url_for("login"))
-    search_query = request.args.get('search', '').strip().lower()
+    
+    raw_search_query = request.args.get('search', '').strip()
+    search_query_lower = raw_search_query.lower()
 
     tag_descriptions = {
         "Halal": "Delicious recipes prepared with 100% Halal-certified ingredients and methods.",
@@ -1041,19 +1043,25 @@ def category_index():
             tags = [t.strip() for t in r.special_tag.split(',')]
             unique_tags.update(tags)
 
-    if search_query:
+    if search_query_lower:
         for tag in unique_tags:
-            if search_query == tag.lower():
+            if search_query_lower == tag.lower():
                 return redirect(url_for('category_results', tag=tag))
 
     categories_with_images = []
     used_recipe_ids = set()
-    filtered_tags = [t for t in sorted(list(unique_tags)) if search_query in t.lower()]
+    filtered_tags = [t for t in sorted(list(unique_tags)) if search_query_lower in t.lower()]
 
     for tag in filtered_tags:
-        sample_recipe = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"), Recipe.id.notin_(used_recipe_ids)).first()
+        query_filter = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
+        
+        if tag == "Vegetarian":
+            query_filter = query_filter.filter(Recipe.special_tag.not_ilike("%Non-Vegetarian%"))
+
+        sample_recipe = query_filter.filter(Recipe.id.notin_(used_recipe_ids)).first()
+        
         if not sample_recipe:
-            sample_recipe = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%")).first()
+            sample_recipe = query_filter.first()
 
         if sample_recipe:
             used_recipe_ids.add(sample_recipe.id)
@@ -1064,7 +1072,32 @@ def category_index():
                 'description': description
             })
 
-    return render_template('category.html', categories=categories_with_images, search_query=search_query)
+    
+    recommendations = []
+    if not categories_with_images:
+    
+        rec_recipe_ids = set()
+        for tag in sorted(list(unique_tags)):
+            rec_filter = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
+            if tag == "Vegetarian":
+                rec_filter = rec_filter.filter(Recipe.special_tag.not_ilike("%Non-Vegetarian%"))
+            
+            rec_recipe = rec_filter.filter(Recipe.id.notin_(rec_recipe_ids)).first() or rec_filter.first()
+            if rec_recipe:
+                rec_recipe_ids.add(rec_recipe.id)
+                recommendations.append({
+                    'name': tag,
+                    'image': rec_recipe.image
+                })
+        
+        recommendations = recommendations[:6]
+
+    return render_template(
+        'category.html', 
+        categories=categories_with_images, 
+        search_query=raw_search_query,
+        recommendations=recommendations
+    )
 
 
 @app.route('/categories/<tag>')
@@ -1086,16 +1119,18 @@ def category_results(tag):
     }
     
     active_description = tag_descriptions.get(tag, tag_descriptions["Default"])
-    
 
+    
     if tag == "Halal":
-        recipes_query = Recipe.query.filter(
+        base_query = Recipe.query.filter(
             Recipe.special_tag.ilike(f"%{tag}%"),
             Recipe.special_tag.not_ilike("%Non-Halal%")
         )
     else:
-        recipes_query = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
+        base_query = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
 
+
+    recipes_query = base_query
     if search_query:
         recipes_query = recipes_query.filter(Recipe.name.ilike(f"%{search_query}%"))
         
@@ -1103,25 +1138,27 @@ def category_results(tag):
         recipes_query = recipes_query.filter(Recipe.flavor_type.ilike(selected_category))
 
     results = recipes_query.all()
+    results_count = len(results)
+
+    recommendations = []
+    if results_count == 0:
+        
+        recommendations = base_query.limit(6).all()
 
     saved_ids = set()
     if "user" in session:
         saved_ids = get_saved_set(session["user"])
-
-    results_count = len(results)
-
 
     return render_template(
         'category_results.html',
         results=results,
         active_tag=tag,
         search_query=search_query,
-
         saved_ids=saved_ids,
-
         active_category=selected_category,
         active_description=active_description,
         results_count=results_count,
+        recommendations=recommendations 
     )
 
 @app.route('/get_cat_suggestions')
@@ -1182,6 +1219,17 @@ def all_recipes():
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
+
+    recommendations = []
+    if not pagination.items:
+        if search_query:
+ 
+            recommendations = Recipe.query.filter(Recipe.name.ilike(f"%{search_query}%")).limit(6).all()
+        
+
+        if not recommendations:
+            recommendations = Recipe.query.order_by(Recipe.rating.desc().nullslast()).limit(6).all()
+
     saved_ids = set()
     if "user" in session:
         saved_ids = get_saved_set(session["user"])
@@ -1192,7 +1240,8 @@ def all_recipes():
         pagination=pagination,
         search_query=search_query,
         active_flavor=active_flavor,
-        saved_ids=saved_ids
+        saved_ids=saved_ids,
+        recommendations=recommendations 
     )
 @app.route('/get_suggestions')
 def get_suggestions():

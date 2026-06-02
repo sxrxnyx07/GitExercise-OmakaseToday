@@ -1503,6 +1503,49 @@ LAST PAGE BUTTON
             padding: 10px;
         }
 
+    .ingredient-section .tag {
+        display: inline-block;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: 2px solid #000000 !important;
+        border-radius: 12px !important; 
+        padding: 10px 20px !important;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        text-align: center;
+
+        box-shadow: 3px 3px 0px #f4c430 !important;
+        
+        cursor: pointer;
+        user-select: none;
+        
+
+        transition: box-shadow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    }
+
+    .ingredient-section .tag:hover {
+        background-color: #ffffff !important; 
+        
+  
+        box-shadow: 6px 6px 0px #f4c430 !important; 
+    }
+
+    .ingredient-section .tag:active {
+        box-shadow: 1px 1px 0px #f4c430 !important;
+        transform: translate(1px, 1px);
+        transition: all 0.10s ease !important;
+    }
+
+    .ingredient-section .tag.blocked {
+        background-color: #f0f0f0 !important;
+        color: #bbbbbb !important;
+        border-color: #dddddd !important;
+        box-shadow: none !important;
+        transform: none !important;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
         .ingredient-pop {
             background: #fff;
             color: #111;

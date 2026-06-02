@@ -51,11 +51,33 @@
         </div>
         {% endfor %}
     {% else %}
-        <div class="empty-container" style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">
+        <div class="empty-container" style="grid-column: 1 / -1; text-align: center; margin-top: 50px; width: 100%;">
             <h1 class="no-match-title" style="font-size: 3rem; margin-bottom: 20px;">😕 No Matches Found !</h1>
             <p style="font-size: 1.2rem; color: #222 !important;">We couldn't find any category matching "<strong>{{ search_query }}</strong>".</p>
-            <div style="margin-top: 30px;">
+            <div style="margin-top: 30px; margin-bottom: 60px;">
                 <a href="{{ url_for('category_index') }}" style="color: #ff6b6b; text-decoration: underline; font-weight: bold; font-size: 1.1rem;">Show All Categories</a>
+            </div>
+
+            <!-- Divider Line -->
+            <hr style="border: none; border-top: 2px dashed #f4c430; margin: 40px auto; width: 80%;">
+            
+            <!-- Recommendation Header -->
+            <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 2rem; margin-bottom: 30px; color: #000;">
+                RECOMMENDED CATEGORIES FOR YOU 🔥
+            </h2>
+
+            <!-- MODIFIED: 3x3 Grid Layout Configuration -->
+            <div class="category-visual-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; max-width: 1100px; margin: 0 auto 50px auto;">
+                {% for rec in recommendations %}
+                <div class="category-item" style="width: 100%; box-sizing: border-box;">
+                    <a href="{{ url_for('category_results', tag=rec.name) }}">
+                        <div class="image-box">
+                            <img src="{{ rec.image if rec.image.startswith('http') else url_for('static', filename=rec.image or 'placeholder.png') }}" alt="{{ rec.name }}">
+                        </div>
+                        <div class="category-text">{{ rec.name }}</div>
+                    </a>
+                </div>
+                {% endfor %}
             </div>
         </div>
     {% endif %}
@@ -148,7 +170,5 @@
     }
 })();
 </script>
-
-
 
 {% endblock %}
