@@ -126,6 +126,16 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS comment_notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        comment_id INTEGER,
+        notify_me INTEGER DEFAULT 1,
+        FOREIGN KEY (user_email) REFERENCES users(email)
+    )
+    """)
     conn.commit()
     conn.close()
 
@@ -1552,25 +1562,14 @@ def toggle_save():
 
 @app.route("/comment/add", methods=["POST"])
 def add_comment():
-
-    # 直接打印看看
-    print("=== comment/add called ===")
-    print("JSON:", request.json)
-    print("Data:", request.get_json())
-    
     recipe_id = request.json.get('recipe_id')
     email = request.json.get('email')
     username = request.json.get('username')
     rating = request.json.get('rating')
     content = request.json.get('content')
-    parent_id = request.json.get('parent_id')  # ⭐ reply
+    parent_id = request.json.get('parent_id')
+    notify_me = request.json.get('notify_me', False)  # ⭐ 新加
     
-    print("recipe_id:", recipe_id)
-    print("email:", email)
-    print("username:", username)
-    print("rating:", rating)
-    print("content:", content)
-
     if not content:
         return jsonify({"error": "empty comment"}), 400
     
@@ -1580,19 +1579,28 @@ def add_comment():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # 简单写法
+    # 插入评论
     c.execute(
         "INSERT INTO comments (recipe_id, user_email, username, rating, content, parent_id) VALUES (?, ?, ?, ?, ?, ?)",
         (recipe_id, email, username, rating, content, parent_id)
     )
     
-    print("SQL executed!")
-
+    # 获取新评论的 ID
+    comment_id = c.lastrowid
+    
+    # ⭐ 保存通知设置
+    c.execute(
+        "INSERT INTO comment_notifications (user_email, comment_id, notify_me) VALUES (?, ?, ?)",
+        (email, comment_id, 1 if notify_me else 0)
+    )
+    
     conn.commit()
     conn.close()
     
-    print("Done!")
-
+    # ⭐ 如果是回复，发送通知
+    if parent_id:
+        send_reply_notification(parent_id, email, username, content)
+    
     return jsonify({"success": True})
 
 @app.route("/comment/<int:recipe_id>")
@@ -1626,7 +1634,6 @@ def get_comments(recipe_id):
     ])
 
 def get_profile_pic(email):
-    """获取用户的头像"""
     if not email:
         return None
     
@@ -1669,11 +1676,99 @@ def delete_comment():
         conn.close()
         return jsonify({"error": "cannot delete others' comment"}), 403
     
+    # ⭐ 删除这个 comment 的所有 replies
+    c.execute("DELETE FROM comments WHERE parent_id = ?", (comment_id,))
+    # ⭐ 删除这个 comment 自己
     c.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+    # ⭐ 删除相关的通知设置
+    c.execute("DELETE FROM comment_notifications WHERE comment_id = ?", (comment_id,))
+    
     conn.commit()
     conn.close()
     
     return jsonify({"success": True})
+
+# ⭐ 发送回复通知的函数
+def send_reply_notification(parent_comment_id, replier_email, replier_name, reply_content):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 找到原评论和它的 recipe_id
+    c.execute("""
+        SELECT user_email, username, content, recipe_id
+        FROM comments
+        WHERE id = ?
+    """, (parent_comment_id,))
+    parent = c.fetchone()
+    
+    if not parent:
+        conn.close()
+        return
+    
+    original_email = parent[0]
+    original_name = parent[1]
+    original_content = parent[2]
+    recipe_id = parent[3]  # ⭐ 获取正确的 recipe_id
+    
+    # 创建站内通知
+    notification_msg = f"@{replier_name} replied to your comment"
+    c.execute("""
+        INSERT INTO notifications (user_email, message)
+        VALUES (?, ?)
+    """, (original_email, notification_msg))
+    
+    conn.commit()
+    
+    # 检查原评论者是否想要 email 通知
+    c.execute("""
+        SELECT notify_me
+        FROM comment_notifications
+        WHERE user_email = ? AND comment_id = ?
+    """, (original_email, parent_comment_id))
+    notify_row = c.fetchone()
+    
+    want_email = notify_row and notify_row[0] == 1
+    
+    conn.close()
+    
+    # ⭐ 发送 email（如果想要，而且不是自己回复自己）
+    if want_email and original_email.lower() != replier_email.lower():
+        try:
+            # ⭐ 自动获取当前 domain
+            from flask import request
+            base_url = request.host_url.rstrip('/')
+            
+            msg = Message(
+                subject="🔔 Someone replied to your comment",
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[original_email]
+            )
+            msg.html = f"""
+            <h2>New Reply</h2>
+            
+            <p>Hi {original_name},</p>
+            
+            <p><b>@{replier_name}</b> replied to your comment:</p>
+            
+            <blockquote style="background: #f5f5f5; padding: 15px; border-left: 4px solid #f4c542; margin: 15px 0;">
+                {original_content}
+            </blockquote>
+            
+            <p><b>Reply:</b> {reply_content}</p>
+            
+            <p>
+                <a href="{base_url}/recipe/{recipe_id}" style="background: #f4c542; color: black; padding: 10px 20px; text-decoration: none; border-radius: 8px;">
+                    View Recipe
+                </a>
+            </p>
+            
+            <p style="color: #888; font-size: 12px; margin-top: 30px;">
+                If you don't want to receive these emails, go to your comment and uncheck "Notify me by email"
+            </p>
+            """
+            mail.send(msg)
+        except Exception as e:
+            print("Email failed:", e)
 
 if __name__ == "__main__":
     app.run(debug=True)

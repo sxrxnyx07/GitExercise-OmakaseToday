@@ -312,7 +312,7 @@ function loadComments() {
                 `;
                 commentList.innerHTML += commentHTML;
             });
-            commentCount.innerText = data.length;
+            commentCount.innerText = data.length;        // ===== (Count how many comment have in current)) =====
         });
 }
 
@@ -404,6 +404,10 @@ reviewForm.addEventListener("submit", function(e) {
     if (!ratingInput) { alert("Please select a rating!"); return; }
     const rating = parseInt(ratingInput.value);
     const comment = commentInput.value;
+    
+    // ⭐ 获取 notify checkbox
+    const notifyCheckbox = document.querySelector('.notify-checkbox');
+    const notifyMe = notifyCheckbox ? notifyCheckbox.checked : false;
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) { alert("Please enter a valid email address."); return; }
@@ -420,7 +424,8 @@ reviewForm.addEventListener("submit", function(e) {
             email: email,
             username: username, 
             rating: rating,
-            parent_id: parentId
+            parent_id: parentId,
+            notify_me: notifyMe  // ⭐ 新加
         })
     })
     .then(res => res.json())
@@ -437,6 +442,32 @@ reviewForm.addEventListener("submit", function(e) {
         }
     });
 });
+
+// ===== 动态刷新通知 =====
+// 在页面加载后定期检查新通知
+function refreshNotifications() {
+    fetch('/get-notifications')
+        .then(res => res.json())
+        .then(data => {
+            // 更新红点数字
+            const badge = document.querySelector('.notif-badge');
+            if (data.count > 0) {
+                if (badge) {
+                    badge.innerText = data.count;
+                } else {
+                    // 创建红点
+                    const notifIcon = document.querySelector('.notif-icon');
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'notif-badge';
+                    newBadge.innerText = data.count;
+                    notifIcon.appendChild(newBadge);
+                }
+            }
+        });
+}
+
+// 每30秒刷新一次
+setInterval(refreshNotifications, 30000);
 
 // ===== INITIAL LOAD =====
 loadComments();
