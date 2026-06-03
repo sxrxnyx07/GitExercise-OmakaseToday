@@ -1828,7 +1828,7 @@ button:disabled {
     margin-top: 4px;
 }
 
-/* 删除按钮 */
+/* 删除按钮 - 默认隐藏 如果不是自己*/
 .delete-btn {
     background: transparent;
     border: none;
@@ -1837,12 +1837,21 @@ button:disabled {
     padding: 4px 8px;
     border-radius: 4px;
     color: #5f6368;
-    opacity: 0.6;
+    opacity: 0;
     transition: 0.2s;
-    margin-left: auto;  /* 推到右边 */
+    margin-left: auto;
+    display: none;  /* 默认不显示 */
 }
 
-.delete-btn:hover {
+/* 只有自己的 comment 才显示 delete */
+.single-comment.can-delete .delete-btn,
+.reply-comment.can-delete .delete-btn {
+    display: block;
+    opacity: 0.6;
+}
+
+.single-comment.can-delete .delete-btn:hover,
+.reply-comment.can-delete .delete-btn:hover {
     opacity: 1;
     background: #ffebee;
     color: #d93025;

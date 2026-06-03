@@ -229,7 +229,6 @@ const replyingToName = document.getElementById('replyingToName');
 const currentUserEmail = "{{ session.get('user', '') }}";
 
 // 加载评论 - 改成 nested 结构
-// 加载评论 - 改成 nested 结构
 function loadComments() {
     const recipeId = window.location.pathname.split("/").pop();
 
@@ -245,8 +244,9 @@ function loadComments() {
             parents.forEach(parent => {
                 const name = parent.username || "User";
                 
-                // 检查能不能删除
+                // ⭐ 检查能不能删除 - 只有自己能删
                 const canDelete = currentUserEmail && parent.user_email === currentUserEmail;
+                const deleteClass = canDelete ? 'can-delete' : '';
                 const deleteBtn = canDelete 
                     ? `<button class="delete-btn" onclick="deleteComment(${parent.id})">Delete</button>` 
                     : '';
@@ -254,20 +254,21 @@ function loadComments() {
                 // 找这个 parent 的所有 replies
                 const childReplies = replies.filter(r => r.parent_id === parent.id);
                 
-                // 生成 replies HTML - ⭐ 加 @mention
+                // 生成 replies HTML
                 let repliesHtml = '';
                 if (childReplies.length > 0) {
                     repliesHtml = `<div class="replies-container">`;
                     childReplies.forEach(reply => {
                         const replyName = reply.username || "User";
+                        // ⭐ reply 也要检查能不能删
                         const canDeleteReply = currentUserEmail && reply.user_email === currentUserEmail;
+                        const deleteReplyClass = canDeleteReply ? 'can-delete' : '';
                         const deleteReplyBtn = canDeleteReply 
                             ? `<button class="delete-btn" onclick="deleteComment(${reply.id})">Delete</button>` 
                             : '';
                         
-                        // ⭐ 加 @mention tag 那个人的名字
                         repliesHtml += `
-                            <div class="reply-comment">
+                            <div class="reply-comment ${deleteReplyClass}">
                                 <div class="comment-avatar">${replyName.charAt(0).toUpperCase()}</div>
                                 <div class="comment-body">
                                     <div class="comment-header">
@@ -288,10 +289,10 @@ function loadComments() {
                     repliesHtml += `</div>`;
                 }
 
-                // 主评论 HTML + nested replies
+                // 主评论 HTML + nested replies - ⭐ 加 deleteClass
                 const commentHTML = `
                     <div class="comments-group">
-                        <div class="single-comment">
+                        <div class="single-comment ${deleteClass}">
                             <div class="comment-avatar">${name.charAt(0).toUpperCase()}</div>
                             <div class="comment-body">
                                 <div class="comment-header">
@@ -332,16 +333,27 @@ function cancelReply() {
     commentInput.placeholder = "Share your cooking experience...";
 }
 
-// Delete comment
+// Delete comment - 修正 URL
 function deleteComment(commentId) {
     if (!confirm("Delete this comment?")) return;
-    fetch(`/comment/delete/${commentId}`, {
+    
+    fetch("/comment/delete", {  // 改成这个，不用 <int:comment_id>
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({comment_id: commentId})
     })
     .then(res => res.json())
-    .then(data => { if (data.success) loadComments(); });
+    .then(data => {
+        if (data.success) {
+            loadComments();
+        } else {
+            alert(data.error || "Cannot delete this comment");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error deleting comment");
+    });
 }
 
 // Submit form

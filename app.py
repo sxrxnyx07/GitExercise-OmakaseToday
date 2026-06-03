@@ -1623,13 +1623,17 @@ def get_comments(recipe_id):
         for c in comments
     ])
 
-@app.route("/comment/delete/<int:comment_id>", methods=["POST"])
+@app.route("/comment/delete", methods=["POST"])
 def delete_comment():
     if "user" not in session:
         return jsonify({"error": "login required"}), 401
     
-    comment_id = request.json.get('comment_id')
+    data = request.get_json()
+    comment_id = data.get('comment_id')
     user_email = session["user"]
+    
+    if not comment_id:
+        return jsonify({"error": "comment_id required"}), 400
     
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -1639,10 +1643,12 @@ def delete_comment():
     comment = c.fetchone()
     
     if not comment:
+        conn.close()
         return jsonify({"error": "comment not found"}), 404
     
     # 只有自己能删除！
     if comment[0] != user_email:
+        conn.close()
         return jsonify({"error": "cannot delete others' comment"}), 403
     
     c.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
