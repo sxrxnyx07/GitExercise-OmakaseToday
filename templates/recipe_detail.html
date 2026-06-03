@@ -427,7 +427,9 @@ reviewForm.addEventListener("submit", function(e) {
     if (!emailPattern.test(email)) { alert("Please enter a valid email address."); return; }
 
     const recipeId = window.location.pathname.split("/").pop();
-    const parentId = commentInput.dataset.replyTo || null;
+    const parentId = commentInput.dataset.replyTo;
+    // ⭐ 修复：空字符串也转成 null
+    const finalParentId = parentId && parentId !== "" ? parseInt(parentId) : null;
 
     fetch("/comment/add", {
         method: "POST",
@@ -438,7 +440,7 @@ reviewForm.addEventListener("submit", function(e) {
             email: email,
             username: username, 
             rating: rating,
-            parent_id: parentId,
+            parent_id: finalParentId,
             notify_me: notifyMe  // ⭐ 新加
         })
     })

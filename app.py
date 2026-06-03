@@ -1581,7 +1581,7 @@ def add_comment():
     rating = request.json.get('rating')
     content = request.json.get('content')
     parent_id = request.json.get('parent_id')
-    notify_me = request.json.get('notify_me', False)  # ⭐ 新加
+    notify_me = request.json.get('notify_me', False)
     
     if not content:
         return jsonify({"error": "empty comment"}), 400
@@ -1589,13 +1589,17 @@ def add_comment():
     if not email:
         return jsonify({"error": "email required"}), 400
 
+    # ⭐ 修复：把 0 转成 None
+    if parent_id == 0 or parent_id == "0" or parent_id == "":
+        parent_id = None
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
     # 插入评论
     c.execute(
         "INSERT INTO comments (recipe_id, user_email, username, rating, content, parent_id) VALUES (?, ?, ?, ?, ?, ?)",
-        (recipe_id, email, username, rating, content, parent_id)
+        (recipe_id, email, username, rating, content, parent_id)  # ⭐ None 会变成 NULL
     )
     
     # 获取新评论的 ID
