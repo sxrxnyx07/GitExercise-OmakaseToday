@@ -1668,99 +1668,195 @@ button:disabled {
     font-weight: bold;
 }
 
-/* ===== SINGLE COMMENT - GOOGLE STYLE ===== */
+/* ===== SINGLE COMMENT - FIX LAYOUT ===== */
 .single-comment {
     display: flex;
     gap: 12px;
     background: white;
     border: 1px solid #eee;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 16px;
-    margin-top: 14px;
+    margin-bottom: 12px;
 }
 
 /* 头像 */
 .comment-avatar {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
     border-radius: 50%;
     background: linear-gradient(135deg, #4285f4, #34a853);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
+    flex-shrink: 0;
 }
 
 /* 主体 */
 .comment-body {
     flex: 1;
     min-width: 0;
-}
-
-/* 日期 - 在上面 */
-.comment-date {
-    font-size: 12px;
-    color: #5f6368;
-    margin-bottom: 2px;
+    text-align: left;  /* ⭐ 加这个！ */
 }
 
 /* 名字 */
 .comment-username {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
     color: #202124;
-    display: block;
-    margin-bottom: 4px;
-    margin-right: 900px;
+    display: inline;  /* ⭐ 改成 inline */
 }
 
 /* 星星 */
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .comment-stars {
     display: flex;
     gap: 1px;
 }
 
-.star-filled {
-    color: #fbbc04;
-    font-size: 14px;
-}
-
-.star-empty {
-    color: #e0e0e0;
-    font-size: 14px;
-}
-
 /* Comment 文字 */
 .comment-text {
-    margin: 10px 0 0 0;
+    margin: 6px 0;
     line-height: 1.5;
     color: #4d5156;
     font-size: 14px;
-    margin-right: 800px;
+    word-wrap: break-word;
+    text-align: left;  /* ⭐ 加这个！ */
+    width: 100%;
+    display: block;
 }
 
 /* Footer */
 .comment-footer {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 10px;
-    padding-top: 10px;
+    gap: 16px;
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid #f0f0f0;
+    text-align: left;
 }
 
-/* Reply 显示区域 */
+.comment-date {
+    font-size: 12px;
+    color: #5f6368;
+}
+
+/* Reply button */
+.reply-btn {
+    background: transparent;
+    border: none;
+    color: #1a73e8;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+}
+
+.reply-btn:hover {
+    text-decoration: underline;
+}
+
+/* ===== COMMENT @MENTION ===== */
+.comment-mention {
+    color: #1a73e8;  /* 蓝色 */
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.comment-mention:hover {
+    text-decoration: underline;
+}
+
+/* 名字 */
+.comment-username {
+    font-weight: 600;
+    font-size: 14px;
+    color: #202124;
+}
+
+/* Comment 文字 */
+.comment-text {
+    margin: 6px 0;
+    line-height: 1.5;
+    color: #4d5156;
+    font-size: 14px;
+    word-wrap: break-word;
+}
+
+/* ===== NESTED REPLIES ===== */
+.replies-container {
+    margin-left: 52px;
+    padding-left: 16px;
+    border-left: 2px solid #dadce0;
+    margin-top: 8px;
+}
+
+.reply-comment {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.reply-comment .comment-avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    font-size: 12px;
+}
+
+.reply-comment .comment-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.reply-comment .comment-footer {
+    border-top: none;
+    padding-top: 4px;
+    margin-top: 4px;
+}
+
+/* 删除按钮 */
+.delete-btn {
+    background: transparent;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #5f6368;
+    opacity: 0.6;
+    transition: 0.2s;
+    margin-left: auto;  /* 推到右边 */
+}
+
+.delete-btn:hover {
+    opacity: 1;
+    background: #ffebee;
+    color: #d93025;
+}
+
+/* ===== REPLY INPUT AREA ===== */
 .replying-to {
     display: none;
-    background: #e3f2fd;
-    padding: 10px 15px;
+    background: #e8f0fe;
+    padding: 10px 16px;
     border-radius: 8px;
     margin-bottom: 15px;
-    font-size: 14px;
-    color: #1976d2;
+    font-size: 13px;
+    color: #1a73e8;
     align-items: center;
     gap: 10px;
 }
@@ -1771,54 +1867,27 @@ button:disabled {
     font-size: 16px;
     cursor: pointer;
     padding: 4px 8px;
+    color: #5f6368;
 }
 
-/* Comment 输入框 - 大一点 */
+.replying-to button:hover {
+    color: #d93025;
+}
+
+/* Comment 输入框 */
 .comment-input {
     width: 100%;
     min-height: 100px;
-    padding: 15px;
+    padding: 14px;
     border: 2px solid #ddd;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 14px;
     resize: vertical;
     margin-top: 15px;
+    font-family: inherit;
 }
 
 .comment-input:focus {
-    border-color: #ffb703;
+    border-color: #1a73e8;
     outline: none;
-}
-
-/* Reply button */
-.reply-btn {
-    background: transparent;
-    border: none;
-    color: #1976d2;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-
-.reply-btn:hover {
-    background: #e3f2fd;
-}
-
-/* Delete button */
-.delete-btn {
-    background: transparent;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    opacity: 0.6;
-    transition: 0.2s;
-}
-
-.delete-btn:hover {
-    opacity: 1;
-    background: #ffebee;
 }

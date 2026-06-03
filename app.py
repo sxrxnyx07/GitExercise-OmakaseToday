@@ -1601,10 +1601,10 @@ def get_comments(recipe_id):
     c = conn.cursor()
 
     c.execute("""
-        SELECT id, user_email, username, content, created_at, rating
+        SELECT id, user_email, username, content, created_at, rating, parent_id
         FROM comments
         WHERE recipe_id=?
-        ORDER BY created_at DESC
+        ORDER BY created_at ASC
     """, (recipe_id,))
 
     comments = c.fetchall()
@@ -1617,7 +1617,8 @@ def get_comments(recipe_id):
             "username": c[2],
             "content": c[3],
             "created_at": c[4],
-            "rating": c[5]
+            "rating": c[5],
+            "parent_id": c[6]
         }
         for c in comments
     ])
