@@ -1292,17 +1292,15 @@ def search():
     selected_raw = request.form.get('ingredients')
     user_input = [s.strip().lower() for s in selected_raw.split(',')] if selected_raw else []
     results = []
+    recommendations = []
 
     if user_input:
         all_recipes = Recipe.query.all()
         for recipe in all_recipes:
             recipe_ing_list = [i.strip().lower() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
             total_count = len(recipe_ing_list)
+            if total_count == 0: continue
 
-            if total_count == 0:
-                continue
-
-            
             is_valid_match = True
             matched_in_recipe = []
 
@@ -1314,19 +1312,20 @@ def search():
                         if ri not in matched_in_recipe:
                             matched_in_recipe.append(ri)
                         break 
-                
                 if not found_this_item:
                     is_valid_match = False
                     break 
-            
 
             if is_valid_match:
                 have_count = len(user_input)
                 percent = int((have_count / total_count) * 100)
                 missing_ingredients = [ri for ri in recipe_ing_list if ri not in matched_in_recipe]
                 
-                display_missing = missing_ingredients[:3] 
-                extra_count = len(missing_ingredients) - len(display_missing)
+                display_names = [m.title() for m in matched_in_recipe]
+                if len(display_names) > 5:
+                    combo_text = " + ".join(display_names[:5]) + f" ...(+{len(display_names) - 5} more)"
+                else:
+                    combo_text = " + ".join(display_names)
 
                 results.append({
                     "id": recipe.id,
@@ -1335,17 +1334,49 @@ def search():
                     "meal_category": recipe.meal_category,
                     "rating": recipe.rating,
                     "match": percent,
-                    "missing_names": display_missing,
-                    "extra_count": extra_count
+                    "matched_combo": combo_text,
+                    "missing_names": missing_ingredients[:3],
+                    "extra_count": len(missing_ingredients) - 3
                 })
+        results = sorted(results, key=lambda x: x['match'], reverse=True)
+    
+    
+    if not results:
+        all_recipes = Recipe.query.all()
+        temp_recs = []
+        
+       
+        if user_input:
+            for recipe in all_recipes:
+                recipe_ing_list = [i.strip().lower() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
+                match_count = sum(1 for ui in user_input if any(ui in ri for ri in recipe_ing_list))
+                
+                if match_count > 0:
+                    temp_recs.append((recipe, match_count))
+            
+            
+            temp_recs.sort(key=lambda x: (x[1], x[0].rating or 0), reverse=True)
+            recommendations = [item[0] for item in temp_recs[:6]]
 
-    results = sorted(results, key=lambda x: x['match'], reverse=True)
+      
+        if len(recommendations) < 6:
+            needed = 6 - len(recommendations)
+            existing_ids = [r.id for r in recommendations]
+            
+          
+            fillers = Recipe.query.filter(~Recipe.id.in_(existing_ids))\
+                                 .order_by(Recipe.rating.desc())\
+                                 .limit(needed).all()
+            recommendations.extend(fillers)
+
     saved_ids = set()
     if "user" in session:
         saved_ids = get_saved_set(session["user"])
+
     return render_template(
         'result.html',
         results=results,
+        recommendations=recommendations,
         selected=user_input,
         saved_ids=saved_ids
     )
