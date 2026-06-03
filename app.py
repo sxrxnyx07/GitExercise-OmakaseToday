@@ -101,6 +101,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_email TEXT,
         message TEXT,
+        recipe_id INTEGER,
         is_read INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
@@ -162,6 +163,18 @@ def add_reset_columns():
     conn.close()
 
 add_reset_columns()
+def add_recipe_id_to_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute("ALTER TABLE notifications ADD COLUMN recipe_id INTEGER")
+    except:
+        pass
+    conn.commit()
+    conn.close()
+
+# 调用它
+add_recipe_id_to_notifications()
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
@@ -866,7 +879,7 @@ def inject_notifications():
 
 
     c.execute("""
-        SELECT message, is_read, created_at
+        SELECT message, is_read, recipe_id,  created_at
         FROM notifications
         WHERE user_email = ?
         ORDER BY created_at DESC
@@ -920,7 +933,7 @@ def get_notifications():
     c = conn.cursor()
 
     c.execute("""
-        SELECT message, is_read
+        SELECT message, is_read, recipe_id
         FROM notifications
         WHERE user_email = ?
         ORDER BY created_at DESC
@@ -1710,12 +1723,12 @@ def send_reply_notification(parent_comment_id, replier_email, replier_name, repl
     original_content = parent[2]
     recipe_id = parent[3]  # ⭐ 获取正确的 recipe_id
     
-    # 创建站内通知
+    # ⭐ 创建站内通知 - 加 recipe_id
     notification_msg = f"@{replier_name} replied to your comment"
     c.execute("""
-        INSERT INTO notifications (user_email, message)
-        VALUES (?, ?)
-    """, (original_email, notification_msg))
+        INSERT INTO notifications (user_email, message, recipe_id)
+        VALUES (?, ?, ?)
+    """, (original_email, notification_msg, recipe_id))
     
     conn.commit()
     
@@ -1731,10 +1744,9 @@ def send_reply_notification(parent_comment_id, replier_email, replier_name, repl
     
     conn.close()
     
-    # ⭐ 发送 email（如果想要，而且不是自己回复自己）
+    # 发送 email（如果想要）
     if want_email and original_email.lower() != replier_email.lower():
         try:
-            # ⭐ 自动获取当前 domain
             from flask import request
             base_url = request.host_url.rstrip('/')
             

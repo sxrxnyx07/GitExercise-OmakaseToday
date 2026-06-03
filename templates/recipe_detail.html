@@ -233,8 +233,62 @@ function loadComments() {
         .then(data => {
             commentList.innerHTML = "";
             
-            const parents = data.filter(c => !c.parent_id);
-            const replies = data.filter(c => c.parent_id);
+            // ⭐ 创建 id -> comment map
+            const commentMap = {};
+            data.forEach(c => {
+                commentMap[c.id] = c;
+            });
+
+            // ⭐ 递归渲染函数
+            function renderReplies(parentId, level = 0) {
+                const childReplies = data.filter(c => c.parent_id === parentId);
+                if (childReplies.length === 0) return '';
+
+                let html = `<div class="replies-container" style="margin-left: ${level * 20}px;">`;
+                childReplies.forEach(reply => {
+                    const replyName = reply.username || "User";
+                    const replyProfilePic = reply.profile_pic;
+                    const canDeleteReply = currentUserEmail && reply.user_email === currentUserEmail;
+                    const deleteReplyClass = canDeleteReply ? 'can-delete' : '';
+                    const deleteReplyBtn = canDeleteReply 
+                        ? `<button class="delete-btn" onclick="deleteComment(${reply.id})">Delete</button>` 
+                        : '';
+                    
+                    // ⭐ 找到回复谁的 username
+                    const parentComment = commentMap[reply.parent_id];
+                    const replyToName = parentComment ? parentComment.username : 'User';
+                    
+                    const replyAvatarImg = replyProfilePic 
+                        ? `/static/uploads/${replyProfilePic}` 
+                        : '/static/uploads/default.png';
+                    
+                    html += `
+                        <div class="reply-comment ${deleteReplyClass}">
+                            <img class="comment-avatar-img" src="${replyAvatarImg}" alt="${replyName}">
+                            <div class="comment-body">
+                                <div class="comment-header">
+                                    <span class="comment-username">${replyName}</span>
+                                    <span class="comment-stars">${getStarsHtml(reply.rating)}</span>
+                                </div>
+                                <p class="comment-text">
+                                    <span class="comment-mention">@${replyToName}</span> ${reply.content}
+                                </p>
+                                <div class="comment-footer">
+                                    <span class="comment-date">${reply.created_at || 'Just now'}</span>
+                                    <button class="reply-btn" onclick="showReply(${reply.id}, '${replyName}')">Reply</button>
+                                    ${deleteReplyBtn}
+                                </div>
+                            </div>
+                        </div>
+                        ${renderReplies(reply.id, level + 1)}
+                    `;
+                });
+                html += `</div>`;
+                return html;
+            }
+
+            // 只渲染顶层评论（没有 parent_id 的）
+            const parents = data.filter(c => !c.parent_id || c.parent_id === 0);
 
             parents.forEach(parent => {
                 const name = parent.username || "User";
@@ -245,46 +299,6 @@ function loadComments() {
                 const deleteBtn = canDelete 
                     ? `<button class="delete-btn" onclick="deleteComment(${parent.id})">Delete</button>` 
                     : '';
-
-                const childReplies = replies.filter(r => r.parent_id === parent.id);
-                
-                let repliesHtml = '';
-                if (childReplies.length > 0) {
-                    repliesHtml = `<div class="replies-container">`;
-                    childReplies.forEach(reply => {
-                        const replyName = reply.username || "User";
-                        const replyProfilePic = reply.profile_pic;
-                        const canDeleteReply = currentUserEmail && reply.user_email === currentUserEmail;
-                        const deleteReplyClass = canDeleteReply ? 'can-delete' : '';
-                        const deleteReplyBtn = canDeleteReply 
-                            ? `<button class="delete-btn" onclick="deleteComment(${reply.id})">Delete</button>` 
-                            : '';
-                        
-                        const replyAvatarImg = replyProfilePic 
-                            ? `/static/uploads/${replyProfilePic}` 
-                            : '/static/uploads/default.png';
-                        
-                        repliesHtml += `
-                            <div class="reply-comment ${deleteReplyClass}">
-                                <img class="comment-avatar-img" src="${replyAvatarImg}" alt="${replyName}">
-                                <div class="comment-body">
-                                    <div class="comment-header">
-                                        <span class="comment-username">${replyName}</span>
-                                        <span class="comment-stars">${getStarsHtml(reply.rating)}</span>
-                                    </div>
-                                    <p class="comment-text">
-                                        <span class="comment-mention">@${name}</span> ${reply.content}
-                                    </p>
-                                    <div class="comment-footer">
-                                        <span class="comment-date">${reply.created_at || 'Just now'}</span>
-                                        ${deleteReplyBtn}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    repliesHtml += `</div>`;
-                }
 
                 const avatarImg = profilePic 
                     ? `/static/uploads/${profilePic}` 
@@ -307,12 +321,12 @@ function loadComments() {
                                 </div>
                             </div>
                         </div>
-                        ${repliesHtml}
+                        ${renderReplies(parent.id)}
                     </div>
                 `;
                 commentList.innerHTML += commentHTML;
             });
-            commentCount.innerText = data.length;        // ===== (Count how many comment have in current)) =====
+            commentCount.innerText = data.length;
         });
 }
 
