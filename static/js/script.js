@@ -430,49 +430,89 @@ function openTab(tabName) {
     event.target.classList.add("active");
 }
 function filterSavedRecipes() {
-    const input = document.getElementById("savedSearch").value.toLowerCase();
-    const cards = document.querySelectorAll(".recipe-card");
+
+    const input =
+        document.getElementById("savedSearch")
+        .value
+        .toLowerCase();
+
+    const cards =
+        document.querySelectorAll(".saved-card");
 
     cards.forEach(card => {
-        const title = card.querySelector(".recipe-title").innerText.toLowerCase();
 
-        if (title.includes(input)) {
-            card.style.display = "block";
-        } else {
+        const title =
+            card.querySelector(".recipe-title")
+            .innerText
+            .toLowerCase();
+
+        if(title.includes(input)){
+
+            card.style.display = "";
+
+        }else{
+
             card.style.display = "none";
+
         }
+
     });
+
 }
 
-// live search
-const savedSearchInput = document.getElementById("savedSearch");
+const savedSearchInput =
+    document.getElementById("savedSearch");
 
-if (savedSearchInput) {
+if(savedSearchInput){
 
-    const cards = document.querySelectorAll(".recipe-card");
+    savedSearchInput.addEventListener(
+        "input",
+        filterSavedRecipes
+    );
 
-    savedSearchInput.addEventListener("input", function () {
+}
+const filterButtons =
+    document.querySelectorAll(".filter-btn");
 
-        const input = this.value.toLowerCase();
-        let visibleCount = 0;
+filterButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document
+            .querySelectorAll(".filter-btn")
+            .forEach(btn => btn.classList.remove("active"));
+
+        button.classList.add("active");
+
+        const category =
+            button.innerText.trim();
+
+        const cards =
+            document.querySelectorAll(".saved-card");
 
         cards.forEach(card => {
-            const titleEl = card.querySelector(".recipe-title");
 
-            if (!titleEl) return;
+            const cardCategory =
+                card.dataset.category;
 
-            const title = titleEl.innerText.toLowerCase();
+            if(
+                category === "All Category" ||
+                cardCategory === category
+            ){
 
-            if (title.includes(input)) {
-                card.style.display = "block";
-                visibleCount++;
-            } else {
+                card.style.display = "";
+
+            }else{
+
                 card.style.display = "none";
             }
+
         });
 
     });
-}
+
+});
+
 function toggleNotif(event){
     event.preventDefault()
 
