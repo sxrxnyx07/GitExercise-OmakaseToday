@@ -156,6 +156,15 @@
                 <button type="submit" class="submit-review-btn">Submit Review ✨</button>
             </form>
         </div>
+        
+        <!-- display tips message -->
+            <div id="wakeModeMessage" class="toast-message" style="display: none;">
+                ☀️ Sleep Mode ON
+            </div>
+
+            <div id="deleteMessage" class="toast-message" style="display: none;">
+                ✅ Deleted successfully!
+            </div>
 
         <!-- COMMENT LIST -->
         <div class="comment-display-card">
@@ -353,6 +362,64 @@ function deleteComment(commentId) {
     .catch(err => {
         console.error(err);
         alert("Error deleting comment");
+    });
+}
+
+// Toast 消息函数
+function showToast(elementId, message, type = 'default') {
+    const toast = document.getElementById(elementId);
+    if (!toast) return;
+    
+    toast.innerText = message;
+    toast.className = 'toast-message';
+    if (type === 'success') toast.classList.add('success');
+    if (type === 'error') toast.classList.add('error');
+    
+    toast.style.display = 'block';
+    
+    // 3秒后消失
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// Wake lock toggle - 加 toast
+async function toggleWakeLock() {
+    try {
+        if (!isAwake) {
+            wakeLock = await navigator.wakeLock.request("screen");
+            isAwake = true;
+            showToast('wakeModeMessage', '☀️ Sleep Mode ON', 'success');  // ⭐ 加这个
+        } else {
+            if (wakeLock) await wakeLock.release();
+            wakeLock = null; isAwake = false;
+            showToast('wakeModeMessage', '💤 Sleep Mode OFF', 'default');  // ⭐ 加这个
+        }
+    } catch (err) { wakeToggle.checked = false; }
+}
+wakeToggle.addEventListener("change", toggleWakeLock);
+
+// Delete comment - 加 toast
+function deleteComment(commentId) {
+    if (!confirm("Delete this comment?")) return;
+    
+    fetch("/comment/delete", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({comment_id: commentId})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('deleteMessage', '✅ Deleted successfully!', 'success');  // ⭐ 加这个
+            loadComments();
+        } else {
+            showToast('deleteMessage', data.error || 'Cannot delete', 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('deleteMessage', 'Error deleting comment', 'error');
     });
 }
 

@@ -1384,6 +1384,36 @@ button:disabled {
 }
 
 /*_________ Keep Screen Awake Button _______*/
+/* ===== TOAST MESSAGE ===== */
+.toast-message {
+    position: fixed;
+    top: 80px;                    /* ⭐ 改到上面 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 10px 20px;           /* ⭐ 更小 */
+    border-radius: 25px;
+    font-size: 14px;             /* ⭐ 更小 */
+    font-weight: 500;
+    z-index: 9999;
+    animation: toastSlide 0.3s ease;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.toast-message.success {
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+}
+
+.toast-message.error {
+    background: linear-gradient(135deg, #f44336, #e53935);
+}
+
+@keyframes toastSlide {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 
 /* ===== TOGGLE SWITCH ===== */
 .wake-wrapper {
