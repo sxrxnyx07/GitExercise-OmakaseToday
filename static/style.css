@@ -1824,6 +1824,23 @@ button:disabled {
 }
 
 /* ===== NESTED REPLIES ===== */
+
+/* ===== COMMENT AVATAR IMAGE ===== */
+.comment-avatar-img {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #eee;
+    flex-shrink: 0;
+}
+
+.reply-comment .comment-avatar-img {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+}
 .replies-container {
     margin-left: 52px;
     padding-left: 16px;

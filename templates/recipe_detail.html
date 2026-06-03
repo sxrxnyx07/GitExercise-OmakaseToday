@@ -156,7 +156,7 @@
                 <button type="submit" class="submit-review-btn">Submit Review ✨</button>
             </form>
         </div>
-        
+
         <!-- display tips message -->
             <div id="wakeModeMessage" class="toast-message" style="display: none;">
                 ☀️ Sleep Mode ON
@@ -183,7 +183,12 @@
 </div>
 
 <script>
-// 生成星星
+// ===== VARIABLES =====
+let wakeLock = null;
+let isAwake = false;
+const wakeToggle = document.getElementById("wakeToggle");
+
+// ===== GENERATE STARS =====
 function getStarsHtml(rating) {
     let stars = "";
     for (let i = 1; i <= 5; i++) {
@@ -194,7 +199,7 @@ function getStarsHtml(rating) {
     return stars;
 }
 
-// Star rating click handler
+// ===== STAR RATING =====
 const starInputs = document.querySelectorAll('.star-rating-input');
 const ratingText = document.getElementById('ratingText');
 
@@ -208,24 +213,7 @@ starInputs.forEach(input => {
     });
 });
 
-// Wake lock
-let wakeLock = null; let isAwake = false;
-const wakeToggle = document.getElementById("wakeToggle");
-
-async function toggleWakeLock() {
-    try {
-        if (!isAwake) {
-            wakeLock = await navigator.wakeLock.request("screen");
-            isAwake = true;
-        } else {
-            if (wakeLock) await wakeLock.release();
-            wakeLock = null; isAwake = false;
-        }
-    } catch (err) { wakeToggle.checked = false; }
-}
-wakeToggle.addEventListener("change", toggleWakeLock);
-
-// Form elements
+// ===== FORM ELEMENTS =====
 const reviewForm = document.getElementById("reviewForm");
 const commentList = document.getElementById("commentList");
 const commentCount = document.getElementById('commentCount');
@@ -234,10 +222,9 @@ const commentInput = document.getElementById('comment');
 const replyingTo = document.getElementById('replyingTo');
 const replyingToName = document.getElementById('replyingToName');
 
-// 从 session 拿 user email
 const currentUserEmail = "{{ session.get('user', '') }}";
 
-// 加载评论 - 改成 nested 结构
+// ===== LOAD COMMENTS =====
 function loadComments() {
     const recipeId = window.location.pathname.split("/").pop();
 
@@ -246,39 +233,40 @@ function loadComments() {
         .then(data => {
             commentList.innerHTML = "";
             
-            // 分开 parent comments 和 replies
             const parents = data.filter(c => !c.parent_id);
             const replies = data.filter(c => c.parent_id);
 
             parents.forEach(parent => {
                 const name = parent.username || "User";
+                const profilePic = parent.profile_pic;
                 
-                // ⭐ 检查能不能删除 - 只有自己能删
                 const canDelete = currentUserEmail && parent.user_email === currentUserEmail;
                 const deleteClass = canDelete ? 'can-delete' : '';
                 const deleteBtn = canDelete 
                     ? `<button class="delete-btn" onclick="deleteComment(${parent.id})">Delete</button>` 
                     : '';
 
-                // 找这个 parent 的所有 replies
                 const childReplies = replies.filter(r => r.parent_id === parent.id);
                 
-                // 生成 replies HTML
                 let repliesHtml = '';
                 if (childReplies.length > 0) {
                     repliesHtml = `<div class="replies-container">`;
                     childReplies.forEach(reply => {
                         const replyName = reply.username || "User";
-                        // ⭐ reply 也要检查能不能删
+                        const replyProfilePic = reply.profile_pic;
                         const canDeleteReply = currentUserEmail && reply.user_email === currentUserEmail;
                         const deleteReplyClass = canDeleteReply ? 'can-delete' : '';
                         const deleteReplyBtn = canDeleteReply 
                             ? `<button class="delete-btn" onclick="deleteComment(${reply.id})">Delete</button>` 
                             : '';
                         
+                        const replyAvatarImg = replyProfilePic 
+                            ? `/static/uploads/${replyProfilePic}` 
+                            : '/static/uploads/default.png';
+                        
                         repliesHtml += `
                             <div class="reply-comment ${deleteReplyClass}">
-                                <div class="comment-avatar">${replyName.charAt(0).toUpperCase()}</div>
+                                <img class="comment-avatar-img" src="${replyAvatarImg}" alt="${replyName}">
                                 <div class="comment-body">
                                     <div class="comment-header">
                                         <span class="comment-username">${replyName}</span>
@@ -298,11 +286,14 @@ function loadComments() {
                     repliesHtml += `</div>`;
                 }
 
-                // 主评论 HTML + nested replies - ⭐ 加 deleteClass
+                const avatarImg = profilePic 
+                    ? `/static/uploads/${profilePic}` 
+                    : '/static/uploads/default.png';
+
                 const commentHTML = `
                     <div class="comments-group">
                         <div class="single-comment ${deleteClass}">
-                            <div class="comment-avatar">${name.charAt(0).toUpperCase()}</div>
+                            <img class="comment-avatar-img" src="${avatarImg}" alt="${name}">
                             <div class="comment-body">
                                 <div class="comment-header">
                                     <span class="comment-username">${name}</span>
@@ -325,7 +316,7 @@ function loadComments() {
         });
 }
 
-// 点击 Reply
+// ===== SHOW REPLY (MISSING!) =====
 function showReply(commentId, username) {
     replyingTo.style.display = "flex";
     replyingToName.innerText = username;
@@ -335,37 +326,14 @@ function showReply(commentId, username) {
     commentInput.placeholder = `Replying to ${username}...`;
 }
 
-// 取消回复
+// ===== CANCEL REPLY (MISSING!) =====
 function cancelReply() {
     replyingTo.style.display = "none";
     commentInput.dataset.replyTo = "";
     commentInput.placeholder = "Share your cooking experience...";
 }
 
-// Delete comment - 修正 URL
-function deleteComment(commentId) {
-    if (!confirm("Delete this comment?")) return;
-    
-    fetch("/comment/delete", {  // 改成这个，不用 <int:comment_id>
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({comment_id: commentId})
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            loadComments();
-        } else {
-            alert(data.error || "Cannot delete this comment");
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Error deleting comment");
-    });
-}
-
-// Toast 消息函数
+// ===== TOAST =====
 function showToast(elementId, message, type = 'default') {
     const toast = document.getElementById(elementId);
     if (!toast) return;
@@ -377,29 +345,31 @@ function showToast(elementId, message, type = 'default') {
     
     toast.style.display = 'block';
     
-    // 3秒后消失
     setTimeout(() => {
         toast.style.display = 'none';
     }, 3000);
 }
 
-// Wake lock toggle - 加 toast
+// ===== WAKE LOCK =====
 async function toggleWakeLock() {
     try {
         if (!isAwake) {
             wakeLock = await navigator.wakeLock.request("screen");
             isAwake = true;
-            showToast('wakeModeMessage', '☀️ Sleep Mode ON', 'success');  // ⭐ 加这个
+            showToast('wakeModeMessage', '☀️ Sleep Mode ON', 'success');
         } else {
             if (wakeLock) await wakeLock.release();
-            wakeLock = null; isAwake = false;
-            showToast('wakeModeMessage', '💤 Sleep Mode OFF', 'default');  // ⭐ 加这个
+            wakeLock = null;
+            isAwake = false;
+            showToast('wakeModeMessage', '💤 Sleep Mode OFF', 'default');
         }
-    } catch (err) { wakeToggle.checked = false; }
+    } catch (err) { 
+        wakeToggle.checked = false; 
+    }
 }
 wakeToggle.addEventListener("change", toggleWakeLock);
 
-// Delete comment - 加 toast
+// ===== DELETE COMMENT =====
 function deleteComment(commentId) {
     if (!confirm("Delete this comment?")) return;
     
@@ -411,7 +381,7 @@ function deleteComment(commentId) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            showToast('deleteMessage', '✅ Deleted successfully!', 'success');  // ⭐ 加这个
+            showToast('deleteMessage', '✅ Deleted successfully!', 'success');
             loadComments();
         } else {
             showToast('deleteMessage', data.error || 'Cannot delete', 'error');
@@ -423,7 +393,7 @@ function deleteComment(commentId) {
     });
 }
 
-// Submit form
+// ===== SUBMIT FORM =====
 reviewForm.addEventListener("submit", function(e) {
     e.preventDefault();
 
@@ -457,14 +427,9 @@ reviewForm.addEventListener("submit", function(e) {
     .then(data => {
         if (data.success) {
             commentCount.innerText = parseInt(commentCount.innerText) + 1;
-            
-            // 刷新列表
             loadComments();
-            
             successMessage.style.display = "block";
             setTimeout(() => { successMessage.style.display = "none"; }, 3000);
-            
-            // 重置 form
             reviewForm.reset();
             ratingText.innerText = "Click to rate";
             commentInput.placeholder = "Share your cooking experience...";
@@ -473,6 +438,7 @@ reviewForm.addEventListener("submit", function(e) {
     });
 });
 
+// ===== INITIAL LOAD =====
 loadComments();
 </script>
 

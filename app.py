@@ -1610,6 +1610,7 @@ def get_comments(recipe_id):
     comments = c.fetchall()
     conn.close()
 
+    # 返回包含 profile_pic 的数据
     return jsonify([
         {
             "id": c[0],
@@ -1618,10 +1619,27 @@ def get_comments(recipe_id):
             "content": c[3],
             "created_at": c[4],
             "rating": c[5],
-            "parent_id": c[6]
+            "parent_id": c[6],
+            "profile_pic": get_profile_pic(c[1])  # ⭐ 新加
         }
         for c in comments
     ])
+
+def get_profile_pic(email):
+    """获取用户的头像"""
+    if not email:
+        return None
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    c.execute("SELECT profile_pic FROM users WHERE email = ?", (email,))
+    row = c.fetchone()
+    conn.close()
+    
+    if row and row[0]:
+        return row[0]
+    return None
 
 @app.route("/comment/delete", methods=["POST"])
 def delete_comment():
