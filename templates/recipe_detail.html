@@ -413,24 +413,44 @@ function deleteComment(commentId) {
 reviewForm.addEventListener("submit", function(e) {
     e.preventDefault();
 
+    // ⭐ 防止重复点击 - 如果正在提交就退出
+    if (reviewForm.dataset.submitting === "true") return;
+    reviewForm.dataset.submitting = "true";
+
+    // ⭐ 禁用按钮 + 显示正在提交
+    const submitBtn = document.querySelector('.submit-review-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '⏳ Posting...';
+
     const username = document.getElementById("username").value;
     const email = document.getElementById("email").value;
     
     const ratingInput = document.querySelector('input[name="rating"]:checked');
-    if (!ratingInput) { alert("Please select a rating!"); return; }
+    if (!ratingInput) { 
+        alert("Please select a rating!"); 
+        // ⭐ 恢复按钮
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
+        return; 
+    }
     const rating = parseInt(ratingInput.value);
     const comment = commentInput.value;
     
-    // ⭐ 获取 notify checkbox
     const notifyCheckbox = document.querySelector('.notify-checkbox');
     const notifyMe = notifyCheckbox ? notifyCheckbox.checked : false;
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) { alert("Please enter a valid email address."); return; }
+    if (!emailPattern.test(email)) { 
+        alert("Please enter a valid email address."); 
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
+        return; 
+    }
 
     const recipeId = window.location.pathname.split("/").pop();
     const parentId = commentInput.dataset.replyTo;
-    // ⭐ 修复：空字符串也转成 null
     const finalParentId = parentId && parentId !== "" ? parseInt(parentId) : null;
 
     fetch("/comment/add", {
@@ -443,7 +463,7 @@ reviewForm.addEventListener("submit", function(e) {
             username: username, 
             rating: rating,
             parent_id: finalParentId,
-            notify_me: notifyMe  // ⭐ 新加
+            notify_me: notifyMe
         })
     })
     .then(res => res.json())
@@ -458,6 +478,12 @@ reviewForm.addEventListener("submit", function(e) {
             commentInput.placeholder = "Share your cooking experience...";
             replyingTo.style.display = "none";
         }
+    })
+    .finally(() => {
+        // ⭐ 完成後恢復按鈕
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
     });
 });
 
