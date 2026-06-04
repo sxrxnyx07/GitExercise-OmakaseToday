@@ -264,6 +264,7 @@ function loadComments() {
                     
                     html += `
                         <div class="reply-comment ${deleteReplyClass}">
+                            id="comment-${reply.id}">
                             <img class="comment-avatar-img" src="${replyAvatarImg}" alt="${replyName}">
                             <div class="comment-body">
                                 <div class="comment-header">
@@ -307,6 +308,7 @@ function loadComments() {
                 const commentHTML = `
                     <div class="comments-group">
                         <div class="single-comment ${deleteClass}">
+                            id="comment-${parent.id}">
                             <img class="comment-avatar-img" src="${avatarImg}" alt="${name}">
                             <div class="comment-body">
                                 <div class="comment-header">
@@ -487,6 +489,31 @@ setInterval(refreshNotifications, 30000);
 
 // ===== INITIAL LOAD =====
 loadComments();
+
+window.addEventListener('load', () => {
+
+    const hash = window.location.hash;
+
+    if (!hash) return;
+
+    const target = document.querySelector(hash);
+
+    if (target) {
+
+        target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        target.classList.add('highlight-comment');
+
+        setTimeout(() => {
+            target.classList.remove('highlight-comment');
+        }, 4000);
+    }
+
+});
+
 </script>
 
 </body>

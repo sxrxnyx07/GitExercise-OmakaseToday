@@ -175,6 +175,69 @@ def add_recipe_id_to_notifications():
 
 # 调用它
 add_recipe_id_to_notifications()
+
+def add_comment_id_to_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    try:
+        c.execute("""
+            ALTER TABLE notifications
+            ADD COLUMN comment_id INTEGER
+        """)
+    except:
+        pass
+
+    conn.commit()
+    conn.close()
+
+add_comment_id_to_notifications()
+
+def fill_recipe_id_for_old_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 先看看有什么 notification，没有 recipe_id 的
+    c.execute("SELECT id, message FROM notifications WHERE recipe_id IS NULL OR recipe_id = ''")
+    notifications = c.fetchall()
+    
+    print(f"找到 {len(notifications)} 条没有 recipe_id 的 notification")
+    
+    updated = 0
+    for notif_id, message in notifications:
+        if message and "@" in message:
+            try:
+                # 提取 username（格式: "@John replied to your comment"）
+                parts = message.split(" ")
+                if len(parts) >= 1:
+                    username = parts[0].replace("@", "")
+                    
+                    # 找到这个用户最新评论的 recipe_id
+                    c.execute("""
+                        SELECT recipe_id FROM comments 
+                        WHERE username = ? 
+                        ORDER BY created_at DESC 
+                        LIMIT 1
+                    """, (username,))
+                    result = c.fetchone()
+                    
+                    if result and result[0]:
+                        recipe_id = result[0]
+                        c.execute("""
+                            UPDATE notifications 
+                            SET recipe_id = ? 
+                            WHERE id = ?
+                        """, (recipe_id, notif_id))
+                        updated += 1
+            except Exception as e:
+                print(f"Error processing notif {notif_id}: {e}")
+    
+    conn.commit()
+    print(f"成功更新 {updated} 条 notification")
+    conn.close()
+
+# 调用它
+fill_recipe_id_for_old_notifications()
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
@@ -877,9 +940,9 @@ def inject_notifications():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-
+    # ⭐ 改这里！不要选 created_at
     c.execute("""
-        SELECT message, is_read, recipe_id,  created_at
+        SELECT message, is_read, recipe_id, comment_id
         FROM notifications
         WHERE user_email = ?
         ORDER BY created_at DESC
@@ -888,10 +951,9 @@ def inject_notifications():
 
     rows = c.fetchall()
 
-    # 
     new_notifs = [n for n in rows if n[1] == 0]  
     old_notifs = [n for n in rows if n[1] == 1]  
-    # unread count（红点）
+    
     c.execute("""
         SELECT COUNT(*) FROM notifications
         WHERE user_email = ? AND is_read = 0
@@ -933,7 +995,7 @@ def get_notifications():
     c = conn.cursor()
 
     c.execute("""
-        SELECT message, is_read, recipe_id
+        SELECT message, is_read, recipe_id, comment_id
         FROM notifications
         WHERE user_email = ?
         ORDER BY created_at DESC
@@ -1616,7 +1678,7 @@ def add_comment():
     
     # ⭐ 如果是回复，发送通知
     if parent_id:
-        send_reply_notification(parent_id, email, username, content)
+        send_reply_notification(parent_id, comment_id, email, username, content)
     
     return jsonify({"success": True})
 
@@ -1706,7 +1768,7 @@ def delete_comment():
     return jsonify({"success": True})
 
 # ⭐ 发送回复通知的函数
-def send_reply_notification(parent_comment_id, replier_email, replier_name, reply_content):
+def send_reply_notification(parent_comment_id, new_reply_id, replier_email, replier_name, reply_content):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
@@ -1730,9 +1792,9 @@ def send_reply_notification(parent_comment_id, replier_email, replier_name, repl
     # ⭐ 创建站内通知 - 加 recipe_id
     notification_msg = f"@{replier_name} replied to your comment"
     c.execute("""
-        INSERT INTO notifications (user_email, message, recipe_id)
-        VALUES (?, ?, ?)
-    """, (original_email, notification_msg, recipe_id))
+        INSERT INTO notifications (user_email, message, recipe_id, comment_id)
+        VALUES (?, ?, ?, ?)
+    """, (original_email, notification_msg, recipe_id, new_reply_id))
     
     conn.commit()
     
@@ -1773,7 +1835,7 @@ def send_reply_notification(parent_comment_id, replier_email, replier_name, repl
             <p><b>Reply:</b> {reply_content}</p>
             
             <p>
-                <a href="{base_url}/recipe/{recipe_id}" style="background: #f4c542; color: black; padding: 10px 20px; text-decoration: none; border-radius: 8px;">
+                <a href="{base_url}/recipe/{recipe_id}#comment-{new_reply_id}" style="background: #f4c542; color: black; padding: 10px 20px; text-decoration: none; border-radius: 8px;">
                     View Recipe
                 </a>
             </p>

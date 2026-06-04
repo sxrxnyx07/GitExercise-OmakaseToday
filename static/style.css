@@ -1840,6 +1840,24 @@ button:disabled {
     word-wrap: break-word;
 }
 
+.highlight-comment {
+    animation: flashComment 4s ease;
+}
+
+@keyframes flashComment {
+
+    0% {
+        background: #fff3cd;
+        box-shadow: 0 0 20px rgba(255,193,7,.5);
+    }
+
+    100% {
+        background: transparent;
+        box-shadow: none;
+    }
+
+}
+
 /* ===== NESTED REPLIES ===== */
 
 /* ===== COMMENT AVATAR IMAGE ===== */
