@@ -296,15 +296,27 @@ def profile():
     # =========================
 
     c.execute("""
-        SELECT keyword, COUNT(*) as total
+        SELECT keyword
         FROM search_history
         WHERE user_email = ?
-        GROUP BY keyword
-        ORDER BY total DESC
-        LIMIT 3
+        ORDER BY searched_at DESC
     """, (email,))
+    search_rows = c.fetchall()
 
-    top_keywords = [row[0] for row in c.fetchall()]
+    top_keywords = []
+    seen_keywords = set()
+
+    for row in search_rows:
+
+        keyword = row[0]
+
+        if keyword not in seen_keywords:
+
+            top_keywords.append(keyword)
+            seen_keywords.add(keyword)
+
+        if len(top_keywords) == 3:
+            break
 
     conn.close()
 

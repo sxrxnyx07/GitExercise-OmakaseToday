@@ -429,7 +429,9 @@ function openTab(tabName) {
     // highlight button
     event.target.classList.add("active");
 }
-function filterSavedRecipes() {
+let currentCategory = "All Category";
+
+function filterSavedRecipes(){
 
     const input =
         document.getElementById("savedSearch")
@@ -439,6 +441,8 @@ function filterSavedRecipes() {
     const cards =
         document.querySelectorAll(".saved-card");
 
+    let visibleCount = 0;
+
     cards.forEach(card => {
 
         const title =
@@ -446,9 +450,21 @@ function filterSavedRecipes() {
             .innerText
             .toLowerCase();
 
-        if(title.includes(input)){
+        const cardCategory =
+            card.dataset.category;
+
+        const matchesSearch =
+            title.includes(input);
+
+        const matchesCategory =
+            currentCategory === "All Category" ||
+            cardCategory === currentCategory;
+
+        if(matchesSearch && matchesCategory){
 
             card.style.display = "";
+
+            visibleCount++;
 
         }else{
 
@@ -458,7 +474,49 @@ function filterSavedRecipes() {
 
     });
 
+    const emptyBox =
+        document.getElementById("noCategoryResult");
+
+    const emptyTitle =
+        document.getElementById("emptyCategoryTitle");
+
+    const emptyText =
+        document.getElementById("emptyCategoryText");
+
+    if(visibleCount === 0){
+
+        emptyBox.style.display = "flex";
+
+        if(currentCategory !== "All Category"){
+
+            emptyTitle.innerText =
+                `No ${currentCategory} Recipes Saved`;
+
+            emptyText.innerText =
+                `You haven't saved any ${currentCategory.toLowerCase()} recipes yet.`;
+
+        }else{
+
+            emptyTitle.innerText =
+                "No Recipes Found";
+
+            emptyText.innerText =
+                "Try another search keyword.";
+
+        }
+
+    }else{
+
+        emptyBox.style.display = "none";
+
+    }
+
 }
+
+
+// =====================
+// SEARCH
+// =====================
 
 const savedSearchInput =
     document.getElementById("savedSearch");
@@ -471,6 +529,12 @@ if(savedSearchInput){
     );
 
 }
+
+
+// =====================
+// CATEGORY FILTER
+// =====================
+
 const filterButtons =
     document.querySelectorAll(".filter-btn");
 
@@ -480,39 +544,42 @@ filterButtons.forEach(button => {
 
         document
             .querySelectorAll(".filter-btn")
-            .forEach(btn => btn.classList.remove("active"));
+            .forEach(btn =>
+                btn.classList.remove("active")
+            );
 
         button.classList.add("active");
 
-        const category =
+        currentCategory =
             button.innerText.trim();
 
-        const cards =
-            document.querySelectorAll(".saved-card");
-
-        cards.forEach(card => {
-
-            const cardCategory =
-                card.dataset.category;
-
-            if(
-                category === "All Category" ||
-                cardCategory === category
-            ){
-
-                card.style.display = "";
-
-            }else{
-
-                card.style.display = "none";
-            }
-
-        });
+        // 重新套用 Search + Category
+        filterSavedRecipes();
 
     });
 
 });
+function resetCategoryFilter(){
 
+    currentCategory = "All Category";
+
+    document
+        .getElementById("savedSearch")
+        .value = "";
+
+    document
+        .querySelectorAll(".filter-btn")
+        .forEach(btn =>
+            btn.classList.remove("active")
+        );
+
+    document
+        .querySelector(".filter-btn")
+        .classList.add("active");
+
+    filterSavedRecipes();
+
+}
 function toggleNotif(event){
     event.preventDefault()
 
@@ -979,4 +1046,29 @@ function goToSearch(){
 
     window.location.href =
         `/all_recipes?search=${encodeURIComponent(keyword)}`;
+}
+
+
+// ENTER = SEARCH
+
+const homeSearch =
+    document.getElementById("homeSearch");
+
+if(homeSearch){
+
+    homeSearch.addEventListener(
+        "keydown",
+        function(event){
+
+            if(event.key === "Enter"){
+
+                event.preventDefault();
+
+                goToSearch();
+
+            }
+
+        }
+    );
+
 }

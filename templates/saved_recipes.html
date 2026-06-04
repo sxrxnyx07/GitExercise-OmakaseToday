@@ -17,7 +17,7 @@
             <input
                 type="text"
                 id="savedSearch"
-                placeholder="🔍 Find a saved recipe..."
+                placeholder="Find a saved recipe..."
             >
 
         </div>
@@ -127,6 +127,39 @@
 
     </div>
 
+    <!-- NO FILTER RESULT -->
+
+    <div
+        id="noCategoryResult"
+        class="empty-wrapper"
+        style="display:none;"
+    >
+
+        <div class="empty-state-card">
+
+            <div class="empty-icon">
+                ❤️
+            </div>
+
+            <h2 id="emptyCategoryTitle">
+                No Recipes Found
+            </h2>
+
+            <p id="emptyCategoryText">
+                Try another category or search keyword.
+            </p>
+
+            <button
+                class="explore-btn"
+                onclick="resetCategoryFilter()"
+            >
+                View All Recipes
+            </button>
+
+        </div>
+
+    </div>
+
     {% else %}
 
     <div class="empty-wrapper">
@@ -134,9 +167,7 @@
         <div class="empty-state-card">
 
             <div class="empty-icon">
-
-                🍽️
-
+                ❤️
             </div>
 
             <h2>No Saved Recipes Yet</h2>
@@ -146,7 +177,7 @@
             </p>
 
             <a
-                href="/"
+                href="{{ url_for('all_recipes') }}"
                 class="explore-btn"
             >
                 Explore Recipes
