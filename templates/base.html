@@ -48,41 +48,29 @@
                     <span class="notif-badge">{{ notif_count }}</span>
                 {% endif %}
             </a>
-            <div class="notif-dropdown" id="notifDropdown" onclick="markNotificationsRead()">
-                <div class="notif-header">Notifications</div>
-                
-                {% if new_notifications %}
-                    <div class="notif-section">New 🔔</div>
-                    {% for notif in new_notifications %}
-                        {% if notif[2] and notif[2] != 0 %}
-                            <a href="/recipe/{{ notif[2] }}#comment-{{ notif[3] }}" class="notif-item unread">
-                                <span>{{ notif[0] }}</span>
-                            </a>
-                        {% else %}
-                            <div class="notif-item unread">
-                                <span>{{ notif[0] }}</span>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    <div class="notif-empty">No new notifications</div>
-                {% endif %}
-                
-                {% if old_notifications %}
-                    <div class="notif-section">Earlier</div>
-                    {% for notif in old_notifications %}
-                        {% if notif[2] and notif[2] != 0 %}
-                            <a href="/recipe/{{ notif[2] }}#comment-{{ notif[3] }}" class="notif-item">
-                                <span>{{ notif[0] }}</span>
-                            </a>
-                        {% else %}
-                            <div class="notif-item">
-                                <span>{{ notif[0] }}</span>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            </div>
+<div class="notif-dropdown" id="notifDropdown" onclick="markNotificationsRead()">
+    <div class="notif-header">Notifications</div>
+    
+    {% if new_notifications %}
+        <div class="notif-section">New 🔔</div>
+        {% for notif in new_notifications %}
+            <a href="/recipe/{{ notif[2] if notif[2] else 1 }}{% if notif[3] %}#comment-{{ notif[3] }}{% endif %}" class="notif-item unread">
+                <span>{{ notif[0] }}</span>
+            </a>
+        {% endfor %}
+    {% else %}
+        <div class="notif-empty">No new notifications</div>
+    {% endif %}
+    
+{% if old_notifications %}
+    <div class="notif-section">Earlier</div>
+    {% for notif in old_notifications %}
+        <a href="/recipe/{{ notif[2] if notif[2] else 1 }}{% if notif[3] %}#comment-{{ notif[3] }}{% endif %}" class="notif-item">
+            <span>{{ notif[0] }}</span>
+        </a>
+    {% endfor %}
+{% endif %}
+</div>
         </li>
         <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
     </ul>

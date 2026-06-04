@@ -197,47 +197,51 @@ def fill_recipe_id_for_old_notifications():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # 先看看有什么 notification，没有 recipe_id 的
-    c.execute("SELECT id, message FROM notifications WHERE recipe_id IS NULL OR recipe_id = ''")
+    # 找没有 recipe_id 或 comment_id 的回复通知
+    c.execute("""
+        SELECT id, message 
+        FROM notifications 
+        WHERE (recipe_id IS NULL OR recipe_id = 0 OR comment_id IS NULL OR comment_id = 0)
+        AND message LIKE '@%replied to your comment%'
+    """)
     notifications = c.fetchall()
     
-    print(f"找到 {len(notifications)} 条没有 recipe_id 的 notification")
+    print(f"找到 {len(notifications)} 条需要修复的通知")
     
     updated = 0
     for notif_id, message in notifications:
-        if message and "@" in message:
-            try:
-                # 提取 username（格式: "@John replied to your comment"）
+        try:
+            # 格式: "@username replied to your comment"
+            if message and message.startswith("@"):
+                # 提取 username
                 parts = message.split(" ")
-                if len(parts) >= 1:
-                    username = parts[0].replace("@", "")
-                    
-                    # 找到这个用户最新评论的 recipe_id
+                username = parts[0].replace("@", "")
+                
+                # 找到这个用户的最新评论
+                c.execute("""
+                    SELECT id, recipe_id 
+                    FROM comments 
+                    WHERE username = ?
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                """, (username,))
+                result = c.fetchone()
+                
+                if result:
+                    comment_id, recipe_id = result
                     c.execute("""
-                        SELECT recipe_id FROM comments 
-                        WHERE username = ? 
-                        ORDER BY created_at DESC 
-                        LIMIT 1
-                    """, (username,))
-                    result = c.fetchone()
-                    
-                    if result and result[0]:
-                        recipe_id = result[0]
-                        c.execute("""
-                            UPDATE notifications 
-                            SET recipe_id = ? 
-                            WHERE id = ?
-                        """, (recipe_id, notif_id))
-                        updated += 1
-            except Exception as e:
-                print(f"Error processing notif {notif_id}: {e}")
+                        UPDATE notifications 
+                        SET recipe_id = ?, comment_id = ?
+                        WHERE id = ?
+                    """, (recipe_id, comment_id, notif_id))
+                    updated += 1
+                    print(f"修复: notif {notif_id} -> recipe_id={recipe_id}, comment_id={comment_id}")
+        except Exception as e:
+            print(f"Error processing notif {notif_id}: {e}")
     
     conn.commit()
-    print(f"成功更新 {updated} 条 notification")
+    print(f"成功修复 {updated} 条通知")
     conn.close()
-
-# 调用它
-fill_recipe_id_for_old_notifications()
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
@@ -931,16 +935,11 @@ def saved_recipes():
 @app.context_processor
 def inject_notifications():
     if "user" not in session:
-        return dict(
-            new_notifications=[],
-            old_notifications=[],
-            notif_count=0
-        )
+        return dict(new_notifications=[], old_notifications=[], notif_count=0)
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # ⭐ 改这里！不要选 created_at
     c.execute("""
         SELECT message, is_read, recipe_id, comment_id
         FROM notifications
@@ -950,9 +949,15 @@ def inject_notifications():
     """, (session["user"],))
 
     rows = c.fetchall()
+    
+    # DEBUG
+    print("DEBUG rows:", rows)
+    print("DEBUG user:", session["user"])
 
     new_notifs = [n for n in rows if n[1] == 0]  
     old_notifs = [n for n in rows if n[1] == 1]  
+    
+    print("DEBUG new_notifs:", new_notifs)
     
     c.execute("""
         SELECT COUNT(*) FROM notifications
@@ -1847,6 +1852,58 @@ def send_reply_notification(parent_comment_id, new_reply_id, replier_email, repl
             mail.send(msg)
         except Exception as e:
             print("Email failed:", e)
+
+@app.route("/comment/delete-all-fake", methods=["POST", "GET"])
+def delete_fake_comments():
+    fake_emails = [
+        'sosidney307@gmail.com', 'sidney.so1@icloud.com', 'sosidney630@gmail.com'
+    ]
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    for email in fake_emails:
+        c.execute("DELETE FROM comments WHERE user_email = ?", (email,))
+    
+    conn.commit()
+    deleted = c.rowcount
+    conn.close()
+    
+    if request.method == "GET":
+        return f"✅ Deleted {deleted} fake comments!"
+    
+    return jsonify({"success": True, "deleted": deleted})
+
+@app.route("/fill-old-notifications")
+def fill_old_notifs():
+    fill_recipe_id_for_old_notifications()
+    return "✅ 修复完成！刷新页面看看通知能不能点击了！"
+
+@app.route("/debug-notifs")
+def debug_notifs():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    c.execute("""
+        SELECT id, message, recipe_id, comment_id 
+        FROM notifications 
+        WHERE message LIKE '@%replied%'
+        ORDER BY id DESC
+        LIMIT 10
+    """)
+    rows = c.fetchall()
+    
+    html = "<h2>Notifications:</h2>"
+    for r in rows:
+        html += f"<p>ID: {r[0]}, Msg: {r[1]}, recipe_id: {r[2]}, comment_id: {r[3]}</p>"
+    
+    html += "<h2>Comments:</h2>"
+    c.execute("SELECT id, username, recipe_id FROM comments ORDER BY id DESC LIMIT 10")
+    for r in c.fetchall():
+        html += f"<p>ID: {r[0]}, username: {r[1]}, recipe_id: {r[2]}</p>"
+    
+    conn.close()
+    return html
 
 if __name__ == "__main__":
     app.run(debug=True)
