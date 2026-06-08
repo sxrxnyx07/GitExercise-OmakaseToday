@@ -161,6 +161,10 @@ def add_reset_columns():
         c.execute("ALTER TABLE users ADD COLUMN reset_viewed INTEGER DEFAULT 0")
     except:
         pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN last_login TEXT")
+    except:
+        pass
     conn.commit()
     conn.close()
 
