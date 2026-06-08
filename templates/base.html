@@ -48,29 +48,35 @@
                     <span class="notif-badge">{{ notif_count }}</span>
                 {% endif %}
             </a>
-<div class="notif-dropdown" id="notifDropdown" onclick="markNotificationsRead()">
-    <div class="notif-header">Notifications</div>
-    
-    {% if new_notifications %}
-        <div class="notif-section">New 🔔</div>
-        {% for notif in new_notifications %}
-            <a href="/recipe/{{ notif[2] }}/{% if notif[3] %}#comment-{{ notif[3] }}{% endif %}" class="notif-item unread">
-                <span>{{ notif[0] }} - R{{ notif[2] }}C{{ notif[3] }}</span>
-            </a>
-        {% endfor %}
-    {% else %}
-        <div class="notif-empty">No new notifications</div>
-    {% endif %}
-    
-    {% if old_notifications %}
-        <div class="notif-section">Earlier</div>
-        {% for notif in old_notifications %}
-            <a href="/recipe/{{ notif[2] }}/{% if notif[3] %}#comment-{{ notif[3] }}{% endif %}" class="notif-item unread">
-                <span>{{ notif[0] }} - R{{ notif[2] }}C{{ notif[3] }}</span>
-            </a>
-        {% endfor %}
-    {% endif %}
-</div>
+            
+            <!-- ⭐ dropdown 现在在这里，跟 a 平级 -->
+            <div class="notif-dropdown" id="notifDropdown" onclick="markNotificationsRead()">
+                <div class="notif-header">Notifications</div>
+                
+                {% if new_notifications %}
+                    <div class="notif-section">New 🔔</div>
+                    {% for notif in new_notifications %}
+                        <div class="notif-link-wrapper">
+                            <a href="/recipe/{{ notif[2] }}/#comment-{{ notif[3] }}" class="notif-link-btn">
+                                📄 {{ notif[0] }}
+                            </a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="notif-empty">No new notifications</div>
+                {% endif %}
+                
+                {% if old_notifications %}
+                    <div class="notif-section">Earlier</div>
+                    {% for notif in old_notifications %}
+                        <div class="notif-link-wrapper">
+                            <a href="/recipe/{{ notif[2] }}/#comment-{{ notif[3] }}" class="notif-link-btn">
+                                📄 {{ notif[0] }}
+                            </a>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
         </li>
         <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
     </ul>
@@ -80,6 +86,29 @@
 
 <script>
 var lastNotifCount = 0;
+
+// ⭐ TOGGLE NOTIF - 关键函数！
+function toggleNotif(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    var dropdown = document.getElementById('notifDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// 点击其他地方关闭dropdown
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('notifDropdown');
+    var icon = document.querySelector('.notif-icon');
+    
+    if (dropdown && icon) {
+        if (!dropdown.contains(e.target) && !icon.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    }
+});
 
 function getInitCount() {
     var el = document.getElementById('initNotifCount');

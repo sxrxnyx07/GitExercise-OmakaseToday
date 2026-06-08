@@ -228,18 +228,16 @@ const currentUserEmail = "{{ session.get('user', '') }}";
 function loadComments() {
     const recipeId = window.location.pathname.split("/").pop();
 
-    fetch(`/comment/${recipeId}`)
+    return fetch(`/comment/${recipeId}`)
         .then(res => res.json())
         .then(data => {
             commentList.innerHTML = "";
             
-            // ⭐ 创建 id -> comment map
             const commentMap = {};
             data.forEach(c => {
                 commentMap[c.id] = c;
             });
 
-            // ⭐ 递归渲染函数
             function renderReplies(parentId, level = 0) {
                 const childReplies = data.filter(c => c.parent_id === parentId);
                 if (childReplies.length === 0) return '';
@@ -254,7 +252,6 @@ function loadComments() {
                         ? `<button class="delete-btn" onclick="deleteComment(${reply.id})">Delete</button>` 
                         : '';
                     
-                    // ⭐ 找到回复谁的 username
                     const parentComment = commentMap[reply.parent_id];
                     const replyToName = parentComment ? parentComment.username : 'User';
                     
@@ -263,8 +260,7 @@ function loadComments() {
                         : '/static/uploads/default.png';
                     
                     html += `
-                        <div class="reply-comment ${deleteReplyClass}">
-                            id="comment-${reply.id}">
+                        <div class="reply-comment ${deleteReplyClass}" id="comment-${reply.id}">
                             <img class="comment-avatar-img" src="${replyAvatarImg}" alt="${replyName}">
                             <div class="comment-body">
                                 <div class="comment-header">
@@ -288,7 +284,6 @@ function loadComments() {
                 return html;
             }
 
-            // 只渲染顶层评论（没有 parent_id 的）
             const parents = data.filter(c => !c.parent_id || c.parent_id === 0);
 
             parents.forEach(parent => {
@@ -307,8 +302,7 @@ function loadComments() {
 
                 const commentHTML = `
                     <div class="comments-group">
-                        <div class="single-comment ${deleteClass}">
-                            id="comment-${parent.id}">
+                        <div class="single-comment ${deleteClass}" id="comment-${parent.id}">
                             <img class="comment-avatar-img" src="${avatarImg}" alt="${name}">
                             <div class="comment-body">
                                 <div class="comment-header">
@@ -331,6 +325,65 @@ function loadComments() {
             commentCount.innerText = data.length;
         });
 }
+
+// ===== INITIAL LOAD =====
+loadComments().then(() => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#comment-')) {
+        setTimeout(() => {
+            const target = document.querySelector(hash);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('highlight-comment');
+                setTimeout(() => { target.classList.remove('highlight-comment'); }, 4000);
+            }
+        }, 500);
+    }
+});
+
+function toggleNotif(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    var dropdown = document.getElementById('notifDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// 点击页面其他地方关闭 dropdown
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('notifDropdown');
+    var icon = document.querySelector('.notif-icon');
+    
+    if (dropdown && !dropdown.contains(e.target) && !icon.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// ===== 动态刷新通知 =====
+function refreshNotifications() {
+    fetch('/get-notifications')
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.querySelector('.notif-badge');
+            if (data.count > 0) {
+                if (badge) {
+                    badge.innerText = data.count;
+                } else {
+                    const notifIcon = document.querySelector('.notif-icon');
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'notif-badge';
+                    newBadge.innerText = data.count;
+                    notifIcon.appendChild(newBadge);
+                }
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+}
+
+setInterval(refreshNotifications, 5000);
 
 // ===== SHOW REPLY (MISSING!) =====
 function showReply(commentId, username) {
@@ -485,59 +538,6 @@ reviewForm.addEventListener("submit", function(e) {
         submitBtn.innerHTML = 'Submit Review ✨';
         reviewForm.dataset.submitting = "false";
     });
-});
-
-// ===== 动态刷新通知 =====
-// 在页面加载后定期检查新通知
-function refreshNotifications() {
-    fetch('/get-notifications')
-        .then(res => res.json())
-        .then(data => {
-            // 更新红点数字
-            const badge = document.querySelector('.notif-badge');
-            if (data.count > 0) {
-                if (badge) {
-                    badge.innerText = data.count;
-                } else {
-                    // 创建红点
-                    const notifIcon = document.querySelector('.notif-icon');
-                    const newBadge = document.createElement('span');
-                    newBadge.className = 'notif-badge';
-                    newBadge.innerText = data.count;
-                    notifIcon.appendChild(newBadge);
-                }
-            }
-        });
-}
-
-// 每30秒刷新一次
-setInterval(refreshNotifications, 30000);
-
-// ===== INITIAL LOAD =====
-loadComments();
-
-window.addEventListener('load', () => {
-
-    const hash = window.location.hash;
-
-    if (!hash) return;
-
-    const target = document.querySelector(hash);
-
-    if (target) {
-
-        target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-        });
-
-        target.classList.add('highlight-comment');
-
-        setTimeout(() => {
-            target.classList.remove('highlight-comment');
-        }, 4000);
-    }
-
 });
 
 </script>
