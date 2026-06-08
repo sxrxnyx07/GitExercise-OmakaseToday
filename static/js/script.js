@@ -1072,3 +1072,53 @@ if(homeSearch){
     );
 
 }
+const sections = document.querySelectorAll(
+    ".slide-left, .slide-right"
+);
+
+const observer = new IntersectionObserver(
+
+    (entries) => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add(
+                    "show-section"
+                );
+
+            }
+
+        });
+
+    },
+
+    {
+        threshold: 0.2
+    }
+
+);
+
+sections.forEach(section => {
+
+    observer.observe(section);
+
+});
+function quickSearch(keyword){
+
+    document.getElementById(
+        "homeSearch"
+    ).value = keyword;
+
+}
+function togglePassword(inputId){
+
+    const input = document.getElementById(inputId);
+
+    if(input.type === "password"){
+        input.type = "text";
+    }else{
+        input.type = "password";
+    }
+}

@@ -94,8 +94,7 @@
     <!-- INGREDIENT SECTION -->
     <!-- ===================================================== -->
     <section class="scene feature-section">
-        <div class="feature-block">
-            <!-- TEXT -->
+        <div class="feature-block slide-left">
             <div class="feature-text">
                 <h2>
                     Cook with What You Have 🍳
@@ -118,7 +117,6 @@
                     Cook Now →
                 </a>
             </div>
-            <!-- IMAGE -->
             <div class="feature-visual">
                 <img
                     src="{{ url_for('static', filename='css/picture/ingredients.jpg') }}"
@@ -131,7 +129,7 @@
     <!-- SPINNER SECTION -->
     <!-- ===================================================== -->
     <section class="scene feature-section">
-        <div class="feature-block reverse-block">
+        <div class="feature-block reverse-block slide-right">
             <!-- IMAGE -->
             <div class="feature-visual">
                 <img
@@ -164,7 +162,7 @@
     <!-- SEARCH SECTION -->
     <!-- ===================================================== -->
     <section class="scene feature-section">
-        <div class="feature-block search-block">
+        <div class="feature-block search-block slide-left">
             <div class="feature-text">
                 <h2>
                     Find Your Favorite Meal 🔍
@@ -176,8 +174,22 @@
                     type="text"
                     id="homeSearch"
                     class="search-box"
-                    placeholder="Search recipes..."
+                    placeholder="🔍 Search recipes..."
                 >
+                <div class="search-suggestions">
+                    <span onclick="quickSearch('Chicken')">
+                        Chicken
+                    </span>
+                    <span onclick="quickSearch('Avocado')">
+                        Avocado
+                    </span>
+                    <span onclick="quickSearch('Cake')">
+                        Cake
+                    </span>
+                    <span onclick="quickSearch('Lamb')">
+                        Lamb
+                    </span>
+                </div>
                 <button
                     class="btn-return"
                     onclick="goToSearch()"
@@ -211,11 +223,17 @@
                     ABOUT US
                 </span>
                 <h2>
-                    Bringing Joy Back Into Cooking 🍳
+                    Bringing Joy Back Into
+                    <span class="glow-text">
+                        Every Meal
+                    </span>
+                     🍳
                 </h2>
                 <p>
                     Omakase Today was created to make cooking
                     more fun, interactive and inspiring.
+                </p>
+                <p>
                     We believe every meal should feel exciting,
                     creative and personal.
                 </p>

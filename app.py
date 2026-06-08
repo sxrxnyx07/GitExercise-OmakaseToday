@@ -7,10 +7,12 @@ import secrets
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -193,35 +195,57 @@ def home():
 def register():
 
     if request.method == "POST":
-        username = request.form["username"]
-        email = request.form["email"]
-        password = request.form["password"]
+
         username = request.form.get("username", "").strip()
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
+        repeat = request.form.get("repeat-password", "")
 
         if not username or not email or not password:
-            return render_template("register.html", error="All fields required")
+            return render_template(
+                "register.html",
+                error="All fields required"
+            )
+
+        if len(password) < 8:
+            return render_template(
+                "register.html",
+                error="Password must be at least 8 characters"
+            )
+
+        if password != repeat:
+            return render_template(
+                "register.html",
+                error="Passwords do not match"
+            )
 
         hashed_pw = generate_password_hash(password)
-        try:
-            with sqlite3.connect(DB_PATH) as conn:
-                c = conn.cursor()
-                c.execute("INSERT INTO users (email, username, password, bio) VALUES (?, ?, ?, ?)", (email, username, hashed_pw, ""))
 
+        try:
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
 
             c.execute("""
-                INSERT INTO users (email, username, password, bio)
+                INSERT INTO users
+                (email, username, password, bio)
                 VALUES (?, ?, ?, ?)
-            """, (email, username, hashed_pw, ""))
+            """, (
+                email,
+                username,
+                hashed_pw,
+                ""
+            ))
 
             conn.commit()
             conn.close()
+
             return redirect(url_for("login"))
+
         except sqlite3.IntegrityError:
-            return render_template("register.html", error="This email is already registered!")
+            return render_template(
+                "register.html",
+                error="This email is already registered!"
+            )
 
     return render_template("register.html")
 
@@ -242,19 +266,30 @@ def check_email():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-
         email = request.form["email"]
         password = request.form["password"]
-
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-
         c.execute("SELECT * FROM users WHERE email = ?", (email,))
         user = c.fetchone()        #get a tuple, example:'test@email.com', 'anna', 'hashed_password', '', '', 'admin'
-
         conn.close()
-
-        if user and check_password_hash(user[2], password):     #check id exist indb, check password
+        if user and check_password_hash(user[2], password):
+            from datetime import datetime
+            current_time = datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("""
+                UPDATE users
+                SET last_login = ?
+                WHERE email = ?
+            """, (
+                current_time,
+                email
+            ))
+            conn.commit()
+            conn.close()
             session["user"] = email
             session["role"] = user[5]
             return redirect(url_for("profile"))
@@ -358,26 +393,6 @@ def profile():
         saved_ids=saved_ids,
         role=session.get("role")
     )
-
-@app.route("/newpassword", methods=["GET", "POST"])
-def newpassword():
-    if "reset_user" not in session: return redirect(url_for("login"))
-    if request.method == "POST":
-        password, repeat = request.form["password"], request.form["repeat-password"]
-        if not password: return render_template("newpassword.html", error="Password is required")
-        if len(password) < 8: return render_template("newpassword.html", error="Too short")
-        if password != repeat: return render_template("newpassword.html", error="No match")
-        hashed_pw = generate_password_hash(password)
-        email = session["reset_user"]
-        conn = sqlite3.connect("users.db")
-        c = conn.cursor()
-        c.execute("UPDATE users SET password=? WHERE email=?", (hashed_pw, email))
-        conn.commit()
-        conn.close()
-        session.pop("reset_user", None)
-        return redirect(url_for("login"))
-    return render_template("newpassword.html")
-
 
 # ---------------- UPLOAD PROFILE PIC ----------------
 @app.route("/upload-profile-pic", methods=["POST"])
@@ -533,24 +548,83 @@ def logout():
 # ---------------- ADMIN ----------------
 @app.route("/admin")
 def admin():
+
     if session.get("role") != "admin":
         return "403 Forbidden"
 
-    # 1. Get recent users (continue using sqlite3 to access users.db)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT email, username, role FROM users ORDER BY rowid DESC LIMIT 5")   #sqlite
+    six_months_ago = (
+        datetime.now() - timedelta(days=180)
+    ).strftime("%Y-%m-%d %H:%M:%S")
+
+    c.execute("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE last_login IS NULL
+        OR last_login < ?
+    """, (six_months_ago,))
+
+    inactive_users = c.fetchone()[0]
+    c.execute("""
+        SELECT username,email
+        FROM users
+        WHERE last_login IS NULL
+        OR last_login < ?
+        LIMIT 3
+    """,(
+        six_months_ago,
+    ))
+
+    inactive_accounts = c.fetchall()
+    # recent users
+    c.execute("""
+        SELECT email, username, role
+        FROM users
+        ORDER BY rowid DESC
+        LIMIT 5
+    """)
     recent_users = c.fetchall()
+
+    # total users
+    c.execute("""
+        SELECT COUNT(*)
+        FROM users
+    """)
+    total_users = c.fetchone()[0]
+
     conn.close()
 
-    # 2. Gey recent recipes (continue using SQLAlchemy to access omakase.db)
-    # This will prevent the "no such table: recipes" error.
-    recent_recipes = Recipe.query.order_by(Recipe.id.desc()).limit(5).all()  #recipes(SQLAIchemy)
+    # recipes (SQLAlchemy)
+    recent_recipes = (
+        Recipe.query
+        .order_by(Recipe.id.desc())
+        .limit(5)
+        .all()
+    )
+
+    total_recipes = Recipe.query.count()
+
+    avg_rating = db.session.query(
+        func.avg(Recipe.rating)
+    ).scalar()
+
+    most_popular = (
+        Recipe.query
+        .order_by(Recipe.rating.desc())
+        .first()
+    )
 
     return render_template(
         "admin.html",
         recent_users=recent_users,
-        recent_recipes=recent_recipes
+        recent_recipes=recent_recipes,
+        total_recipes=total_recipes,
+        total_users=total_users,
+        avg_rating=round(avg_rating or 0, 1),
+        most_popular=most_popular,
+        inactive_users=inactive_users,
+        inactive_accounts=inactive_accounts
     )
 
 # =======================
@@ -581,12 +655,55 @@ def admin_users():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    c.execute("SELECT email, username, role FROM users")
+    c.execute("""
+        SELECT email,
+            username,
+            role,
+            last_login
+        FROM users
+    """)
     users = c.fetchall()
 
     conn.close()
 
-    return render_template("admin_users.html", users=users)
+    six_months_ago = (
+            datetime.now() - timedelta(days=180)
+        )
+
+    processed_users = []
+
+    for user in users:
+
+        status = "Inactive"
+
+        if user[3]:
+
+            try:
+                last_login = datetime.strptime(
+                    user[3],
+                    "%Y-%m-%d %H:%M:%S"
+                )
+
+                if last_login > six_months_ago:
+                    status = "Active"
+
+            except:
+                status = "Inactive"
+
+        processed_users.append(
+            (
+                user[0],  # email
+                user[1],  # username
+                user[2],  # role
+                user[3],  # last_login
+                status    # active/inactive
+            )
+        )
+
+    return render_template(
+        "admin_users.html",
+        users=processed_users
+    )
 
 @app.route("/admin/users/update/<email>", methods=["POST"])
 def update_user(email):
@@ -1741,6 +1858,23 @@ def delete_comment():
     conn.close()
     
     return jsonify({"success": True})
+@app.route("/check-login")
+def check_login():
 
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT email,
+               username,
+               last_login
+        FROM users
+    """)
+
+    data = c.fetchall()
+
+    conn.close()
+
+    return str(data)
 if __name__ == "__main__":
     app.run(debug=True)
