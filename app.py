@@ -103,6 +103,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_email TEXT,
         message TEXT,
+        recipe_id INTEGER,
         is_read INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
@@ -126,6 +127,16 @@ def init_db():
         rating INTEGER,
         parent_id INTEGER DEFAULT NULL,  
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS comment_notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        comment_id INTEGER,
+        notify_me INTEGER DEFAULT 1,
+        FOREIGN KEY (user_email) REFERENCES users(email)
     )
     """)
     conn.commit()
@@ -154,6 +165,85 @@ def add_reset_columns():
     conn.close()
 
 add_reset_columns()
+def add_recipe_id_to_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute("ALTER TABLE notifications ADD COLUMN recipe_id INTEGER")
+    except:
+        pass
+    conn.commit()
+    conn.close()
+
+# 调用它
+add_recipe_id_to_notifications()
+
+def add_comment_id_to_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    try:
+        c.execute("""
+            ALTER TABLE notifications
+            ADD COLUMN comment_id INTEGER
+        """)
+    except:
+        pass
+
+    conn.commit()
+    conn.close()
+
+add_comment_id_to_notifications()
+
+def fill_recipe_id_for_old_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 找没有 recipe_id 或 comment_id 的回复通知
+    c.execute("""
+        SELECT id, message 
+        FROM notifications 
+        WHERE (recipe_id IS NULL OR recipe_id = 0 OR comment_id IS NULL OR comment_id = 0)
+        AND message LIKE '@%replied to your comment%'
+    """)
+    notifications = c.fetchall()
+    
+    print(f"找到 {len(notifications)} 条需要修复的通知")
+    
+    updated = 0
+    for notif_id, message in notifications:
+        try:
+            # 格式: "@username replied to your comment"
+            if message and message.startswith("@"):
+                # 提取 username
+                parts = message.split(" ")
+                username = parts[0].replace("@", "")
+                
+                # 找到这个用户的最新评论
+                c.execute("""
+                    SELECT id, recipe_id 
+                    FROM comments 
+                    WHERE username = ?
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                """, (username,))
+                result = c.fetchone()
+                
+                if result:
+                    comment_id, recipe_id = result
+                    c.execute("""
+                        UPDATE notifications 
+                        SET recipe_id = ?, comment_id = ?
+                        WHERE id = ?
+                    """, (recipe_id, comment_id, notif_id))
+                    updated += 1
+                    print(f"修复: notif {notif_id} -> recipe_id={recipe_id}, comment_id={comment_id}")
+        except Exception as e:
+            print(f"Error processing notif {notif_id}: {e}")
+    
+    conn.commit()
+    print(f"成功修复 {updated} 条通知")
+    conn.close()
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
@@ -974,18 +1064,13 @@ def saved_recipes():
 @app.context_processor
 def inject_notifications():
     if "user" not in session:
-        return dict(
-            new_notifications=[],
-            old_notifications=[],
-            notif_count=0
-        )
+        return dict(new_notifications=[], old_notifications=[], notif_count=0)
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-
     c.execute("""
-        SELECT message, is_read, created_at
+        SELECT message, is_read, recipe_id, comment_id
         FROM notifications
         WHERE user_email = ?
         ORDER BY created_at DESC
@@ -993,11 +1078,16 @@ def inject_notifications():
     """, (session["user"],))
 
     rows = c.fetchall()
+    
+    # DEBUG
+    print("DEBUG rows:", rows)
+    print("DEBUG user:", session["user"])
 
-    # 
     new_notifs = [n for n in rows if n[1] == 0]  
     old_notifs = [n for n in rows if n[1] == 1]  
-    # unread count（红点）
+    
+    print("DEBUG new_notifs:", new_notifs)
+    
     c.execute("""
         SELECT COUNT(*) FROM notifications
         WHERE user_email = ? AND is_read = 0
@@ -1039,7 +1129,7 @@ def get_notifications():
     c = conn.cursor()
 
     c.execute("""
-        SELECT message, is_read
+        SELECT message, is_read, recipe_id, comment_id
         FROM notifications
         WHERE user_email = ?
         ORDER BY created_at DESC
@@ -1761,47 +1851,49 @@ def toggle_save():
 
 @app.route("/comment/add", methods=["POST"])
 def add_comment():
-
-    # 直接打印看看
-    print("=== comment/add called ===")
-    print("JSON:", request.json)
-    print("Data:", request.get_json())
-    
     recipe_id = request.json.get('recipe_id')
     email = request.json.get('email')
     username = request.json.get('username')
     rating = request.json.get('rating')
     content = request.json.get('content')
-    parent_id = request.json.get('parent_id')  # ⭐ reply
+    parent_id = request.json.get('parent_id')
+    notify_me = request.json.get('notify_me', False)
     
-    print("recipe_id:", recipe_id)
-    print("email:", email)
-    print("username:", username)
-    print("rating:", rating)
-    print("content:", content)
-
     if not content:
         return jsonify({"error": "empty comment"}), 400
     
     if not email:
         return jsonify({"error": "email required"}), 400
 
+    # ⭐ 修复：把 0 转成 None
+    if parent_id == 0 or parent_id == "0" or parent_id == "":
+        parent_id = None
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # 简单写法
+    # 插入评论
     c.execute(
         "INSERT INTO comments (recipe_id, user_email, username, rating, content, parent_id) VALUES (?, ?, ?, ?, ?, ?)",
-        (recipe_id, email, username, rating, content, parent_id)
+        (recipe_id, email, username, rating, content, parent_id)  # ⭐ None 会变成 NULL
     )
     
-    print("SQL executed!")
-
+    # 获取新评论的 ID
+    comment_id = c.lastrowid
+    
+    # ⭐ 保存通知设置
+    c.execute(
+        "INSERT INTO comment_notifications (user_email, comment_id, notify_me) VALUES (?, ?, ?)",
+        (email, comment_id, 1 if notify_me else 0)
+    )
+    
     conn.commit()
     conn.close()
     
-    print("Done!")
-
+    # ⭐ 如果是回复，发送通知
+    if parent_id:
+        send_reply_notification(parent_id, comment_id, email, username, content)
+    
     return jsonify({"success": True})
 
 @app.route("/comment/<int:recipe_id>")
@@ -1810,15 +1902,16 @@ def get_comments(recipe_id):
     c = conn.cursor()
 
     c.execute("""
-        SELECT id, user_email, username, content, created_at, rating
+        SELECT id, user_email, username, content, created_at, rating, parent_id
         FROM comments
         WHERE recipe_id=?
-        ORDER BY created_at DESC
+        ORDER BY created_at ASC
     """, (recipe_id,))
 
     comments = c.fetchall()
     conn.close()
 
+    # 返回包含 profile_pic 的数据
     return jsonify([
         {
             "id": c[0],
@@ -1826,18 +1919,39 @@ def get_comments(recipe_id):
             "username": c[2],
             "content": c[3],
             "created_at": c[4],
-            "rating": c[5]
+            "rating": c[5],
+            "parent_id": c[6],
+            "profile_pic": get_profile_pic(c[1])  # ⭐ 新加
         }
         for c in comments
     ])
 
-@app.route("/comment/delete/<int:comment_id>", methods=["POST"])
+def get_profile_pic(email):
+    if not email:
+        return None
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    c.execute("SELECT profile_pic FROM users WHERE email = ?", (email,))
+    row = c.fetchone()
+    conn.close()
+    
+    if row and row[0]:
+        return row[0]
+    return None
+
+@app.route("/comment/delete", methods=["POST"])
 def delete_comment():
     if "user" not in session:
         return jsonify({"error": "login required"}), 401
     
-    comment_id = request.json.get('comment_id')
+    data = request.get_json()
+    comment_id = data.get('comment_id')
     user_email = session["user"]
+    
+    if not comment_id:
+        return jsonify({"error": "comment_id required"}), 400
     
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -1847,13 +1961,21 @@ def delete_comment():
     comment = c.fetchone()
     
     if not comment:
+        conn.close()
         return jsonify({"error": "comment not found"}), 404
     
     # 只有自己能删除！
     if comment[0] != user_email:
+        conn.close()
         return jsonify({"error": "cannot delete others' comment"}), 403
     
+    # ⭐ 删除这个 comment 的所有 replies
+    c.execute("DELETE FROM comments WHERE parent_id = ?", (comment_id,))
+    # ⭐ 删除这个 comment 自己
     c.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+    # ⭐ 删除相关的通知设置
+    c.execute("DELETE FROM comment_notifications WHERE comment_id = ?", (comment_id,))
+    
     conn.commit()
     conn.close()
     
@@ -1876,5 +1998,140 @@ def check_login():
     conn.close()
 
     return str(data)
+
+# ⭐ 发送回复通知的函数
+def send_reply_notification(parent_comment_id, new_reply_id, replier_email, replier_name, reply_content):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 找到原评论和它的 recipe_id
+    c.execute("""
+        SELECT user_email, username, content, recipe_id
+        FROM comments
+        WHERE id = ?
+    """, (parent_comment_id,))
+    parent = c.fetchone()
+    
+    if not parent:
+        conn.close()
+        return
+    
+    original_email = parent[0]
+    original_name = parent[1]
+    original_content = parent[2]
+    recipe_id = parent[3]  # ⭐ 获取正确的 recipe_id
+    
+    # ⭐ 创建站内通知 - 加 recipe_id
+    notification_msg = f"@{replier_name} replied to your comment"
+    c.execute("""
+        INSERT INTO notifications (user_email, message, recipe_id, comment_id)
+        VALUES (?, ?, ?, ?)
+    """, (original_email, notification_msg, recipe_id, new_reply_id))
+    
+    conn.commit()
+    
+    # 检查原评论者是否想要 email 通知
+    c.execute("""
+        SELECT notify_me
+        FROM comment_notifications
+        WHERE user_email = ? AND comment_id = ?
+    """, (original_email, parent_comment_id))
+    notify_row = c.fetchone()
+    
+    want_email = notify_row and notify_row[0] == 1
+    
+    conn.close()
+    
+    # 发送 email（如果想要）
+    if want_email and original_email.lower() != replier_email.lower():
+        try:
+            from flask import request
+            base_url = request.host_url.rstrip('/')
+            
+            msg = Message(
+                subject="🔔 Someone replied to your comment",
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[original_email]
+            )
+            msg.html = f"""
+            <h2>New Reply</h2>
+            
+            <p>Hi {original_name},</p>
+            
+            <p><b>@{replier_name}</b> replied to your comment:</p>
+            
+            <blockquote style="background: #f5f5f5; padding: 15px; border-left: 4px solid #f4c542; margin: 15px 0;">
+                {original_content}
+            </blockquote>
+            
+            <p><b>Reply:</b> {reply_content}</p>
+            
+            <p>
+                <a href="{base_url}/recipe/{recipe_id}#comment-{new_reply_id}" style="background: #f4c542; color: black; padding: 10px 20px; text-decoration: none; border-radius: 8px;">
+                    View Recipe
+                </a>
+            </p>
+            
+            <p style="color: #888; font-size: 12px; margin-top: 30px;">
+                If you don't want to receive these emails, go to your comment and uncheck "Notify me by email"
+            </p>
+            """
+            mail.send(msg)
+        except Exception as e:
+            print("Email failed:", e)
+
+@app.route("/comment/delete-all-fake", methods=["POST", "GET"])
+def delete_fake_comments():
+    fake_emails = [
+        'sosidney307@gmail.com', 'sidney.so1@icloud.com', 'sosidney630@gmail.com'
+    ]
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    for email in fake_emails:
+        c.execute("DELETE FROM comments WHERE user_email = ?", (email,))
+    
+    conn.commit()
+    deleted = c.rowcount
+    conn.close()
+    
+    if request.method == "GET":
+        return f"✅ Deleted {deleted} fake comments!"
+    
+    return jsonify({"success": True, "deleted": deleted})
+
+@app.route("/fill-old-notifications")
+def fill_old_notifs():
+    fill_recipe_id_for_old_notifications()
+    return "✅ 修复完成！刷新页面看看通知能不能点击了！"
+
+@app.route("/debug-notifs")
+def debug_notifs():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    c.execute("""
+        SELECT id, message, recipe_id, comment_id 
+        FROM notifications 
+        WHERE message LIKE '@%replied%'
+        ORDER BY id DESC
+        LIMIT 10
+    """)
+    rows = c.fetchall()
+    
+    html = "<h2>Notifications:</h2>"
+    for r in rows:
+        html += f"<p>ID: {r[0]}, Msg: {r[1]}, recipe_id: {r[2]}, comment_id: {r[3]}</p>"
+    
+    html += "<h2>Comments:</h2>"
+    c.execute("SELECT id, username, recipe_id FROM comments ORDER BY id DESC LIMIT 10")
+    for r in c.fetchall():
+        html += f"<p>ID: {r[0]}, username: {r[1]}, recipe_id: {r[2]}</p>"
+    
+    conn.close()
+    return html
+
+
 if __name__ == "__main__":
     app.run(debug=True)

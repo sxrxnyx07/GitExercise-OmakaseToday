@@ -1384,6 +1384,36 @@ button:disabled {
 }
 
 /*_________ Keep Screen Awake Button _______*/
+/* ===== TOAST MESSAGE ===== */
+.toast-message {
+    position: fixed;
+    top: 80px;                    /* ⭐ 改到上面 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 10px 20px;           /* ⭐ 更小 */
+    border-radius: 25px;
+    font-size: 14px;             /* ⭐ 更小 */
+    font-weight: 500;
+    z-index: 9999;
+    animation: toastSlide 0.3s ease;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.toast-message.success {
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+}
+
+.toast-message.error {
+    background: linear-gradient(135deg, #f44336, #e53935);
+}
+
+@keyframes toastSlide {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 
 /* ===== TOGGLE SWITCH ===== */
 .wake-wrapper {
@@ -1637,6 +1667,73 @@ button:disabled {
     transform: scale(1.1);
 }
 
+.notif-item {
+    display: block;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    text-decoration: none;
+    color: #333;
+}
+
+.notif-item:hover {
+    background: #f5f5f5;
+}
+
+.notif-item.unread {
+    background: #e8f0fe;
+    font-weight: 600;
+}
+
+/* ⭐ 明显的 View 按钮样式 */
+.notif-link-wrapper {
+    margin-bottom: 8px;
+}
+
+.notif-link-btn {
+    display: block;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white !important;
+    text-decoration: none !important;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.notif-link-btn:hover {
+    transform: translateX(5px);
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.notif-wrapper {
+    position: relative;  /* ⭐ 加这个！是关键 */
+    display: inline-block;
+}
+
+/* 确保通知 dropdown 显示 */
+.notif-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    min-width: 280px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 9999;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.notif-dropdown.show {
+    display: block !important;
+}
+
 /* Bell icon */
 .notify-icon {
     font-size: 18px;
@@ -1668,99 +1765,239 @@ button:disabled {
     font-weight: bold;
 }
 
-/* ===== SINGLE COMMENT - GOOGLE STYLE ===== */
+/* ===== SINGLE COMMENT - FIX LAYOUT ===== */
 .single-comment {
     display: flex;
     gap: 12px;
     background: white;
     border: 1px solid #eee;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 16px;
-    margin-top: 14px;
+    margin-bottom: 12px;
 }
 
 /* 头像 */
 .comment-avatar {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
     border-radius: 50%;
     background: linear-gradient(135deg, #4285f4, #34a853);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
+    flex-shrink: 0;
 }
 
 /* 主体 */
 .comment-body {
     flex: 1;
     min-width: 0;
-}
-
-/* 日期 - 在上面 */
-.comment-date {
-    font-size: 12px;
-    color: #5f6368;
-    margin-bottom: 2px;
+    text-align: left;  /* ⭐ 加这个！ */
 }
 
 /* 名字 */
 .comment-username {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
     color: #202124;
-    display: block;
-    margin-bottom: 4px;
-    margin-right: 900px;
+    display: inline;  /* ⭐ 改成 inline */
 }
 
 /* 星星 */
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .comment-stars {
     display: flex;
     gap: 1px;
 }
 
-.star-filled {
-    color: #fbbc04;
-    font-size: 14px;
-}
-
-.star-empty {
-    color: #e0e0e0;
-    font-size: 14px;
-}
-
 /* Comment 文字 */
 .comment-text {
-    margin: 10px 0 0 0;
+    margin: 6px 0;
     line-height: 1.5;
     color: #4d5156;
     font-size: 14px;
-    margin-right: 800px;
+    word-wrap: break-word;
+    text-align: left;  /* ⭐ 加这个！ */
+    width: 100%;
+    display: block;
 }
 
 /* Footer */
 .comment-footer {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 10px;
-    padding-top: 10px;
+    gap: 16px;
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid #f0f0f0;
+    text-align: left;
 }
 
-/* Reply 显示区域 */
+.comment-date {
+    font-size: 12px;
+    color: #5f6368;
+}
+
+/* Reply button */
+.reply-btn {
+    background: transparent;
+    border: none;
+    color: #1a73e8;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+}
+
+.reply-btn:hover {
+    text-decoration: underline;
+}
+
+/* ===== COMMENT @MENTION ===== */
+.comment-mention {
+    color: #1a73e8;  /* 蓝色 */
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.comment-mention:hover {
+    text-decoration: underline;
+}
+
+/* 名字 */
+.comment-username {
+    font-weight: 600;
+    font-size: 14px;
+    color: #202124;
+}
+
+/* Comment 文字 */
+.comment-text {
+    margin: 6px 0;
+    line-height: 1.5;
+    color: #4d5156;
+    font-size: 14px;
+    word-wrap: break-word;
+}
+
+.highlight-comment {
+    animation: flashComment 4s ease;
+}
+
+@keyframes flashComment {
+
+    0% {
+        background: #fff3cd;
+        box-shadow: 0 0 20px rgba(255,193,7,.5);
+    }
+
+    100% {
+        background: transparent;
+        box-shadow: none;
+    }
+
+}
+
+/* ===== NESTED REPLIES ===== */
+
+/* ===== COMMENT AVATAR IMAGE ===== */
+.comment-avatar-img {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #eee;
+    flex-shrink: 0;
+}
+
+.reply-comment .comment-avatar-img {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+}
+.replies-container {
+    margin-left: 52px;
+    padding-left: 16px;
+    border-left: 2px solid #dadce0;
+    margin-top: 8px;
+}
+
+.reply-comment {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.reply-comment .comment-avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    font-size: 12px;
+}
+
+.reply-comment .comment-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.reply-comment .comment-footer {
+    border-top: none;
+    padding-top: 4px;
+    margin-top: 4px;
+}
+
+/* 删除按钮 - 默认隐藏 如果不是自己*/
+.delete-btn {
+    background: transparent;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #5f6368;
+    opacity: 0;
+    transition: 0.2s;
+    margin-left: auto;
+    display: none;  /* 默认不显示 */
+}
+
+/* 只有自己的 comment 才显示 delete */
+.single-comment.can-delete .delete-btn,
+.reply-comment.can-delete .delete-btn {
+    display: block;
+    opacity: 0.6;
+}
+
+.single-comment.can-delete .delete-btn:hover,
+.reply-comment.can-delete .delete-btn:hover {
+    opacity: 1;
+    background: #ffebee;
+    color: #d93025;
+}
+
+/* ===== REPLY INPUT AREA ===== */
 .replying-to {
     display: none;
-    background: #e3f2fd;
-    padding: 10px 15px;
+    background: #e8f0fe;
+    padding: 10px 16px;
     border-radius: 8px;
     margin-bottom: 15px;
-    font-size: 14px;
-    color: #1976d2;
+    font-size: 13px;
+    color: #1a73e8;
     align-items: center;
     gap: 10px;
 }
@@ -1771,54 +2008,27 @@ button:disabled {
     font-size: 16px;
     cursor: pointer;
     padding: 4px 8px;
+    color: #5f6368;
 }
 
-/* Comment 输入框 - 大一点 */
+.replying-to button:hover {
+    color: #d93025;
+}
+
+/* Comment 输入框 */
 .comment-input {
     width: 100%;
     min-height: 100px;
-    padding: 15px;
+    padding: 14px;
     border: 2px solid #ddd;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 14px;
     resize: vertical;
     margin-top: 15px;
+    font-family: inherit;
 }
 
 .comment-input:focus {
-    border-color: #ffb703;
+    border-color: #1a73e8;
     outline: none;
-}
-
-/* Reply button */
-.reply-btn {
-    background: transparent;
-    border: none;
-    color: #1976d2;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-
-.reply-btn:hover {
-    background: #e3f2fd;
-}
-
-/* Delete button */
-.delete-btn {
-    background: transparent;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    opacity: 0.6;
-    transition: 0.2s;
-}
-
-.delete-btn:hover {
-    opacity: 1;
-    background: #ffebee;
 }

@@ -157,6 +157,15 @@
             </form>
         </div>
 
+        <!-- display tips message -->
+            <div id="wakeModeMessage" class="toast-message" style="display: none;">
+                ☀️ Sleep Mode ON
+            </div>
+
+            <div id="deleteMessage" class="toast-message" style="display: none;">
+                ✅ Deleted successfully!
+            </div>
+
         <!-- COMMENT LIST -->
         <div class="comment-display-card">
             <h3 class="comment-count-title">💬 Total Reviews (<span id="commentCount">0</span>)</h3>
@@ -174,16 +183,23 @@
 </div>
 
 <script>
-// 生成星星
+// ===== VARIABLES =====
+let wakeLock = null;
+let isAwake = false;
+const wakeToggle = document.getElementById("wakeToggle");
+
+// ===== GENERATE STARS =====
 function getStarsHtml(rating) {
     let stars = "";
     for (let i = 1; i <= 5; i++) {
-        stars += i <= rating ? "<span class='star-filled'>★</span>" : "<span class='star-empty'>★</span>";
+        stars += i <= rating 
+            ? "<span class='star-filled'>★</span>" 
+            : "<span class='star-empty'>★</span>";
     }
     return stars;
 }
 
-// Star rating click handler
+// ===== STAR RATING =====
 const starInputs = document.querySelectorAll('.star-rating-input');
 const ratingText = document.getElementById('ratingText');
 
@@ -197,24 +213,7 @@ starInputs.forEach(input => {
     });
 });
 
-// Wake lock
-let wakeLock = null; let isAwake = false;
-const wakeToggle = document.getElementById("wakeToggle");
-
-async function toggleWakeLock() {
-    try {
-        if (!isAwake) {
-            wakeLock = await navigator.wakeLock.request("screen");
-            isAwake = true;
-        } else {
-            if (wakeLock) await wakeLock.release();
-            wakeLock = null; isAwake = false;
-        }
-    } catch (err) { wakeToggle.checked = false; }
-}
-wakeToggle.addEventListener("change", toggleWakeLock);
-
-// Form elements - ⭐ 更新版本
+// ===== FORM ELEMENTS =====
 const reviewForm = document.getElementById("reviewForm");
 const commentList = document.getElementById("commentList");
 const commentCount = document.getElementById('commentCount');
@@ -223,39 +222,102 @@ const commentInput = document.getElementById('comment');
 const replyingTo = document.getElementById('replyingTo');
 const replyingToName = document.getElementById('replyingToName');
 
-// ⭐ 从 session 拿 user email
 const currentUserEmail = "{{ session.get('user', '') }}";
 
-// 加载评论
+// ===== LOAD COMMENTS =====
 function loadComments() {
     const recipeId = window.location.pathname.split("/").pop();
 
-    fetch(`/comment/${recipeId}`)
+    return fetch(`/comment/${recipeId}`)
         .then(res => res.json())
         .then(data => {
             commentList.innerHTML = "";
             
+            const commentMap = {};
             data.forEach(c => {
-                const name = c.username || "User";
-                // ⭐ 用 session 的 email 检查能不能删除
-                const canDelete = currentUserEmail && c.user_email === currentUserEmail;
-                const deleteBtn = canDelete ? `<button class="delete-btn" onclick="deleteComment(${c.id})">🗑️</button>` : '';
-                
-                const commentHTML = `
-                    <div class="single-comment">
-                        <div class="comment-avatar">${name.charAt(0).toUpperCase()}</div>
-                        <div class="comment-body">
-                            <div class="comment-header">
-                                <span class="comment-username">${name}</span>
-                                <span class="comment-stars">${getStarsHtml(c.rating)}</span>
-                            </div>
-                            <p class="comment-text">${c.content}</p>
-                            <div class="comment-footer">
-                                <span class="comment-date">${c.created_at || 'Just now'}</span>
-                                <button class="reply-btn" onclick="showReply(${c.id}, '${name}')">Reply</button>
-                                ${deleteBtn}
+                commentMap[c.id] = c;
+            });
+
+            function renderReplies(parentId, level = 0) {
+                const childReplies = data.filter(c => c.parent_id === parentId);
+                if (childReplies.length === 0) return '';
+
+                let html = `<div class="replies-container" style="margin-left: ${level * 20}px;">`;
+                childReplies.forEach(reply => {
+                    const replyName = reply.username || "User";
+                    const replyProfilePic = reply.profile_pic;
+                    const canDeleteReply = currentUserEmail && reply.user_email === currentUserEmail;
+                    const deleteReplyClass = canDeleteReply ? 'can-delete' : '';
+                    const deleteReplyBtn = canDeleteReply 
+                        ? `<button class="delete-btn" onclick="deleteComment(${reply.id})">Delete</button>` 
+                        : '';
+                    
+                    const parentComment = commentMap[reply.parent_id];
+                    const replyToName = parentComment ? parentComment.username : 'User';
+                    
+                    const replyAvatarImg = replyProfilePic 
+                        ? `/static/uploads/${replyProfilePic}` 
+                        : '/static/uploads/default.png';
+                    
+                    html += `
+                        <div class="reply-comment ${deleteReplyClass}" id="comment-${reply.id}">
+                            <img class="comment-avatar-img" src="${replyAvatarImg}" alt="${replyName}">
+                            <div class="comment-body">
+                                <div class="comment-header">
+                                    <span class="comment-username">${replyName}</span>
+                                    <span class="comment-stars">${getStarsHtml(reply.rating)}</span>
+                                </div>
+                                <p class="comment-text">
+                                    <span class="comment-mention">@${replyToName}</span> ${reply.content}
+                                </p>
+                                <div class="comment-footer">
+                                    <span class="comment-date">${reply.created_at || 'Just now'}</span>
+                                    <button class="reply-btn" onclick="showReply(${reply.id}, '${replyName}')">Reply</button>
+                                    ${deleteReplyBtn}
+                                </div>
                             </div>
                         </div>
+                        ${renderReplies(reply.id, level + 1)}
+                    `;
+                });
+                html += `</div>`;
+                return html;
+            }
+
+            const parents = data.filter(c => !c.parent_id || c.parent_id === 0);
+
+            parents.forEach(parent => {
+                const name = parent.username || "User";
+                const profilePic = parent.profile_pic;
+                
+                const canDelete = currentUserEmail && parent.user_email === currentUserEmail;
+                const deleteClass = canDelete ? 'can-delete' : '';
+                const deleteBtn = canDelete 
+                    ? `<button class="delete-btn" onclick="deleteComment(${parent.id})">Delete</button>` 
+                    : '';
+
+                const avatarImg = profilePic 
+                    ? `/static/uploads/${profilePic}` 
+                    : '/static/uploads/default.png';
+
+                const commentHTML = `
+                    <div class="comments-group">
+                        <div class="single-comment ${deleteClass}" id="comment-${parent.id}">
+                            <img class="comment-avatar-img" src="${avatarImg}" alt="${name}">
+                            <div class="comment-body">
+                                <div class="comment-header">
+                                    <span class="comment-username">${name}</span>
+                                    <span class="comment-stars">${getStarsHtml(parent.rating)}</span>
+                                </div>
+                                <p class="comment-text">${parent.content}</p>
+                                <div class="comment-footer">
+                                    <span class="comment-date">${parent.created_at || 'Just now'}</span>
+                                    <button class="reply-btn" onclick="showReply(${parent.id}, '${name}')">Reply</button>
+                                    ${deleteBtn}
+                                </div>
+                            </div>
+                        </div>
+                        ${renderReplies(parent.id)}
                     </div>
                 `;
                 commentList.innerHTML += commentHTML;
@@ -264,7 +326,66 @@ function loadComments() {
         });
 }
 
-// ⭐ 点击 Reply - 滚动到输入框
+// ===== INITIAL LOAD =====
+loadComments().then(() => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#comment-')) {
+        setTimeout(() => {
+            const target = document.querySelector(hash);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('highlight-comment');
+                setTimeout(() => { target.classList.remove('highlight-comment'); }, 4000);
+            }
+        }, 500);
+    }
+});
+
+function toggleNotif(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    var dropdown = document.getElementById('notifDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// 点击页面其他地方关闭 dropdown
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('notifDropdown');
+    var icon = document.querySelector('.notif-icon');
+    
+    if (dropdown && !dropdown.contains(e.target) && !icon.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// ===== 动态刷新通知 =====
+function refreshNotifications() {
+    fetch('/get-notifications')
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.querySelector('.notif-badge');
+            if (data.count > 0) {
+                if (badge) {
+                    badge.innerText = data.count;
+                } else {
+                    const notifIcon = document.querySelector('.notif-icon');
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'notif-badge';
+                    newBadge.innerText = data.count;
+                    notifIcon.appendChild(newBadge);
+                }
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+}
+
+setInterval(refreshNotifications, 5000);
+
+// ===== SHOW REPLY (MISSING!) =====
 function showReply(commentId, username) {
     replyingTo.style.display = "flex";
     replyingToName.innerText = username;
@@ -274,42 +395,116 @@ function showReply(commentId, username) {
     commentInput.placeholder = `Replying to ${username}...`;
 }
 
-// ⭐ 取消回复
+// ===== CANCEL REPLY (MISSING!) =====
 function cancelReply() {
     replyingTo.style.display = "none";
     commentInput.dataset.replyTo = "";
     commentInput.placeholder = "Share your cooking experience...";
 }
 
-// Delete comment
+// ===== TOAST =====
+function showToast(elementId, message, type = 'default') {
+    const toast = document.getElementById(elementId);
+    if (!toast) return;
+    
+    toast.innerText = message;
+    toast.className = 'toast-message';
+    if (type === 'success') toast.classList.add('success');
+    if (type === 'error') toast.classList.add('error');
+    
+    toast.style.display = 'block';
+    
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// ===== WAKE LOCK =====
+async function toggleWakeLock() {
+    try {
+        if (!isAwake) {
+            wakeLock = await navigator.wakeLock.request("screen");
+            isAwake = true;
+            showToast('wakeModeMessage', '☀️ Sleep Mode ON', 'success');
+        } else {
+            if (wakeLock) await wakeLock.release();
+            wakeLock = null;
+            isAwake = false;
+            showToast('wakeModeMessage', '💤 Sleep Mode OFF', 'default');
+        }
+    } catch (err) { 
+        wakeToggle.checked = false; 
+    }
+}
+wakeToggle.addEventListener("change", toggleWakeLock);
+
+// ===== DELETE COMMENT =====
 function deleteComment(commentId) {
     if (!confirm("Delete this comment?")) return;
-    fetch(`/comment/delete/${commentId}`, {
+    
+    fetch("/comment/delete", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({comment_id: commentId})
     })
     .then(res => res.json())
-    .then(data => { if (data.success) loadComments(); });
+    .then(data => {
+        if (data.success) {
+            showToast('deleteMessage', '✅ Deleted successfully!', 'success');
+            loadComments();
+        } else {
+            showToast('deleteMessage', data.error || 'Cannot delete', 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('deleteMessage', 'Error deleting comment', 'error');
+    });
 }
 
-// Submit form
+// ===== SUBMIT FORM =====
 reviewForm.addEventListener("submit", function(e) {
     e.preventDefault();
+
+    // ⭐ 防止重复点击 - 如果正在提交就退出
+    if (reviewForm.dataset.submitting === "true") return;
+    reviewForm.dataset.submitting = "true";
+
+    // ⭐ 禁用按钮 + 显示正在提交
+    const submitBtn = document.querySelector('.submit-review-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '⏳ Posting...';
 
     const username = document.getElementById("username").value;
     const email = document.getElementById("email").value;
     
     const ratingInput = document.querySelector('input[name="rating"]:checked');
-    if (!ratingInput) { alert("Please select a rating!"); return; }
+    if (!ratingInput) { 
+        alert("Please select a rating!"); 
+        // ⭐ 恢复按钮
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
+        return; 
+    }
     const rating = parseInt(ratingInput.value);
     const comment = commentInput.value;
+    
+    const notifyCheckbox = document.querySelector('.notify-checkbox');
+    const notifyMe = notifyCheckbox ? notifyCheckbox.checked : false;
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) { alert("Please enter a valid email address."); return; }
+    if (!emailPattern.test(email)) { 
+        alert("Please enter a valid email address."); 
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
+        return; 
+    }
 
     const recipeId = window.location.pathname.split("/").pop();
-    const parentId = commentInput.dataset.replyTo || null;
+    const parentId = commentInput.dataset.replyTo;
+    const finalParentId = parentId && parentId !== "" ? parseInt(parentId) : null;
 
     fetch("/comment/add", {
         method: "POST",
@@ -320,45 +515,31 @@ reviewForm.addEventListener("submit", function(e) {
             email: email,
             username: username, 
             rating: rating,
-            parent_id: parentId
+            parent_id: finalParentId,
+            notify_me: notifyMe
         })
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
             commentCount.innerText = parseInt(commentCount.innerText) + 1;
-            
-            const commentHTML = `
-                <div class="single-comment">
-                    <div class="comment-avatar">${username.charAt(0).toUpperCase()}</div>
-                    <div class="comment-body">
-                        <div class="comment-header">
-                            <span class="comment-username">${username}</span>
-                            <span class="comment-stars">${getStarsHtml(rating)}</span>
-                        </div>
-                        <p class="comment-text">${comment}</p>
-                        <div class="comment-footer">
-                            <span class="comment-date">Just now</span>
-                            <button class="reply-btn" onclick="showReply(0, '${username}')">Reply</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            commentList.innerHTML = commentHTML + commentList.innerHTML;
-            
+            loadComments();
             successMessage.style.display = "block";
             setTimeout(() => { successMessage.style.display = "none"; }, 3000);
-            
-            // ⭐ 成功后清空 form
             reviewForm.reset();
             ratingText.innerText = "Click to rate";
             commentInput.placeholder = "Share your cooking experience...";
             replyingTo.style.display = "none";
         }
+    })
+    .finally(() => {
+        // ⭐ 完成後恢復按鈕
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
     });
 });
 
-loadComments();
 </script>
 
 </body>
