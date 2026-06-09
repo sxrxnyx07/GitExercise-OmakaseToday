@@ -1,16 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Profile{% endblock %}
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<div class="profile-header">
+    <h1>MY PROFILE</h1>
+</div>
 <div class="profile-container">
-    <!-- LEFT -->
+
     <div class="profile-left">
 
         <div class="profile-card">
 
             <div class="profile-img-box">
-                <img src="{{ url_for('static', filename='uploads/' + profile_pic) if profile_pic else url_for('static', filename='uploads/default.png') }}">
-
+                <div class="avatar-wrapper">
+                    <img
+                        class="profile-avatar"
+                        src="{{ url_for('static', filename='uploads/' + profile_pic) if profile_pic else url_for('static', filename='uploads/default.png') }}"
+                        alt="Profile Picture"
+                    >
+                    <div class="chef-badge">
+                        🌟
+                    </div>
+                </div>
                 <form action="/upload-profile-pic" method="POST" enctype="multipart/form-data">
                     <input type="file" name="image" id="fileInput" accept="image/*" hidden>
                     <label for="fileInput" class="upload-btn">
@@ -48,33 +58,55 @@
                     <input name="bio" id="bio" type="text"
                         value="{{ bio }}" disabled>
                 </div>
-                <div class="profile-buttons">
+            <div class="profile-actions">
 
-                    <button type="button" class="edit-btn" onclick="enableEdit()">
-                        Edit Profile
-                    </button>
-
-                    <button type="submit" class="edit-btn" id="saveBtn" style="display:none;">
-                        Save
-                    </button>
-                    {% if role == 'admin' %}
-                    <a href="/admin" class="admin-access-btn">
-                        Admin Page
-                    </a>
-                    {% endif %}
-                    <a href="/logout" class="logout-btn">
-                        Logout
-                    </a>
-                </div>
-                <button type="button" class="delete-account-btn" onclick="openDeleteModal()">
-                    Delete Account
+                <button
+                    type="button"
+                    class="profile-action-btn edit-btn"
+                    onclick="enableEdit()"
+                >
+                    Edit Profile
                 </button>
 
-            </form>
+                <button
+                    type="submit"
+                    class="profile-action-btn edit-btn"
+                    id="saveBtn"
+                    style="display:none;"
+                >
+                    Save Changes
+                </button>
 
+                <div class="secondary-buttons">
+
+                    <button
+                        type="button"
+                        class="profile-action-btn delete-account-btn"
+                        onclick="openDeleteModal()"
+                    >
+                        Delete Account
+                    </button>
+
+                    <a
+                        href="/logout"
+                        class="profile-action-btn logout-btn"
+                    >
+                        Logout
+                    </a>
+
+                </div>
+
+            </div>
+
+            </form>
+        
 
         </div>
-
+        {% if role == 'admin' %}
+            <a href="/admin" class="admin-access-btn">
+            Admin Page
+            </a>
+        {% endif %}
     </div>
 
 </div>
@@ -132,13 +164,13 @@
             <div class="empty-wrapper" id="emptyState">
 
                 <div class="empty-state-card">
-                    <div class="empty-icon">🍽️</div>
+                    <div class="empty-icon">❤️</div>
 
                     <h2>No Saved Rituals Yet</h2>
 
                     <p>Start exploring delicious recipes and build your collection.</p>
 
-                    <a href="/" class="explore-btn">Explore Recipes</a>
+                    <a href="{{ url_for('all_recipes') }}" class="explore-btn">Explore Recipes</a>
                 </div>
 
             </div>
@@ -165,8 +197,7 @@
                         data-id="{{ recipe.id }}"
                         data-name="{{ recipe.name }}"
                         data-image="{{ recipe.image }}"
-                        onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)"
-                        {% if recipe.id in saved_ids %}disabled{% endif %}>
+                        onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)">
                         ❤
                     </button>
                     <img src="{{ recipe.image if recipe.image and recipe.image.startswith('http') else url_for('static', filename=recipe.image or 'placeholder.png') }}"

@@ -21,6 +21,8 @@
                 <th>EMAIL</th>
                 <th>USERNAME</th>
                 <th>ROLE</th>
+                <th>LAST LOGIN</th>
+                <th>STATUS</th>
             </tr>
         </thead>
 
@@ -64,6 +66,26 @@
                 <td>{{ u[1] }}</td>
                 <td>{{ u[2] }}</td>
 
+                <td>
+                    {% if u[3] %}
+                        {{ u[3] }}
+                    {% else %}
+                        Never Logged In
+                    {% endif %}
+                </td>
+
+                <td>
+                    <span class="
+                        status-badge
+                        {% if u[4] == 'Active' %}
+                            active-status
+                        {% else %}
+                            inactive-status
+                        {% endif %}
+                    ">
+                        {{ u[4] }}
+                    </span>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

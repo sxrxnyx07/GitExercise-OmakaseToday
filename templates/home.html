@@ -3,121 +3,248 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<div class="home-container">
-       <!-- FLOATING EMOJIS -->
-    <div class="floating floating1">🍣</div>
-    <div class="floating floating2">🥗</div>
-    <div class="floating floating3">🍕</div>
-    <div class="floating floating4">🥞</div>
-    <div class="hero-text">
-        <h1 class="home-title">
-            Discover Your Next
-            <span>Favorite Meal</span>
-        </h1>
 
-        <p class="home-subtitle">
-            Explore delicious recipes, save your favorites,
-            and cook with confidence.
-        </p>
-    </div>
-    <div class="home-image-wrapper">
-        <img id="foodImage" src="{{ url_for('static', filename='css/picture/dishclose.png') }}">
-        <button class="lid-btn" onclick="liftLid()">🍽 Lift the lid</button>
-    </div>
+<div class="homepage-wrapper">
+    <!-- ===================================================== -->
+    <!-- HERO SECTION -->
+    <!-- ===================================================== -->
+    <section class="scene intro-scene">
+        <!-- FLOATING FOOD -->
+        <div class="floating-food food1">🍣</div>
+        <div class="floating-food food2">🍕</div>
+        <div class="floating-food food3">🥗</div>
+        <div class="floating-food food4">🥞</div>
+        <!-- LEFT -->
+        <div class="hero-left">
+            <h1 class="hero-title">
+                Discover Your Next
+                <span>Favorite Meal</span>
+            </h1>
+            <p class="hero-subtitle">
+                Explore delicious recipes, save your favorites,
+                and cook with confidence.
+            </p>
+            <a
+                href="{{ url_for('all_recipes') }}"
+                class="primary-btn"
+            >
+                Start Cooking →
+            </a>
+        </div>
 
-    <a href="{{ url_for('all_recipes') }}" class="menu-btn">Access Menu →</a>
+        <!-- RIGHT -->
+        <div class="hero-right">
+            <img
+                id="heroLid"
+                class="hero-lid"
+                src="{{ url_for('static', filename='css/picture/dishclose.png') }}"
+                alt="Cooking Lid"
+            >
+        </div>
+        <!-- MOVING STRIP -->
+        <div class="horizontal-strip">
+            <div class="strip-track">
+                <span>Fresh Recipes</span>
+                <span>Asian Cuisine</span>
+                <span>Healthy Meals</span>
+                <span>Quick Cooking</span>
+                <span>Homemade Food</span>
 
-</div>
-<div class="recipe-slider">
+                <span>Fresh Recipes</span>
+                <span>Asian Cuisine</span>
+                <span>Healthy Meals</span>
+                <span>Quick Cooking</span>
+                <span>Homemade Food</span>
+            </div>
+        </div>
+    </section>
 
-    <h2>Popular Picks🔥</h2>
-
-    <div class="slider-container">
-
-        <div class="slider" id="slider">
-        
-        {% for recipe in popular_recipes %}
-
-        <a href="/recipe/{{ recipe.id }}" class="home-card-link">
-
-            <div class="home-card">
-
-                <div class="card-img-wrapper">
-
-                    {% if recipe.image and recipe.image.startswith('http') %}
-                        <img src="{{ recipe.image }}">
-                    {% else %}
-                        <img src="{{ url_for('static', filename=recipe.image or 'placeholder.png') }}">
-                    {% endif %}
-
-                    <div class="saved-tag">
+    <!-- ===================================================== -->
+    <!-- POPULAR PICKS -->
+    <!-- ===================================================== -->
+    <section class="scene showcase-scene">
+        <h2 class="scene-title">
+            Popular Picks 🔥
+        </h2>
+        <div class="food-showcase">
+            {% for recipe in popular_recipes %}
+            <a
+                href="/recipe/{{ recipe.id }}"
+                class="food-card"
+            >
+            <img
+                src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
+                alt="{{ recipe.name }}"
+            >
+                <div class="food-card-body">
+                    <div class="food-card-title">
+                        {{ recipe.name }}
+                    </div>
+                    <div class="saved-badge">
                         ❤ {{ recipe.saved_count }} saved
                     </div>
-
                 </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
 
-                <span class="recipe-title">{{ recipe.name }}</span>
 
+    <!-- ===================================================== -->
+    <!-- INGREDIENT SECTION -->
+    <!-- ===================================================== -->
+    <section class="scene feature-section">
+        <div class="feature-block slide-left">
+            <div class="feature-text">
+                <h2>
+                    Cook with What You Have 🍳
+                </h2>
+                <p>
+                    Select your ingredients and discover recipes instantly.
+                </p>
+                <div class="ingredient-tags">
+                    <a class="tag" href="https://www.google.com/search?q=Clove" target="_blank">Clove</a>
+                    <a class="tag" href="https://www.google.com/search?q=Macadamia" target="_blank">Macadamia</a>
+                    <a class="tag" href="https://www.google.com/search?q=Nectarine" target="_blank">Nectarine</a>
+                    <a class="tag" href="https://www.google.com/search?q=Paprika" target="_blank">Paprika</a>
+                    <a class="tag" href="https://www.google.com/search?q=Raisin" target="_blank">Raisin</a>
+                    <a class="tag" href="https://www.google.com/search?q=Stevia" target="_blank">Stevia</a>
+                </div>
+                <a
+                    href="{{ url_for('ingredient_index') }}"
+                    class="btn-return"
+                >
+                    Cook Now →
+                </a>
+            </div>
+            <div class="feature-visual">
+                <img
+                    src="{{ url_for('static', filename='css/picture/ingredients.jpg') }}"
+                    alt="Ingredients"
+                >
+            </div>
+        </div>
+    </section>
+    <!-- ===================================================== -->
+    <!-- SPINNER SECTION -->
+    <!-- ===================================================== -->
+    <section class="scene feature-section">
+        <div class="feature-block reverse-block slide-right">
+            <!-- IMAGE -->
+            <div class="feature-visual">
+                <img
+                    src="{{ url_for('static', filename='css/picture/gacha.png') }}"
+                    alt="Spinner"
+                >
+            </div>
+            <!-- TEXT -->
+            <div class="feature-text">
+                <h2>
+                    Can't Decide? 🎡
+                </h2>
+                <p>
+                    Let our random spinner choose your meal.
+                </p>
+                <p class="preview-note">
+                    Watch how it works 👇
+                </p>
+                <a
+                    href="{{ url_for('random_recipe') }}"
+                    class="btn-return"
+                >
+                    Try the Spinner →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- SEARCH SECTION -->
+    <!-- ===================================================== -->
+    <section class="scene feature-section">
+        <div class="feature-block search-block slide-left">
+            <div class="feature-text">
+                <h2>
+                    Find Your Favorite Meal 🔍
+                </h2>
+                <p>
+                    Search recipes by name or ingredients.
+                </p>
+                <input
+                    type="text"
+                    id="homeSearch"
+                    class="search-box"
+                    placeholder="🔍 Search recipes..."
+                >
+                <div class="search-suggestions">
+                    <span onclick="quickSearch('Chicken')">
+                        Chicken
+                    </span>
+                    <span onclick="quickSearch('Avocado')">
+                        Avocado
+                    </span>
+                    <span onclick="quickSearch('Cake')">
+                        Cake
+                    </span>
+                    <span onclick="quickSearch('Lamb')">
+                        Lamb
+                    </span>
+                </div>
+                <button
+                    class="btn-return"
+                    onclick="goToSearch()"
+                >
+                    Go to Search →
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- ABOUT SECTION -->
+    <!-- ===================================================== -->
+    <section class="scene outro-scene">
+        <div class="about-wrapper">
+            <!-- LEFT IMAGES -->
+            <div class="about-images">
+                <!-- BIG IMAGE -->
+                <div class="about-big-image">
+                    <img src="{{ url_for('static', filename='css/picture/aboutfood.jpg') }}" alt="Food">
+                </div>
+                <!-- SMALL OVERLAP IMAGE -->
+                <div class="about-small-image">
+                    <img src="{{ url_for('static', filename='css/picture/chef.jpg') }}" alt="Chef Cooking">
+                </div>
             </div>
 
-        </a>
-
-        {% endfor %}
+            <!-- RIGHT TEXT -->
+            <div class="about-text">
+                <span class="about-label">
+                    ABOUT US
+                </span>
+                <h2>
+                    Bringing Joy Back Into
+                    <span class="glow-text">
+                        Every Meal
+                    </span>
+                     🍳
+                </h2>
+                <p>
+                    Omakase Today was created to make cooking
+                    more fun, interactive and inspiring.
+                </p>
+                <p>
+                    We believe every meal should feel exciting,
+                    creative and personal.
+                </p>
+                <p>
+                    Discover recipes, experiment with ingredients,
+                    and enjoy the journey from preparation to plating.
+                </p>
+            </div>
         </div>
-        <button class="slide-btn left" onclick="slideLeft()">‹</button>
-        <button class="slide-btn right" onclick="slideRight()">›</button>
-
-    </div>
+    </section>
 
 </div>
 
-<div class="feature-block">
-
-    <div class="feature-text">
-        <h2>Cook with What You Have 🍳</h2>
-        <p>Select your ingredients and discover recipes instantly.</p>
-
-        <div class="ingredient-tags">
-            <button class="tag">Chicken</button>
-            <button class="tag">Egg</button>
-            <button class="tag">Rice</button>
-            <button class="tag">Tomato</button>
-            <button class="tag">Cheese</button>
-            <button class="tag">Onion</button>
-            <button class="tag">Noodles</button>
-        </div>
-
-        <a href="{{ url_for('ingredient_index') }}" class="feature-btn">Cook Now →</a>
-    </div>
-
-    <div class="feature-visual">
-        <img src="{{ url_for('static', filename='css/picture/ingredients.jpg') }}">
-    </div>
-
-</div>
-<div class="feature-block block">
-
-    <div class="feature-visual">
-            <img src="{{ url_for('static', filename='css/picture/gacha.png') }}">
-    </div>
-    <div class="feature-text">
-        <h2>Can't Decide? 🎡</h2>
-        <p>Let our random spinner choose your meal.</p>
-
-        <p class="preview-note">Watch how it works 👇</p>
-
-        <a href="" class="feature-btn">Try the Spinner →</a>
-    </div>
-</div>
-<div class="feature-block search-block">
-    <div class="feature-text">
-        <h2>Find Your Favorite Meal 🔍</h2>
-        <p>Search recipes by name or ingredients.</p>
-
-        <input type="text" class="search-box" placeholder="Search recipes...">
-
-        <a href="{{ url_for('all_recipes') }}" class="feature-btn">Go to Search →</a>
-    </div>
-</div>
 {% endblock %}
-

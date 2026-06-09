@@ -53,12 +53,19 @@
     {% for r in results %}
     <div class="recipe-card">
         <div class="image-container">
-            <button class="heart-btn" onclick="event.stopPropagation(); toggleSave('{{ r.id }}', this);">❤</button>
-            {% if r.image and r.image.startswith('http') %}
-                <img src="{{ r.image }}" alt="{{ r.name }}">
-            {% else %}
-                <img src="{{ url_for('static', filename=r.image or 'placeholder.png') }}" alt="{{ r.name }}">
-            {% endif %}
+            <button
+                class="heart-btn {% if r.id in saved_ids %}saved{% endif %}"
+                data-id="{{ r.id }}"
+                data-name="{{ r.name }}"
+                data-image="{{ r.image }}"
+                onclick="event.stopPropagation(); toggleSave(this);"
+            >
+                ❤
+            </button>
+            <img
+                src="{{ r.image if r.image else url_for('static', filename='css/picture/default.jpg') }}"
+                alt="{{ r.name }}"
+            >
         </div>
         
         <div class="card-meta">
@@ -95,6 +102,52 @@
             <a href="{{ url_for('all_recipes') }}" class="view-all-link" style="color: #ff6b6b; text-decoration: underline; font-weight: bold; font-size: 1.1rem;">
                 View All Recipes
             </a>
+        </div>
+
+        <hr style="border: none; border-top: 2px dashed #f4c430; margin: 60px auto 40px; width: 80%;">
+        
+        <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.8rem; margin-bottom: 35px; color: #000; text-align: center;">
+            RECOMMENDED RECIPES FOR YOU 🔥
+        </h2>
+
+
+        <div class="all-recipes-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; max-width: 1200px; margin: 0 auto 50px auto; float: none;">
+            {% for r in recommendations %}
+            <div class="recipe-card" style="width: 100%; box-sizing: border-box; text-align: left; margin: 0;">
+                <div class="image-container">
+                    <button
+                        class="heart-btn {% if r.id in saved_ids %}saved{% endif %}"
+                        data-id="{{ r.id }}"
+                        data-name="{{ r.name }}"
+                        data-image="{{ r.image }}"
+                        onclick="event.stopPropagation(); toggleSave(this);"
+                    >
+                        ❤
+                    </button>
+                    <img
+                        src="{{ r.image if r.image else url_for('static', filename='css/picture/default.jpg') }}"
+                        alt="{{ r.name }}"
+                    >
+                </div>
+                
+                <div class="card-meta">
+                    <div class="meal-category">{{ r.meal_category|upper if r.meal_category else 'RECIPE' }}</div>
+                    <span class="recipe-title">{{ r.name }}</span>
+                    
+                    <div class="rating-stars">
+                       {% set current_rating = r.rating|default(0)|int %}
+                       {% for i in range(5) %}
+                           <span style="color: {{ '#ffc107' if i < current_rating else '#e4e5e9' }};">★</span>
+                       {% endfor %}
+                       <span class="rating-count">({{ r.rating|default('0.0') }})</span>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <a href="/recipe/{{ r.id }}" class="btn-return" style="margin: 0; padding: 10px 25px; font-size: 1rem;">View Recipe</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
     {% endfor %}

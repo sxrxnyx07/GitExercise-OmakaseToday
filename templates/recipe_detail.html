@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Recipe</title>
+    <title>Recipe Detail | Omakase Today</title>
+    <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -21,21 +22,26 @@
     <div class="hero">
         <h1 class="hero-title">{{ recipe['name'].upper() }}</h1>
         <p class="hero-sub">FAST AND DELICIOUS FOR WHOLE FAMILY</p>
-        <p class="hero-sub small">LET’S DO IT TOGETHER ✨</p>
+        <p class="hero-sub small">LET'S DO IT TOGETHER ✨</p>
+        <div class="wake-wrapper">
+            <label class="toggle-switch">
+                <input type="checkbox" id="wakeToggle">
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">
+                    <span>💤</span>
+                    <span>☀️</span>
+                </span>
+            </label>
+        </div>
     </div>
 
     <!-- TOP GRID -->
     <div class="top-grid">
-
-        <!-- IMAGE -->
         <div class="image-box">
             <img src="{{ recipe['image'] }}">
         </div>
-
-        <!-- WHY -->
         <div class="card why-card">
             <h3 class="why-title">💛 Why You'll Love This ??</h3>
-
             <ul class="why-list">
                 <li>☑️Quick and easy</li>
                 <li>☑️Rich and flavorful</li>
@@ -43,68 +49,50 @@
                 <li>☑️Great for anyday</li>
             </ul>
         </div>
-
     </div>
 
-<!-- MIDDLE GRID -->
-<!-- MIDDLE GRID -->
-<div class="mid-grid">
-
-    <!-- 🔥 左侧：Ingredients + Highlights -->
-    <div class="left-column">
-        <div class="card ingredient-card">
-            <h3>🥕 Ingredients</h3>
-            <p class="ingredient-hint">
-            🌟 If you're unsure about any ingredient, feel free to click and explore more 🔍
-            </p>
-            <div class="ingredient-grid">
-                {% for item in recipe['clean_ingredients'].split(',') %}
-
-                <!-- call out the google for ingredients, not manually -->
-                    <a class="ingredient-link"
-                        href="https://www.google.com/search?q={{ item.strip() }}"
-                        target="_blank">
+    <!-- MIDDLE GRID -->
+    <div class="mid-grid">
+        <div class="left-column">
+            <div class="card ingredient-card">
+                <h3>🥕 Ingredients</h3>
+                <p class="ingredient-hint">🌟 If you're unsure about any ingredient, feel free to click and explore more 🔍</p>
+                <div class="ingredient-grid">
+                    {% for item in recipe['clean_ingredients'].split(',') %}
+                    <a class="ingredient-link" href="https://www.google.com/search?q={{ item.strip() }}" target="_blank">
                         {{ item.strip() }}
                     </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="ingredient-highlight">
+                <h4>✨ Ingredients Highlights</h4>
+                <ul class="highlight-list">
+                    <li>🥑 Fresh & Natural</li>
+                    <li>🍃 Nutrient-Rich</li>
+                    <li>🔥 Easy to Find</li>
+                </ul>
+            </div>
+        </div>
+        <div class="card required-card">
+            <h3>📏 Required Amount</h3>
+            <div class="ingredient-grid">
+                {% for item in recipe['full_ingredients'].split(',') %}
+                <div class="ingredient-line">{{ item.strip() }}</div>
                 {% endfor %}
             </div>
         </div>
-        
-        <!-- 🔥 Ingredients Highlights（左侧下方） -->
-        <div class="ingredient-highlight">
-            <h4>✨ Ingredients Highlights</h4>
-            <ul class="highlight-list">
-                <li>🥑 Fresh & Natural</li>
-                <li>🍃 Nutrient-Rich</li>
-                <li>🔥 Easy to Find</li>
-            </ul>
-        </div>
     </div>
 
-    <!-- 🔥 右侧：Required Amount（不变） -->
-    <div class="card required-card">
-        <h3>📏 Required Amount</h3>
-        <div class="ingredient-grid">
-            {% for item in recipe['full_ingredients'].split(',') %}
-                <div class="ingredient-line">{{ item.strip() }}</div>
-            {% endfor %}
-        </div>
-    </div>
-
-</div>
-
-</div>
-
-    <!-- DIRECTIONS FULL WIDTH -->
+    <!-- DIRECTIONS -->
     <div class="card full">
         <h3>📖 Directions</h3>
-
         {% set steps = recipe['directions'].split('.') %}
         {% for step in steps if step.strip() %}
-            <div class="step">
-                <span class="step-num">{{ loop.index }}</span>
-                <span>{{ step.strip() }}</span>
-            </div>
+        <div class="step">
+            <span class="step-num">{{ loop.index }}</span>
+            <span>{{ step.strip() }}</span>
+        </div>
         {% endfor %}
     </div>
 
@@ -114,17 +102,445 @@
         <span>🌶 {{ recipe['flavor_type'] }}</span>
     </div>
 
-<div class="nav-section recipe-nav">
-    <a href="/" class="home-btn">🏠 Home</a>
+    <!-- REVIEW SECTION -->
+    <div class="review-section">
+        <div class="review-card">
+            <h2 class="review-title">⭐ Recipe Reviews</h2>
+            <p class="review-subtitle">Share your cooking experience with others 🍳</p>
+            
+            <div id="successMessage" class="success-message">✅ Thank you! Your review has been submitted.</div>
 
-    <a href="/{{ recipe['meal_category'] | lower }}" class="back-btn">
-        ← Back to {{ recipe['meal_category'] }}
-    </a>
+            <!-- FORM -->
+            <form id="reviewForm">
+                <!-- ⭐ 新加：显示正在回复谁 -->
+                <div id="replyingTo" class="replying-to" style="display: none;">
+                    Replying to <span id="replyingToName"></span>
+                    <button type="button" onclick="cancelReply()">✕</button>
+                </div>
+
+                <div class="review-input-grid">
+                    <input type="text" id="username" placeholder="Your Name" required>
+                    <input type="email" id="email" placeholder="Your Email" required>
+                </div>
+
+                <div class="rating-select">
+                    <label class="rating-label">Recipe Rating</label>
+                    <p id="ratingText" style="text-align: center; margin-top: 10px; color: #6d819e; font-size: 14px;">
+                        Click to rate
+                    </p>
+                </div>
+                
+                <div class="star-rating-container">
+                    <input type="radio" name="rating" id="star1" class="star-rating-input" value="5">
+                    <label for="star1" class="star-rating-label">★</label>
+                    <input type="radio" name="rating" id="star2" class="star-rating-input" value="4">
+                    <label for="star2" class="star-rating-label">★</label>
+                    <input type="radio" name="rating" id="star3" class="star-rating-input" value="3">
+                    <label for="star3" class="star-rating-label">★</label>
+                    <input type="radio" name="rating" id="star4" class="star-rating-input" value="2">
+                    <label for="star4" class="star-rating-label">★</label>
+                    <input type="radio" name="rating" id="star5" class="star-rating-input" value="1">
+                    <label for="star5" class="star-rating-label">★</label>
+                </div>
+
+                <textarea id="comment" class="comment-input" placeholder="Share your cooking experience..." required></textarea>
+
+                <div class="notify-wrapper">
+                    <span class="notify-icon">🔔</span>
+                    <label>
+                        <input type="checkbox" class="notify-checkbox">
+                        Notify me by email when someone replies
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-review-btn">Submit Review ✨</button>
+            </form>
+        </div>
+
+        <!-- display tips message -->
+            <div id="wakeModeMessage" class="toast-message" style="display: none;">
+                ☀️ Sleep Mode ON
+            </div>
+
+            <div id="deleteMessage" class="toast-message" style="display: none;">
+                ✅ Deleted successfully!
+            </div>
+
+        <!-- COMMENT LIST -->
+        <div class="comment-display-card">
+            <h3 class="comment-count-title">💬 Total Reviews (<span id="commentCount">0</span>)</h3>
+            <div id="commentList"></div>
+        </div>
+    </div>
+
+    <div class="nav-section recipe-nav">
+        <a href="/" class="home-btn">🏠 Home</a>
+        <a href="/{{ recipe['meal_category'] | lower }}" class="back-btn">← Back to {{ recipe['meal_category'] }}</a>
+    </div>
+
 </div>
 
 </div>
 
-</div>
+<script>
+// ===== VARIABLES =====
+let wakeLock = null;
+let isAwake = false;
+const wakeToggle = document.getElementById("wakeToggle");
+
+// ===== GENERATE STARS =====
+function getStarsHtml(rating) {
+    let stars = "";
+    for (let i = 1; i <= 5; i++) {
+        stars += i <= rating 
+            ? "<span class='star-filled'>★</span>" 
+            : "<span class='star-empty'>★</span>";
+    }
+    return stars;
+}
+
+// ===== STAR RATING =====
+const starInputs = document.querySelectorAll('.star-rating-input');
+const ratingText = document.getElementById('ratingText');
+
+const ratingMessages = {
+    "1": "Poor", "2": "Fair", "3": "Good", "4": "Great", "5": "Excellent"
+};
+
+starInputs.forEach(input => {
+    input.addEventListener('change', function() {
+        ratingText.innerText = ratingMessages[this.value];
+    });
+});
+
+// ===== FORM ELEMENTS =====
+const reviewForm = document.getElementById("reviewForm");
+const commentList = document.getElementById("commentList");
+const commentCount = document.getElementById('commentCount');
+const successMessage = document.getElementById("successMessage");
+const commentInput = document.getElementById('comment');
+const replyingTo = document.getElementById('replyingTo');
+const replyingToName = document.getElementById('replyingToName');
+
+const currentUserEmail = "{{ session.get('user', '') }}";
+
+// ===== LOAD COMMENTS =====
+function loadComments() {
+    const recipeId = window.location.pathname.split("/").pop();
+
+    return fetch(`/comment/${recipeId}`)
+        .then(res => res.json())
+        .then(data => {
+            commentList.innerHTML = "";
+            
+            const commentMap = {};
+            data.forEach(c => {
+                commentMap[c.id] = c;
+            });
+
+            function renderReplies(parentId, level = 0) {
+                const childReplies = data.filter(c => c.parent_id === parentId);
+                if (childReplies.length === 0) return '';
+
+                let html = `<div class="replies-container" style="margin-left: ${level * 20}px;">`;
+                childReplies.forEach(reply => {
+                    const replyName = reply.username || "User";
+                    const replyProfilePic = reply.profile_pic;
+                    const canDeleteReply = currentUserEmail && reply.user_email === currentUserEmail;
+                    const deleteReplyClass = canDeleteReply ? 'can-delete' : '';
+                    const deleteReplyBtn = canDeleteReply 
+                        ? `<button class="delete-btn" onclick="deleteComment(${reply.id})">Delete</button>` 
+                        : '';
+                    
+                    const parentComment = commentMap[reply.parent_id];
+                    const replyToName = parentComment ? parentComment.username : 'User';
+                    
+                    const replyAvatarImg = replyProfilePic 
+                        ? `/static/uploads/${replyProfilePic}` 
+                        : '/static/uploads/default.png';
+                    
+                    html += `
+                        <div class="reply-comment ${deleteReplyClass}" id="comment-${reply.id}">
+                            <img class="comment-avatar-img" src="${replyAvatarImg}" alt="${replyName}">
+                            <div class="comment-body">
+                                <div class="comment-header">
+                                    <span class="comment-username">${replyName}</span>
+                                    <span class="comment-stars">${getStarsHtml(reply.rating)}</span>
+                                </div>
+                                <p class="comment-text">
+                                    <span class="comment-mention">@${replyToName}</span> ${reply.content}
+                                </p>
+                                <div class="comment-footer">
+                                    <span class="comment-date">${reply.created_at || 'Just now'}</span>
+                                    <button class="reply-btn" onclick="showReply(${reply.id}, '${replyName}')">Reply</button>
+                                    ${deleteReplyBtn}
+                                </div>
+                            </div>
+                        </div>
+                        ${renderReplies(reply.id, level + 1)}
+                    `;
+                });
+                html += `</div>`;
+                return html;
+            }
+
+            const parents = data.filter(c => !c.parent_id || c.parent_id === 0);
+
+            parents.forEach(parent => {
+                const name = parent.username || "User";
+                const profilePic = parent.profile_pic;
+                
+                const canDelete = currentUserEmail && parent.user_email === currentUserEmail;
+                const deleteClass = canDelete ? 'can-delete' : '';
+                const deleteBtn = canDelete 
+                    ? `<button class="delete-btn" onclick="deleteComment(${parent.id})">Delete</button>` 
+                    : '';
+
+                const avatarImg = profilePic 
+                    ? `/static/uploads/${profilePic}` 
+                    : '/static/uploads/default.png';
+
+                const commentHTML = `
+                    <div class="comments-group">
+                        <div class="single-comment ${deleteClass}" id="comment-${parent.id}">
+                            <img class="comment-avatar-img" src="${avatarImg}" alt="${name}">
+                            <div class="comment-body">
+                                <div class="comment-header">
+                                    <span class="comment-username">${name}</span>
+                                    <span class="comment-stars">${getStarsHtml(parent.rating)}</span>
+                                </div>
+                                <p class="comment-text">${parent.content}</p>
+                                <div class="comment-footer">
+                                    <span class="comment-date">${parent.created_at || 'Just now'}</span>
+                                    <button class="reply-btn" onclick="showReply(${parent.id}, '${name}')">Reply</button>
+                                    ${deleteBtn}
+                                </div>
+                            </div>
+                        </div>
+                        ${renderReplies(parent.id)}
+                    </div>
+                `;
+                commentList.innerHTML += commentHTML;
+            });
+            commentCount.innerText = data.length;
+        });
+}
+
+// ===== INITIAL LOAD =====
+loadComments().then(() => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#comment-')) {
+        setTimeout(() => {
+            const target = document.querySelector(hash);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('highlight-comment');
+                setTimeout(() => { target.classList.remove('highlight-comment'); }, 4000);
+            }
+        }, 500);
+    }
+});
+
+function toggleNotif(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    var dropdown = document.getElementById('notifDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// 点击页面其他地方关闭 dropdown
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('notifDropdown');
+    var icon = document.querySelector('.notif-icon');
+    
+    if (dropdown && !dropdown.contains(e.target) && !icon.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// ===== 动态刷新通知 =====
+function refreshNotifications() {
+    fetch('/get-notifications')
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.querySelector('.notif-badge');
+            if (data.count > 0) {
+                if (badge) {
+                    badge.innerText = data.count;
+                } else {
+                    const notifIcon = document.querySelector('.notif-icon');
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'notif-badge';
+                    newBadge.innerText = data.count;
+                    notifIcon.appendChild(newBadge);
+                }
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+}
+
+setInterval(refreshNotifications, 5000);
+
+// ===== SHOW REPLY (MISSING!) =====
+function showReply(commentId, username) {
+    replyingTo.style.display = "flex";
+    replyingToName.innerText = username;
+    commentInput.dataset.replyTo = commentId;
+    commentInput.scrollIntoView({behavior: "smooth", block: "center"});
+    commentInput.focus();
+    commentInput.placeholder = `Replying to ${username}...`;
+}
+
+// ===== CANCEL REPLY (MISSING!) =====
+function cancelReply() {
+    replyingTo.style.display = "none";
+    commentInput.dataset.replyTo = "";
+    commentInput.placeholder = "Share your cooking experience...";
+}
+
+// ===== TOAST =====
+function showToast(elementId, message, type = 'default') {
+    const toast = document.getElementById(elementId);
+    if (!toast) return;
+    
+    toast.innerText = message;
+    toast.className = 'toast-message';
+    if (type === 'success') toast.classList.add('success');
+    if (type === 'error') toast.classList.add('error');
+    
+    toast.style.display = 'block';
+    
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+// ===== WAKE LOCK =====
+async function toggleWakeLock() {
+    try {
+        if (!isAwake) {
+            wakeLock = await navigator.wakeLock.request("screen");
+            isAwake = true;
+            showToast('wakeModeMessage', '☀️ Sleep Mode ON', 'success');
+        } else {
+            if (wakeLock) await wakeLock.release();
+            wakeLock = null;
+            isAwake = false;
+            showToast('wakeModeMessage', '💤 Sleep Mode OFF', 'default');
+        }
+    } catch (err) { 
+        wakeToggle.checked = false; 
+    }
+}
+wakeToggle.addEventListener("change", toggleWakeLock);
+
+// ===== DELETE COMMENT =====
+function deleteComment(commentId) {
+    if (!confirm("Delete this comment?")) return;
+    
+    fetch("/comment/delete", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({comment_id: commentId})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast('deleteMessage', '✅ Deleted successfully!', 'success');
+            loadComments();
+        } else {
+            showToast('deleteMessage', data.error || 'Cannot delete', 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('deleteMessage', 'Error deleting comment', 'error');
+    });
+}
+
+// ===== SUBMIT FORM =====
+reviewForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    // ⭐ 防止重复点击 - 如果正在提交就退出
+    if (reviewForm.dataset.submitting === "true") return;
+    reviewForm.dataset.submitting = "true";
+
+    // ⭐ 禁用按钮 + 显示正在提交
+    const submitBtn = document.querySelector('.submit-review-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '⏳ Posting...';
+
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    
+    const ratingInput = document.querySelector('input[name="rating"]:checked');
+    if (!ratingInput) { 
+        alert("Please select a rating!"); 
+        // ⭐ 恢复按钮
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
+        return; 
+    }
+    const rating = parseInt(ratingInput.value);
+    const comment = commentInput.value;
+    
+    const notifyCheckbox = document.querySelector('.notify-checkbox');
+    const notifyMe = notifyCheckbox ? notifyCheckbox.checked : false;
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) { 
+        alert("Please enter a valid email address."); 
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
+        return; 
+    }
+
+    const recipeId = window.location.pathname.split("/").pop();
+    const parentId = commentInput.dataset.replyTo;
+    const finalParentId = parentId && parentId !== "" ? parseInt(parentId) : null;
+
+    fetch("/comment/add", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            recipe_id: recipeId,
+            content: comment,
+            email: email,
+            username: username, 
+            rating: rating,
+            parent_id: finalParentId,
+            notify_me: notifyMe
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            commentCount.innerText = parseInt(commentCount.innerText) + 1;
+            loadComments();
+            successMessage.style.display = "block";
+            setTimeout(() => { successMessage.style.display = "none"; }, 3000);
+            reviewForm.reset();
+            ratingText.innerText = "Click to rate";
+            commentInput.placeholder = "Share your cooking experience...";
+            replyingTo.style.display = "none";
+        }
+    })
+    .finally(() => {
+        // ⭐ 完成後恢復按鈕
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review ✨';
+        reviewForm.dataset.submitting = "false";
+    });
+});
+
+</script>
 
 </body>
 </html>

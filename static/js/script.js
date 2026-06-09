@@ -189,20 +189,6 @@ let autoFlip = setInterval(() => {
 function goLogin(){
     window.location.href = "/login"
 }
-
-function slideLeft() {
-    document.getElementById("slider").scrollBy({
-        left: -220,
-        behavior: "smooth"
-    });
-}
-
-function slideRight() {
-    document.getElementById("slider").scrollBy({
-        left: 220,
-        behavior: "smooth"
-    });
-}
 function showSidebar() {
     const sidebar = document.querySelector(".sidebar")
     if (sidebar) {
@@ -364,6 +350,7 @@ function openAddModal() {
     document.getElementById("edit-timing").value = "";
     document.getElementById("edit-category").value = "";
     document.getElementById("edit-flavor").value = "";
+    document.getElementById("edit-special").value = "";
     const preview = document.getElementById("imagePreview");
     if (preview) {
         preview.src = "";
@@ -371,7 +358,7 @@ function openAddModal() {
     }
 }
 
-function openEditModal(id, name, rating, clean, full, directions, timing, category, flavor) {
+function openEditModal(id, name, rating, clean, full, directions, timing, category, flavor, special) {
 
     document.getElementById("editModal").style.display = "block";
     document.getElementById("editForm").action = `/admin/recipes/update/${id}`;
@@ -385,6 +372,7 @@ function openEditModal(id, name, rating, clean, full, directions, timing, catego
     document.getElementById("edit-timing").value = timing;
     document.getElementById("edit-category").value = category;
     document.getElementById("edit-flavor").value = flavor;
+    document.getElementById("edit-special").value = special;
 }
 
 
@@ -441,49 +429,156 @@ function openTab(tabName) {
     // highlight button
     event.target.classList.add("active");
 }
-function filterSavedRecipes() {
-    const input = document.getElementById("savedSearch").value.toLowerCase();
-    const cards = document.querySelectorAll(".recipe-card");
+let currentCategory = "All Category";
+
+function filterSavedRecipes(){
+
+    const input =
+        document.getElementById("savedSearch")
+        .value
+        .toLowerCase();
+
+    const cards =
+        document.querySelectorAll(".saved-card");
+
+    let visibleCount = 0;
 
     cards.forEach(card => {
-        const title = card.querySelector(".recipe-title").innerText.toLowerCase();
 
-        if (title.includes(input)) {
-            card.style.display = "block";
-        } else {
+        const title =
+            card.querySelector(".recipe-title")
+            .innerText
+            .toLowerCase();
+
+        const cardCategory =
+            card.dataset.category;
+
+        const matchesSearch =
+            title.includes(input);
+
+        const matchesCategory =
+            currentCategory === "All Category" ||
+            cardCategory === currentCategory;
+
+        if(matchesSearch && matchesCategory){
+
+            card.style.display = "";
+
+            visibleCount++;
+
+        }else{
+
             card.style.display = "none";
+
         }
+
     });
+
+    const emptyBox =
+        document.getElementById("noCategoryResult");
+
+    const emptyTitle =
+        document.getElementById("emptyCategoryTitle");
+
+    const emptyText =
+        document.getElementById("emptyCategoryText");
+
+    if(visibleCount === 0){
+
+        emptyBox.style.display = "flex";
+
+        if(currentCategory !== "All Category"){
+
+            emptyTitle.innerText =
+                `No ${currentCategory} Recipes Saved`;
+
+            emptyText.innerText =
+                `You haven't saved any ${currentCategory.toLowerCase()} recipes yet.`;
+
+        }else{
+
+            emptyTitle.innerText =
+                "No Recipes Found";
+
+            emptyText.innerText =
+                "Try another search keyword.";
+
+        }
+
+    }else{
+
+        emptyBox.style.display = "none";
+
+    }
+
 }
 
-// live search
-const savedSearchInput = document.getElementById("savedSearch");
 
-if (savedSearchInput) {
+// =====================
+// SEARCH
+// =====================
 
-    const cards = document.querySelectorAll(".recipe-card");
+const savedSearchInput =
+    document.getElementById("savedSearch");
 
-    savedSearchInput.addEventListener("input", function () {
+if(savedSearchInput){
 
-        const input = this.value.toLowerCase();
-        let visibleCount = 0;
+    savedSearchInput.addEventListener(
+        "input",
+        filterSavedRecipes
+    );
 
-        cards.forEach(card => {
-            const titleEl = card.querySelector(".recipe-title");
+}
 
-            if (!titleEl) return;
 
-            const title = titleEl.innerText.toLowerCase();
+// =====================
+// CATEGORY FILTER
+// =====================
 
-            if (title.includes(input)) {
-                card.style.display = "block";
-                visibleCount++;
-            } else {
-                card.style.display = "none";
-            }
-        });
+const filterButtons =
+    document.querySelectorAll(".filter-btn");
+
+filterButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document
+            .querySelectorAll(".filter-btn")
+            .forEach(btn =>
+                btn.classList.remove("active")
+            );
+
+        button.classList.add("active");
+
+        currentCategory =
+            button.innerText.trim();
+
+        // 重新套用 Search + Category
+        filterSavedRecipes();
 
     });
+
+});
+function resetCategoryFilter(){
+
+    currentCategory = "All Category";
+
+    document
+        .getElementById("savedSearch")
+        .value = "";
+
+    document
+        .querySelectorAll(".filter-btn")
+        .forEach(btn =>
+            btn.classList.remove("active")
+        );
+
+    document
+        .querySelector(".filter-btn")
+        .classList.add("active");
+
+    filterSavedRecipes();
+
 }
 function toggleNotif(event){
     event.preventDefault()
@@ -676,3 +771,354 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+/* =========================================================
+   GSAP
+========================================================= */
+gsap.registerPlugin(ScrollTrigger);
+
+
+/* =========================================================
+   HERO LID ZOOM EFFECT
+========================================================= */
+gsap.to("#heroLid", {
+    scale: 7,
+    rotation: 720,
+    scrollTrigger: {
+        trigger: ".intro-scene",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
+    }
+});
+
+
+/* =========================================================
+   INGREDIENT SYSTEM
+========================================================= */
+const selectedIngredients = [];
+/* INGREDIENT BUTTONS */
+const ingredientButtons =
+    document.querySelectorAll(".ingredient-btn");
+ingredientButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        const ingredient = btn.dataset.name;
+        if (!selectedIngredients.includes(ingredient)) {
+            selectedIngredients.push(ingredient);
+            dropIngredient(ingredient);
+            animateKnife();
+            createCutPieces(ingredient);
+            btn.classList.add("active");
+        }
+    });
+});
+
+/* =========================================================
+   DROP INGREDIENT
+========================================================= */
+function dropIngredient(name){
+    const item = document.createElement("img");
+    item.src = `/static/css/picture/${name}.png`;
+    item.classList.add("falling-ingredient");
+    item.style.left =
+        `${Math.random() * 200 + 120}px`;
+    document
+        .getElementById("ingredientDropZone")
+        .appendChild(item);
+    gsap.fromTo(item,
+        {
+            y: -350,
+            opacity: 0,
+            scale: 0.5,
+            rotation: -20
+        },
+        {
+            y: 80,
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 1,
+            ease: "bounce.out"
+        }
+    );
+}
+
+/* =========================================================
+   KNIFE ANIMATION
+========================================================= */
+function animateKnife(){
+    gsap.to(".knife", {
+        rotation: -25,
+        y: 40,
+        duration: 0.15,
+        repeat: 3,
+        yoyo: true,
+        ease: "power1.inOut"
+    });
+}
+
+/* =========================================================
+   CREATE CUT PIECES
+========================================================= */
+function createCutPieces(name){
+    setTimeout(() => {
+        const pieces = document.createElement("img");
+        pieces.src =
+            `/static/css/picture/${name}-chopped.png`;
+        pieces.classList.add("cut-piece");
+        pieces.style.position = "absolute";
+        pieces.style.width = "110px";
+        pieces.style.left =
+            `${Math.random() * 200 + 150}px`;
+        pieces.style.top =
+            `${Math.random() * 100 + 120}px`;
+        pieces.style.zIndex = "5";
+        document
+            .getElementById("ingredientDropZone")
+            .appendChild(pieces);
+        gsap.fromTo(pieces,
+            {
+                opacity: 0,
+                scale: 0
+            },
+
+            {
+                opacity: 1,
+                scale: 1,
+                duration: 0.4
+            }
+        );
+    }, 500);
+}
+/* =========================================================
+   AUTO DROP
+========================================================= */
+let autoDropPlayed = false;
+ScrollTrigger.create({
+    trigger: ".ingredient-scene",
+    start: "top center",
+    once: true,
+    onEnter: () => {
+        if (
+            selectedIngredients.length === 0
+            &&
+            !autoDropPlayed
+        ){
+            autoDropPlayed = true;
+            const autoIngredients = [
+                "tomato",
+                "onion",
+                "garlic",
+                "chili"
+            ];
+            autoIngredients.forEach((item, index) => {
+                setTimeout(() => {
+                    dropIngredient(item);
+                    animateKnife();
+                    createCutPieces(item);
+                }, index * 900);
+            });
+        }
+    }
+});
+
+/* =========================================================
+   COOKING SCENE
+========================================================= */
+const cookingTimeline = gsap.timeline({
+    scrollTrigger: {
+        trigger: ".cooking-scene",
+        start: "top center",
+        end: "bottom center",
+        scrub: true
+    }
+});
+cookingTimeline
+.to(".ingredient-rain", {
+    y: 280,
+    opacity: 1
+})
+.to(".pot-lid", {
+    y: 160
+})
+.to(".fire-effect", {
+    opacity: 1,
+    scale: 1.2
+});
+
+/* =========================================================
+   FIRE EFFECT
+========================================================= */
+gsap.to(".fire-effect", {
+    scale: 1.1,
+    duration: 0.6,
+    repeat: -1,
+    yoyo: true
+});
+
+/* =========================================================
+   REVEAL SCENE
+========================================================= */
+const revealTimeline = gsap.timeline({
+    scrollTrigger: {
+        trigger: ".reveal-scene",
+        start: "top center",
+        end: "bottom center",
+        scrub: true
+    }
+});
+revealTimeline
+.to(".reveal-lid", {
+    y: -260,
+    rotation: -20
+})
+
+.from(".reveal-food", {
+    opacity: 0,
+    scale: 0.5,
+    y: 100
+})
+
+.from(".reveal-plate", {
+    opacity: 0,
+    scale: 0.8
+});
+
+
+/* =========================================================
+   FLOATING EMOJI PARALLAX
+========================================================= */
+window.addEventListener("scroll", () => {
+    const scrollY = window.scrollY;
+    gsap.to(".food1", {
+        y: scrollY * 0.03
+    });
+    gsap.to(".food2", {
+        y: scrollY * 0.05
+    });
+    gsap.to(".food3", {
+        y: scrollY * 0.04
+    });
+    gsap.to(".food4", {
+        y: scrollY * 0.06
+    });
+});
+
+/* =========================================================
+   FOOD CARD FADE
+========================================================= */
+gsap.utils.toArray(".food-card").forEach(card => {
+    gsap.from(card, {
+        opacity: 0,
+        y: 80,
+        duration: 1,
+        scrollTrigger: {
+            trigger: card,
+            start: "top 90%"
+        }
+    });
+});
+
+gsap.from(".hero-title", {
+    y: 80,
+    opacity: 0,
+    duration: 1
+})
+
+gsap.from(".hero-subtitle", {
+    y: 80,
+    opacity: 0,
+    duration: 1,
+    delay: 0.3
+})
+function goToSearch(){
+
+    const keyword = document
+        .getElementById("homeSearch")
+        .value
+        .trim();
+
+    if(keyword === ""){
+
+        window.location.href = "/all_recipes";
+
+        return;
+    }
+
+    window.location.href =
+        `/all_recipes?search=${encodeURIComponent(keyword)}`;
+}
+
+
+// ENTER = SEARCH
+
+const homeSearch =
+    document.getElementById("homeSearch");
+
+if(homeSearch){
+
+    homeSearch.addEventListener(
+        "keydown",
+        function(event){
+
+            if(event.key === "Enter"){
+
+                event.preventDefault();
+
+                goToSearch();
+
+            }
+
+        }
+    );
+
+}
+const sections = document.querySelectorAll(
+    ".slide-left, .slide-right"
+);
+
+const observer = new IntersectionObserver(
+
+    (entries) => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add(
+                    "show-section"
+                );
+
+            }
+
+        });
+
+    },
+
+    {
+        threshold: 0.2
+    }
+
+);
+
+sections.forEach(section => {
+
+    observer.observe(section);
+
+});
+function quickSearch(keyword){
+
+    document.getElementById(
+        "homeSearch"
+    ).value = keyword;
+
+}
+function togglePassword(inputId){
+
+    const input = document.getElementById(inputId);
+
+    if(input.type === "password"){
+        input.type = "text";
+    }else{
+        input.type = "password";
+    }
+}

@@ -7,14 +7,12 @@ import secrets
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
-from flask import Flask, render_template, request, jsonify
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask import request, render_template, jsonify, redirect, url_for
-
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -105,6 +103,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_email TEXT,
         message TEXT,
+        recipe_id INTEGER,
         is_read INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
@@ -115,6 +114,29 @@ def init_db():
         user_email TEXT,
         keyword TEXT,
         searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    #sidney member 2
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipe_id INTEGER,
+        user_email TEXT,
+        username TEXT,
+        content TEXT,
+        rating INTEGER,
+        parent_id INTEGER DEFAULT NULL,  
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS comment_notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        comment_id INTEGER,
+        notify_me INTEGER DEFAULT 1,
+        FOREIGN KEY (user_email) REFERENCES users(email)
     )
     """)
     conn.commit()
@@ -139,10 +161,93 @@ def add_reset_columns():
         c.execute("ALTER TABLE users ADD COLUMN reset_viewed INTEGER DEFAULT 0")
     except:
         pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN last_login TEXT")
+    except:
+        pass
     conn.commit()
     conn.close()
 
 add_reset_columns()
+def add_recipe_id_to_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute("ALTER TABLE notifications ADD COLUMN recipe_id INTEGER")
+    except:
+        pass
+    conn.commit()
+    conn.close()
+
+# 调用它
+add_recipe_id_to_notifications()
+
+def add_comment_id_to_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    try:
+        c.execute("""
+            ALTER TABLE notifications
+            ADD COLUMN comment_id INTEGER
+        """)
+    except:
+        pass
+
+    conn.commit()
+    conn.close()
+
+add_comment_id_to_notifications()
+
+def fill_recipe_id_for_old_notifications():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 找没有 recipe_id 或 comment_id 的回复通知
+    c.execute("""
+        SELECT id, message 
+        FROM notifications 
+        WHERE (recipe_id IS NULL OR recipe_id = 0 OR comment_id IS NULL OR comment_id = 0)
+        AND message LIKE '@%replied to your comment%'
+    """)
+    notifications = c.fetchall()
+    
+    print(f"找到 {len(notifications)} 条需要修复的通知")
+    
+    updated = 0
+    for notif_id, message in notifications:
+        try:
+            # 格式: "@username replied to your comment"
+            if message and message.startswith("@"):
+                # 提取 username
+                parts = message.split(" ")
+                username = parts[0].replace("@", "")
+                
+                # 找到这个用户的最新评论
+                c.execute("""
+                    SELECT id, recipe_id 
+                    FROM comments 
+                    WHERE username = ?
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                """, (username,))
+                result = c.fetchone()
+                
+                if result:
+                    comment_id, recipe_id = result
+                    c.execute("""
+                        UPDATE notifications 
+                        SET recipe_id = ?, comment_id = ?
+                        WHERE id = ?
+                    """, (recipe_id, comment_id, notif_id))
+                    updated += 1
+                    print(f"修复: notif {notif_id} -> recipe_id={recipe_id}, comment_id={comment_id}")
+        except Exception as e:
+            print(f"Error processing notif {notif_id}: {e}")
+    
+    conn.commit()
+    print(f"成功修复 {updated} 条通知")
+    conn.close()
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
@@ -184,35 +289,57 @@ def home():
 def register():
 
     if request.method == "POST":
-        username = request.form["username"]
-        email = request.form["email"]
-        password = request.form["password"]
+
         username = request.form.get("username", "").strip()
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
+        repeat = request.form.get("repeat-password", "")
 
         if not username or not email or not password:
-            return render_template("register.html", error="All fields required")
+            return render_template(
+                "register.html",
+                error="All fields required"
+            )
+
+        if len(password) < 8:
+            return render_template(
+                "register.html",
+                error="Password must be at least 8 characters"
+            )
+
+        if password != repeat:
+            return render_template(
+                "register.html",
+                error="Passwords do not match"
+            )
 
         hashed_pw = generate_password_hash(password)
-        try:
-            with sqlite3.connect(DB_PATH) as conn:
-                c = conn.cursor()
-                c.execute("INSERT INTO users (email, username, password, bio) VALUES (?, ?, ?, ?)", (email, username, hashed_pw, ""))
 
+        try:
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
 
             c.execute("""
-                INSERT INTO users (email, username, password, bio)
+                INSERT INTO users
+                (email, username, password, bio)
                 VALUES (?, ?, ?, ?)
-            """, (email, username, hashed_pw, ""))
+            """, (
+                email,
+                username,
+                hashed_pw,
+                ""
+            ))
 
             conn.commit()
             conn.close()
+
             return redirect(url_for("login"))
+
         except sqlite3.IntegrityError:
-            return render_template("register.html", error="This email is already registered!")
+            return render_template(
+                "register.html",
+                error="This email is already registered!"
+            )
 
     return render_template("register.html")
 
@@ -233,19 +360,30 @@ def check_email():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-
         email = request.form["email"]
         password = request.form["password"]
-
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-
         c.execute("SELECT * FROM users WHERE email = ?", (email,))
         user = c.fetchone()        #get a tuple, example:'test@email.com', 'anna', 'hashed_password', '', '', 'admin'
-
         conn.close()
-
-        if user and check_password_hash(user[2], password):     #check id exist indb, check password
+        if user and check_password_hash(user[2], password):
+            from datetime import datetime
+            current_time = datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("""
+                UPDATE users
+                SET last_login = ?
+                WHERE email = ?
+            """, (
+                current_time,
+                email
+            ))
+            conn.commit()
+            conn.close()
             session["user"] = email
             session["role"] = user[5]
             return redirect(url_for("profile"))
@@ -287,15 +425,27 @@ def profile():
     # =========================
 
     c.execute("""
-        SELECT keyword, COUNT(*) as total
+        SELECT keyword
         FROM search_history
         WHERE user_email = ?
-        GROUP BY keyword
-        ORDER BY total DESC
-        LIMIT 3
+        ORDER BY searched_at DESC
     """, (email,))
+    search_rows = c.fetchall()
 
-    top_keywords = [row[0] for row in c.fetchall()]
+    top_keywords = []
+    seen_keywords = set()
+
+    for row in search_rows:
+
+        keyword = row[0]
+
+        if keyword not in seen_keywords:
+
+            top_keywords.append(keyword)
+            seen_keywords.add(keyword)
+
+        if len(top_keywords) == 3:
+            break
 
     conn.close()
 
@@ -337,26 +487,6 @@ def profile():
         saved_ids=saved_ids,
         role=session.get("role")
     )
-
-@app.route("/newpassword", methods=["GET", "POST"])
-def newpassword():
-    if "reset_user" not in session: return redirect(url_for("login"))
-    if request.method == "POST":
-        password, repeat = request.form["password"], request.form["repeat-password"]
-        if not password: return render_template("newpassword.html", error="Password is required")
-        if len(password) < 8: return render_template("newpassword.html", error="Too short")
-        if password != repeat: return render_template("newpassword.html", error="No match")
-        hashed_pw = generate_password_hash(password)
-        email = session["reset_user"]
-        conn = sqlite3.connect("users.db")
-        c = conn.cursor()
-        c.execute("UPDATE users SET password=? WHERE email=?", (hashed_pw, email))
-        conn.commit()
-        conn.close()
-        session.pop("reset_user", None)
-        return redirect(url_for("login"))
-    return render_template("newpassword.html")
-
 
 # ---------------- UPLOAD PROFILE PIC ----------------
 @app.route("/upload-profile-pic", methods=["POST"])
@@ -512,24 +642,83 @@ def logout():
 # ---------------- ADMIN ----------------
 @app.route("/admin")
 def admin():
+
     if session.get("role") != "admin":
         return "403 Forbidden"
 
-    # 1. Get recent users (continue using sqlite3 to access users.db)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT email, username, role FROM users ORDER BY rowid DESC LIMIT 5")   #sqlite
+    six_months_ago = (
+        datetime.now() - timedelta(days=180)
+    ).strftime("%Y-%m-%d %H:%M:%S")
+
+    c.execute("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE last_login IS NULL
+        OR last_login < ?
+    """, (six_months_ago,))
+
+    inactive_users = c.fetchone()[0]
+    c.execute("""
+        SELECT username,email
+        FROM users
+        WHERE last_login IS NULL
+        OR last_login < ?
+        LIMIT 3
+    """,(
+        six_months_ago,
+    ))
+
+    inactive_accounts = c.fetchall()
+    # recent users
+    c.execute("""
+        SELECT email, username, role
+        FROM users
+        ORDER BY rowid DESC
+        LIMIT 5
+    """)
     recent_users = c.fetchall()
+
+    # total users
+    c.execute("""
+        SELECT COUNT(*)
+        FROM users
+    """)
+    total_users = c.fetchone()[0]
+
     conn.close()
 
-    # 2. Gey recent recipes (continue using SQLAlchemy to access omakase.db)
-    # This will prevent the "no such table: recipes" error.
-    recent_recipes = Recipe.query.order_by(Recipe.id.desc()).limit(5).all()  #recipes(SQLAIchemy)
+    # recipes (SQLAlchemy)
+    recent_recipes = (
+        Recipe.query
+        .order_by(Recipe.id.desc())
+        .limit(5)
+        .all()
+    )
+
+    total_recipes = Recipe.query.count()
+
+    avg_rating = db.session.query(
+        func.avg(Recipe.rating)
+    ).scalar()
+
+    most_popular = (
+        Recipe.query
+        .order_by(Recipe.rating.desc())
+        .first()
+    )
 
     return render_template(
         "admin.html",
         recent_users=recent_users,
-        recent_recipes=recent_recipes
+        recent_recipes=recent_recipes,
+        total_recipes=total_recipes,
+        total_users=total_users,
+        avg_rating=round(avg_rating or 0, 1),
+        most_popular=most_popular,
+        inactive_users=inactive_users,
+        inactive_accounts=inactive_accounts
     )
 
 # =======================
@@ -560,12 +749,55 @@ def admin_users():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    c.execute("SELECT email, username, role FROM users")
+    c.execute("""
+        SELECT email,
+            username,
+            role,
+            last_login
+        FROM users
+    """)
     users = c.fetchall()
 
     conn.close()
 
-    return render_template("admin_users.html", users=users)
+    six_months_ago = (
+            datetime.now() - timedelta(days=180)
+        )
+
+    processed_users = []
+
+    for user in users:
+
+        status = "Inactive"
+
+        if user[3]:
+
+            try:
+                last_login = datetime.strptime(
+                    user[3],
+                    "%Y-%m-%d %H:%M:%S"
+                )
+
+                if last_login > six_months_ago:
+                    status = "Active"
+
+            except:
+                status = "Inactive"
+
+        processed_users.append(
+            (
+                user[0],  # email
+                user[1],  # username
+                user[2],  # role
+                user[3],  # last_login
+                status    # active/inactive
+            )
+        )
+
+    return render_template(
+        "admin_users.html",
+        users=processed_users
+    )
 
 @app.route("/admin/users/update/<email>", methods=["POST"])
 def update_user(email):
@@ -657,6 +889,7 @@ def add_recipe():
     timing = request.form.get("timing")
     category = request.form.get("meal_category")
     flavor = request.form.get("flavor_type")
+    special = request.form.get("special_tag")
 
     file = request.files.get("image_file")
 
@@ -677,7 +910,8 @@ def add_recipe():
         directions=directions,
         timing=timing,
         meal_category=category,
-        flavor_type=flavor
+        flavor_type=flavor,
+        special_tag=special
     )
 
     db.session.add(new_recipe)
@@ -749,6 +983,7 @@ def update_recipe(id):
         recipe.timing = request.form.get("timing")
         recipe.meal_category = request.form.get("meal_category")
         recipe.flavor_type = request.form.get("flavor_type")
+        recipe.special_tag = request.form.get("special_tag")
 
         file = request.files.get("image_file")
 
@@ -833,18 +1068,13 @@ def saved_recipes():
 @app.context_processor
 def inject_notifications():
     if "user" not in session:
-        return dict(
-            new_notifications=[],
-            old_notifications=[],
-            notif_count=0
-        )
+        return dict(new_notifications=[], old_notifications=[], notif_count=0)
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-
     c.execute("""
-        SELECT message, is_read, created_at
+        SELECT message, is_read, recipe_id, comment_id
         FROM notifications
         WHERE user_email = ?
         ORDER BY created_at DESC
@@ -852,11 +1082,16 @@ def inject_notifications():
     """, (session["user"],))
 
     rows = c.fetchall()
+    
+    # DEBUG
+    print("DEBUG rows:", rows)
+    print("DEBUG user:", session["user"])
 
-    # 
     new_notifs = [n for n in rows if n[1] == 0]  
     old_notifs = [n for n in rows if n[1] == 1]  
-    # unread count（红点）
+    
+    print("DEBUG new_notifs:", new_notifs)
+    
     c.execute("""
         SELECT COUNT(*) FROM notifications
         WHERE user_email = ? AND is_read = 0
@@ -898,7 +1133,7 @@ def get_notifications():
     c = conn.cursor()
 
     c.execute("""
-        SELECT message, is_read
+        SELECT message, is_read, recipe_id, comment_id
         FROM notifications
         WHERE user_email = ?
         ORDER BY created_at DESC
@@ -1005,7 +1240,11 @@ def get_saved_set(user_email):
 
 @app.route('/categories')
 def category_index():
-    search_query = request.args.get('search', '').strip().lower()
+    if "user" not in session:
+        return redirect(url_for("login"))
+    
+    raw_search_query = request.args.get('search', '').strip()
+    search_query_lower = raw_search_query.lower()
 
     tag_descriptions = {
         "Halal": "Delicious recipes prepared with 100% Halal-certified ingredients and methods.",
@@ -1027,19 +1266,25 @@ def category_index():
             tags = [t.strip() for t in r.special_tag.split(',')]
             unique_tags.update(tags)
 
-    if search_query:
+    if search_query_lower:
         for tag in unique_tags:
-            if search_query == tag.lower():
+            if search_query_lower == tag.lower():
                 return redirect(url_for('category_results', tag=tag))
 
     categories_with_images = []
     used_recipe_ids = set()
-    filtered_tags = [t for t in sorted(list(unique_tags)) if search_query in t.lower()]
+    filtered_tags = [t for t in sorted(list(unique_tags)) if search_query_lower in t.lower()]
 
     for tag in filtered_tags:
-        sample_recipe = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"), Recipe.id.notin_(used_recipe_ids)).first()
+        query_filter = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
+        
+        if tag == "Vegetarian":
+            query_filter = query_filter.filter(Recipe.special_tag.not_ilike("%Non-Vegetarian%"))
+
+        sample_recipe = query_filter.filter(Recipe.id.notin_(used_recipe_ids)).first()
+        
         if not sample_recipe:
-            sample_recipe = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%")).first()
+            sample_recipe = query_filter.first()
 
         if sample_recipe:
             used_recipe_ids.add(sample_recipe.id)
@@ -1050,7 +1295,32 @@ def category_index():
                 'description': description
             })
 
-    return render_template('category.html', categories=categories_with_images, search_query=search_query)
+    
+    recommendations = []
+    if not categories_with_images:
+    
+        rec_recipe_ids = set()
+        for tag in sorted(list(unique_tags)):
+            rec_filter = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
+            if tag == "Vegetarian":
+                rec_filter = rec_filter.filter(Recipe.special_tag.not_ilike("%Non-Vegetarian%"))
+            
+            rec_recipe = rec_filter.filter(Recipe.id.notin_(rec_recipe_ids)).first() or rec_filter.first()
+            if rec_recipe:
+                rec_recipe_ids.add(rec_recipe.id)
+                recommendations.append({
+                    'name': tag,
+                    'image': rec_recipe.image
+                })
+        
+        recommendations = recommendations[:6]
+
+    return render_template(
+        'category.html', 
+        categories=categories_with_images, 
+        search_query=raw_search_query,
+        recommendations=recommendations
+    )
 
 
 @app.route('/categories/<tag>')
@@ -1072,16 +1342,18 @@ def category_results(tag):
     }
     
     active_description = tag_descriptions.get(tag, tag_descriptions["Default"])
-    
 
+    
     if tag == "Halal":
-        recipes_query = Recipe.query.filter(
+        base_query = Recipe.query.filter(
             Recipe.special_tag.ilike(f"%{tag}%"),
             Recipe.special_tag.not_ilike("%Non-Halal%")
         )
     else:
-        recipes_query = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
+        base_query = Recipe.query.filter(Recipe.special_tag.ilike(f"%{tag}%"))
 
+
+    recipes_query = base_query
     if search_query:
         recipes_query = recipes_query.filter(Recipe.name.ilike(f"%{search_query}%"))
         
@@ -1091,14 +1363,25 @@ def category_results(tag):
     results = recipes_query.all()
     results_count = len(results)
 
+    recommendations = []
+    if results_count == 0:
+        
+        recommendations = base_query.limit(6).all()
+
+    saved_ids = set()
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
     return render_template(
         'category_results.html',
         results=results,
         active_tag=tag,
         search_query=search_query,
+        saved_ids=saved_ids,
         active_category=selected_category,
         active_description=active_description,
         results_count=results_count,
+        recommendations=recommendations 
     )
 
 @app.route('/get_cat_suggestions')
@@ -1129,6 +1412,8 @@ def get_cat_suggestions():
 
 @app.route('/all_recipes')
 def all_recipes():
+    if "user" not in session:
+        return redirect(url_for("login"))
     search_query = request.args.get('search', '').strip()
     active_flavor = request.args.get('flavor', 'ALL').strip()
     page = request.args.get('page', 1, type=int)
@@ -1157,6 +1442,17 @@ def all_recipes():
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
+
+    recommendations = []
+    if not pagination.items:
+        if search_query:
+ 
+            recommendations = Recipe.query.filter(Recipe.name.ilike(f"%{search_query}%")).limit(6).all()
+        
+
+        if not recommendations:
+            recommendations = Recipe.query.order_by(Recipe.rating.desc().nullslast()).limit(6).all()
+
     saved_ids = set()
     if "user" in session:
         saved_ids = get_saved_set(session["user"])
@@ -1167,7 +1463,8 @@ def all_recipes():
         pagination=pagination,
         search_query=search_query,
         active_flavor=active_flavor,
-        saved_ids=saved_ids
+        saved_ids=saved_ids,
+        recommendations=recommendations 
     )
 @app.route('/get_suggestions')
 def get_suggestions():
@@ -1184,6 +1481,8 @@ def get_suggestions():
 
 @app.route("/ingredient-search")  
 def ingredient_index():
+    if "user" not in session:
+        return redirect(url_for("login"))
     all_recipes = Recipe.query.all()
     ingredients_dict = {char: [] for char in string.ascii_uppercase}
     all_names_flat = set()
@@ -1216,17 +1515,15 @@ def search():
     selected_raw = request.form.get('ingredients')
     user_input = [s.strip().lower() for s in selected_raw.split(',')] if selected_raw else []
     results = []
+    recommendations = []
 
     if user_input:
         all_recipes = Recipe.query.all()
         for recipe in all_recipes:
             recipe_ing_list = [i.strip().lower() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
             total_count = len(recipe_ing_list)
+            if total_count == 0: continue
 
-            if total_count == 0:
-                continue
-
-            
             is_valid_match = True
             matched_in_recipe = []
 
@@ -1238,19 +1535,20 @@ def search():
                         if ri not in matched_in_recipe:
                             matched_in_recipe.append(ri)
                         break 
-                
                 if not found_this_item:
                     is_valid_match = False
                     break 
-            
 
             if is_valid_match:
                 have_count = len(user_input)
                 percent = int((have_count / total_count) * 100)
                 missing_ingredients = [ri for ri in recipe_ing_list if ri not in matched_in_recipe]
                 
-                display_missing = missing_ingredients[:3] 
-                extra_count = len(missing_ingredients) - len(display_missing)
+                display_names = [m.title() for m in matched_in_recipe]
+                if len(display_names) > 5:
+                    combo_text = " + ".join(display_names[:5]) + f" ...(+{len(display_names) - 5} more)"
+                else:
+                    combo_text = " + ".join(display_names)
 
                 results.append({
                     "id": recipe.id,
@@ -1259,17 +1557,49 @@ def search():
                     "meal_category": recipe.meal_category,
                     "rating": recipe.rating,
                     "match": percent,
-                    "missing_names": display_missing,
-                    "extra_count": extra_count
+                    "matched_combo": combo_text,
+                    "missing_names": missing_ingredients[:3],
+                    "extra_count": len(missing_ingredients) - 3
                 })
+        results = sorted(results, key=lambda x: x['match'], reverse=True)
+    
+    
+    if not results:
+        all_recipes = Recipe.query.all()
+        temp_recs = []
+        
+       
+        if user_input:
+            for recipe in all_recipes:
+                recipe_ing_list = [i.strip().lower() for i in str(recipe.clean_ingredients).split(',') if i.strip()]
+                match_count = sum(1 for ui in user_input if any(ui in ri for ri in recipe_ing_list))
+                
+                if match_count > 0:
+                    temp_recs.append((recipe, match_count))
+            
+            
+            temp_recs.sort(key=lambda x: (x[1], x[0].rating or 0), reverse=True)
+            recommendations = [item[0] for item in temp_recs[:6]]
 
-    results = sorted(results, key=lambda x: x['match'], reverse=True)
+      
+        if len(recommendations) < 6:
+            needed = 6 - len(recommendations)
+            existing_ids = [r.id for r in recommendations]
+            
+          
+            fillers = Recipe.query.filter(~Recipe.id.in_(existing_ids))\
+                                 .order_by(Recipe.rating.desc())\
+                                 .limit(needed).all()
+            recommendations.extend(fillers)
+
     saved_ids = set()
     if "user" in session:
         saved_ids = get_saved_set(session["user"])
+
     return render_template(
         'result.html',
         results=results,
+        recommendations=recommendations,
         selected=user_input,
         saved_ids=saved_ids
     )
@@ -1293,10 +1623,6 @@ def db_test():
 def about():
     return render_template('about.html')
 
-@app.route('/random-page')
-def random_page():
-    return render_template('random.html')
-
 @app.route('/breakfast')
 def breakfast():
 
@@ -1308,7 +1634,17 @@ def breakfast():
     ).fetchall()
 
     conn.close()
-    return render_template('breakfast.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'breakfast.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/lunch')
 def lunch():
@@ -1320,7 +1656,17 @@ def lunch():
     ).fetchall()
 
     conn.close()
-    return render_template('lunch.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'lunch.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/dinner')
 def dinner():
@@ -1332,7 +1678,17 @@ def dinner():
     ).fetchall()
 
     conn.close()
-    return render_template('dinner.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'dinner.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/dessert')
 def dessert():
@@ -1344,7 +1700,17 @@ def dessert():
     ).fetchall()
 
     conn.close()
-    return render_template('dessert.html', recipes=recipes)
+
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'dessert.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/drinks')
 def drinks():
@@ -1356,10 +1722,22 @@ def drinks():
     ).fetchall()
 
     conn.close()
-    return render_template('drinks.html', recipes=recipes)
+    
+    saved_ids = set()
+
+    if "user" in session:
+        saved_ids = get_saved_set(session["user"])
+
+    return render_template(
+        'drinks.html',
+        recipes=recipes,
+        saved_ids=saved_ids
+    )
 
 @app.route('/random')
 def random_recipe():
+    if "user" not in session:
+        return redirect(url_for("login"))
     return render_template('random.html')
 
 @app.route('/random-recipe')
@@ -1431,6 +1809,333 @@ def test_foodtype():
     conn.close()
 
     return jsonify([dict(row) for row in rows])
+
+@app.route("/toggle-save", methods=["POST"])
+def toggle_save():
+
+    if "user" not in session:
+        return jsonify({"error": "login required"}), 401
+
+    data = request.get_json()
+    recipe_id = data.get("recipe_id")
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT * FROM saved_recipes
+        WHERE user_email=? AND recipe_id=?
+    """, (session["user"], recipe_id))
+
+    existing = c.fetchone()
+
+    if existing:
+        c.execute("""
+            DELETE FROM saved_recipes
+            WHERE user_email=? AND recipe_id=?
+        """, (session["user"], recipe_id))
+
+        saved = False
+
+    else:
+        c.execute("""
+            INSERT INTO saved_recipes (user_email, recipe_id)
+            VALUES (?, ?)
+        """, (session["user"], recipe_id))
+
+        saved = True
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "saved": saved
+    })
+
+@app.route("/comment/add", methods=["POST"])
+def add_comment():
+    recipe_id = request.json.get('recipe_id')
+    email = request.json.get('email')
+    username = request.json.get('username')
+    rating = request.json.get('rating')
+    content = request.json.get('content')
+    parent_id = request.json.get('parent_id')
+    notify_me = request.json.get('notify_me', False)
+    
+    if not content:
+        return jsonify({"error": "empty comment"}), 400
+    
+    if not email:
+        return jsonify({"error": "email required"}), 400
+
+    # ⭐ 修复：把 0 转成 None
+    if parent_id == 0 or parent_id == "0" or parent_id == "":
+        parent_id = None
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    # 插入评论
+    c.execute(
+        "INSERT INTO comments (recipe_id, user_email, username, rating, content, parent_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (recipe_id, email, username, rating, content, parent_id)  # ⭐ None 会变成 NULL
+    )
+    
+    # 获取新评论的 ID
+    comment_id = c.lastrowid
+    
+    # ⭐ 保存通知设置
+    c.execute(
+        "INSERT INTO comment_notifications (user_email, comment_id, notify_me) VALUES (?, ?, ?)",
+        (email, comment_id, 1 if notify_me else 0)
+    )
+    
+    conn.commit()
+    conn.close()
+    
+    # ⭐ 如果是回复，发送通知
+    if parent_id:
+        send_reply_notification(parent_id, comment_id, email, username, content)
+    
+    return jsonify({"success": True})
+
+@app.route("/comment/<int:recipe_id>")
+def get_comments(recipe_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT id, user_email, username, content, created_at, rating, parent_id
+        FROM comments
+        WHERE recipe_id=?
+        ORDER BY created_at ASC
+    """, (recipe_id,))
+
+    comments = c.fetchall()
+    conn.close()
+
+    # 返回包含 profile_pic 的数据
+    return jsonify([
+        {
+            "id": c[0],
+            "user_email": c[1],
+            "username": c[2],
+            "content": c[3],
+            "created_at": c[4],
+            "rating": c[5],
+            "parent_id": c[6],
+            "profile_pic": get_profile_pic(c[1])  # ⭐ 新加
+        }
+        for c in comments
+    ])
+
+def get_profile_pic(email):
+    if not email:
+        return None
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    c.execute("SELECT profile_pic FROM users WHERE email = ?", (email,))
+    row = c.fetchone()
+    conn.close()
+    
+    if row and row[0]:
+        return row[0]
+    return None
+
+@app.route("/comment/delete", methods=["POST"])
+def delete_comment():
+    if "user" not in session:
+        return jsonify({"error": "login required"}), 401
+    
+    data = request.get_json()
+    comment_id = data.get('comment_id')
+    user_email = session["user"]
+    
+    if not comment_id:
+        return jsonify({"error": "comment_id required"}), 400
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 检查是不是自己的comment
+    c.execute("SELECT user_email FROM comments WHERE id = ?", (comment_id,))
+    comment = c.fetchone()
+    
+    if not comment:
+        conn.close()
+        return jsonify({"error": "comment not found"}), 404
+    
+    # 只有自己能删除！
+    if comment[0] != user_email:
+        conn.close()
+        return jsonify({"error": "cannot delete others' comment"}), 403
+    
+    # ⭐ 删除这个 comment 的所有 replies
+    c.execute("DELETE FROM comments WHERE parent_id = ?", (comment_id,))
+    # ⭐ 删除这个 comment 自己
+    c.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
+    # ⭐ 删除相关的通知设置
+    c.execute("DELETE FROM comment_notifications WHERE comment_id = ?", (comment_id,))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"success": True})
+@app.route("/check-login")
+def check_login():
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT email,
+               username,
+               last_login
+        FROM users
+    """)
+
+    data = c.fetchall()
+
+    conn.close()
+
+    return str(data)
+
+# ⭐ 发送回复通知的函数
+def send_reply_notification(parent_comment_id, new_reply_id, replier_email, replier_name, reply_content):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # 找到原评论和它的 recipe_id
+    c.execute("""
+        SELECT user_email, username, content, recipe_id
+        FROM comments
+        WHERE id = ?
+    """, (parent_comment_id,))
+    parent = c.fetchone()
+    
+    if not parent:
+        conn.close()
+        return
+    
+    original_email = parent[0]
+    original_name = parent[1]
+    original_content = parent[2]
+    recipe_id = parent[3]  # ⭐ 获取正确的 recipe_id
+    
+    # ⭐ 创建站内通知 - 加 recipe_id
+    notification_msg = f"@{replier_name} replied to your comment"
+    c.execute("""
+        INSERT INTO notifications (user_email, message, recipe_id, comment_id)
+        VALUES (?, ?, ?, ?)
+    """, (original_email, notification_msg, recipe_id, new_reply_id))
+    
+    conn.commit()
+    
+    # 检查原评论者是否想要 email 通知
+    c.execute("""
+        SELECT notify_me
+        FROM comment_notifications
+        WHERE user_email = ? AND comment_id = ?
+    """, (original_email, parent_comment_id))
+    notify_row = c.fetchone()
+    
+    want_email = notify_row and notify_row[0] == 1
+    
+    conn.close()
+    
+    # 发送 email（如果想要）
+    if want_email and original_email.lower() != replier_email.lower():
+        try:
+            from flask import request
+            base_url = request.host_url.rstrip('/')
+            
+            msg = Message(
+                subject="🔔 Someone replied to your comment",
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[original_email]
+            )
+            msg.html = f"""
+            <h2>New Reply</h2>
+            
+            <p>Hi {original_name},</p>
+            
+            <p><b>@{replier_name}</b> replied to your comment:</p>
+            
+            <blockquote style="background: #f5f5f5; padding: 15px; border-left: 4px solid #f4c542; margin: 15px 0;">
+                {original_content}
+            </blockquote>
+            
+            <p><b>Reply:</b> {reply_content}</p>
+            
+            <p>
+                <a href="{base_url}/recipe/{recipe_id}#comment-{new_reply_id}" style="background: #f4c542; color: black; padding: 10px 20px; text-decoration: none; border-radius: 8px;">
+                    View Recipe
+                </a>
+            </p>
+            
+            <p style="color: #888; font-size: 12px; margin-top: 30px;">
+                If you don't want to receive these emails, go to your comment and uncheck "Notify me by email"
+            </p>
+            """
+            mail.send(msg)
+        except Exception as e:
+            print("Email failed:", e)
+
+@app.route("/comment/delete-all-fake", methods=["POST", "GET"])
+def delete_fake_comments():
+    fake_emails = [
+        'sosidney307@gmail.com', 'sidney.so1@icloud.com', 'sosidney630@gmail.com'
+    ]
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    for email in fake_emails:
+        c.execute("DELETE FROM comments WHERE user_email = ?", (email,))
+    
+    conn.commit()
+    deleted = c.rowcount
+    conn.close()
+    
+    if request.method == "GET":
+        return f"✅ Deleted {deleted} fake comments!"
+    
+    return jsonify({"success": True, "deleted": deleted})
+
+@app.route("/fill-old-notifications")
+def fill_old_notifs():
+    fill_recipe_id_for_old_notifications()
+    return "✅ 修复完成！刷新页面看看通知能不能点击了！"
+
+@app.route("/debug-notifs")
+def debug_notifs():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    c.execute("""
+        SELECT id, message, recipe_id, comment_id 
+        FROM notifications 
+        WHERE message LIKE '@%replied%'
+        ORDER BY id DESC
+        LIMIT 10
+    """)
+    rows = c.fetchall()
+    
+    html = "<h2>Notifications:</h2>"
+    for r in rows:
+        html += f"<p>ID: {r[0]}, Msg: {r[1]}, recipe_id: {r[2]}, comment_id: {r[3]}</p>"
+    
+    html += "<h2>Comments:</h2>"
+    c.execute("SELECT id, username, recipe_id FROM comments ORDER BY id DESC LIMIT 10")
+    for r in c.fetchall():
+        html += f"<p>ID: {r[0]}, username: {r[1]}, recipe_id: {r[2]}</p>"
+    
+    conn.close()
+    return html
+
 
 if __name__ == "__main__":
     app.run(debug=True)

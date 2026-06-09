@@ -7,6 +7,8 @@
     <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 </head>
 
 <body>
@@ -35,30 +37,42 @@
 
         <li class="hideOnMobile"><a href="{{ url_for('saved_recipes') }}">SAVED RECIPE</a></li>
         <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
+        
+        <!-- ⭐ 存 notif_count 的隐藏元素 -->
+        <span id="initNotifCount" data-count="{{ notif_count if notif_count is defined else 0 }}" style="display:none;"></span>
+        
         <li class="notif-wrapper">
             <a href="#" class="notif-icon" onclick="toggleNotif(event)">
                 🔔
-                <!-- Dynamic unread count -->
-                {% if notif_count > 0 %}
+                {% if notif_count is defined and notif_count > 0 %}
                     <span class="notif-badge">{{ notif_count }}</span>
                 {% endif %}
             </a>
-            <!-- dropdown -->
-            <div class="notif-dropdown" id="notifDropdown">
+            
+            <!-- ⭐ dropdown 现在在这里，跟 a 平级 -->
+            <div class="notif-dropdown" id="notifDropdown" onclick="markNotificationsRead()">
                 <div class="notif-header">Notifications</div>
+                
                 {% if new_notifications %}
-                    <div class="notif-section">New</div>
+                    <div class="notif-section">New 🔔</div>
                     {% for notif in new_notifications %}
-                        <div class="notif-item unread">
-                            <span>{{ notif[0] }}</span>
+                        <div class="notif-link-wrapper">
+                            <a href="/recipe/{{ notif[2] }}/#comment-{{ notif[3] }}" class="notif-link-btn">
+                                📄 {{ notif[0] }}
+                            </a>
                         </div>
                     {% endfor %}
+                {% else %}
+                    <div class="notif-empty">No new notifications</div>
                 {% endif %}
+                
                 {% if old_notifications %}
                     <div class="notif-section">Earlier</div>
                     {% for notif in old_notifications %}
-                        <div class="notif-item">
-                            <span>{{ notif[0] }}</span>
+                        <div class="notif-link-wrapper">
+                            <a href="/recipe/{{ notif[2] }}/#comment-{{ notif[3] }}" class="notif-link-btn">
+                                📄 {{ notif[0] }}
+                            </a>
                         </div>
                     {% endfor %}
                 {% endif %}
@@ -67,6 +81,126 @@
         <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
     </ul>
 </nav>
+
+<div id="newNotifToast" class="toast-message" style="display: none;"></div>
+
+<script>
+var lastNotifCount = 0;
+
+// ⭐ TOGGLE NOTIF - 关键函数！
+function toggleNotif(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    var dropdown = document.getElementById('notifDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// 点击其他地方关闭dropdown
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('notifDropdown');
+    var icon = document.querySelector('.notif-icon');
+    
+    if (dropdown && icon) {
+        if (!dropdown.contains(e.target) && !icon.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    }
+});
+
+function getInitCount() {
+    var el = document.getElementById('initNotifCount');
+    if (el) {
+        var val = el.getAttribute('data-count');
+        if (val) {
+            return parseInt(val, 10) || 0;
+        }
+    }
+    return 0;
+}
+
+lastNotifCount = getInitCount();
+
+function checkNewNotifications() {
+    fetch('/get-notifications')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.count > 0 && data.count > lastNotifCount && lastNotifCount > 0) {
+                showNewNotifToast(data.count);
+            }
+            lastNotifCount = data.count;
+            
+            var badge = document.querySelector('.notif-badge');
+            if (data.count > 0) {
+                if (badge) {
+                    badge.textContent = data.count;
+                } else {
+                    var notifIcon = document.querySelector('.notif-icon');
+                    if (notifIcon) {
+                        var newBadge = document.createElement('span');
+                        newBadge.className = 'notif-badge';
+                        newBadge.textContent = data.count;
+                        notifIcon.appendChild(newBadge);
+                    }
+                }
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+}
+
+function showNewNotifToast(count) {
+    var toast = document.getElementById('newNotifToast');
+    if (!toast) return;
+    
+    toast.textContent = '🔔 You have ' + count + ' new notification(s)!';
+    toast.style.display = 'block';
+    toast.style.background = 'linear-gradient(135deg, #4caf50, #66bb6a)';
+    
+    setTimeout(function() {
+        toast.style.display = 'none';
+    }, 4000);
+}
+
+function markNotificationsRead() {
+    fetch('/mark-notifications-read')
+        .then(function() {
+            var badge = document.querySelector('.notif-badge');
+            if (badge) {
+                badge.remove();
+            }
+            lastNotifCount = 0;
+        });
+}
+
+function showToast(elementId, message, type) {
+    if (!type) type = 'default';
+    
+    var toast = document.getElementById(elementId);
+    if (!toast) return;
+    
+    toast.textContent = message;
+    toast.className = 'toast-message';
+    if (type === 'success') toast.style.background = 'linear-gradient(135deg, #4caf50, #66bb6a)';
+    if (type === 'error') toast.style.background = 'linear-gradient(135deg, #f44336, #e53935)';
+    
+    toast.style.display = 'block';
+    
+    setTimeout(function() {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    lastNotifCount = getInitCount();
+    checkNewNotifications();
+});
+
+setInterval(checkNewNotifications, 30000);
+</script>
+
 {% block content %}{% endblock %}
 </body>
 </html>

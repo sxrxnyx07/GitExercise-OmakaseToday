@@ -3,93 +3,183 @@
 {% block content %}
 
 <div class="saved-page">
-
     <!-- HEADER -->
-    <div class="saved-header">
-        <h2>Saved Recipes</h2>
-        <p>Your personal collection 🍽️</p>
-    </div>
-    <div class="saved-search">
-        <input 
-            type="text" 
-            id="savedSearch"
-            placeholder="Search saved recipes..."
-        >
+    <div class="saved-hero">
+        <h1>MY SAVED RECIPES</h1>
     </div>
 
-{% if saved_recipes and saved_recipes|length > 0 %}
+    <!-- SEARCH + FILTER -->
 
-<div class="saved-grid">
+    <div class="saved-toolbar">
 
-    {% for recipe in saved_recipes %}
+        <div class="saved-search">
 
-    <div class="saved-card"
-         onclick="window.location.href='/recipe/{{ recipe.id }}'">
-
-        <!-- IMAGE -->
-        <div class="image-container">
-
-            <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
-                 alt="{{ recipe.name }}">
+            <input
+                type="text"
+                id="savedSearch"
+                placeholder="Find a saved recipe..."
+            >
 
         </div>
+        <div class="saved-count">
+            {{ saved_recipes|length }} Recipes Saved
+        </div>
+    </div>
+    <div class="saved-filters">
 
-        <!-- CONTENT -->
-        <div class="card-meta">
+            <button class="filter-btn active">
+                All Category
+            </button>
 
-            <div class="meal-category">
-                {{ recipe.meal_category }}
+            <button class="filter-btn">
+                Breakfast
+            </button>
+
+            <button class="filter-btn">
+                Lunch
+            </button>
+
+            <button class="filter-btn">
+                Dinner
+            </button>
+
+            <button class="filter-btn">
+                Dessert
+            </button>
+    </div>
+
+    {% if saved_recipes and saved_recipes|length > 0 %}
+
+    <div class="saved-grid">
+
+        {% for recipe in saved_recipes %}
+
+        <div
+            class="saved-card"
+            data-category="{{ recipe.meal_category }}"
+            onclick="window.location.href='/recipe/{{ recipe.id }}'"
+        >
+
+            <!-- IMAGE -->
+
+            <div class="image-container">
+
+                <img
+                    src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
+                    alt="{{ recipe.name }}"
+                >
+
             </div>
 
-            <span class="recipe-title">
-                {{ recipe.name }}
-            </span>
+            <!-- CONTENT -->
 
-            <!-- ⭐ RATING -->
-            <div class="rating-stars">
+            <div class="card-meta">
 
-                {% set current_rating = recipe.rating|default(0)|int %}
+                <div class="meal-category">
 
-                {% for i in range(5) %}
-                    <span class="{% if i < current_rating %}star-filled{% else %}star-empty{% endif %}">
-                        ★
-                    </span>
-                {% endfor %}
+                    {{ recipe.meal_category }}
 
-                <span class="rating-count">
-                    {{ recipe.rating|default('0.0') }}
+                </div>
+
+                <span class="recipe-title">
+
+                    {{ recipe.name }}
+
                 </span>
 
+                <!-- RATING -->
+
+                <div class="rating-stars">
+
+                    {% set current_rating = recipe.rating|default(0)|int %}
+
+                    {% for i in range(5) %}
+
+                        <span class="{% if i < current_rating %}star-filled{% else %}star-empty{% endif %}">
+                            ★
+                        </span>
+
+                    {% endfor %}
+
+                    <span class="rating-count">
+
+                        {{ recipe.rating|default('0.0') }}
+
+                    </span>
+
+                </div>
+
+                <!-- REMOVE -->
+
+                <a
+                    href="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}"
+                    class="unsave-btn"
+                    onclick="event.stopPropagation()"
+                >
+                    🗑 Remove
+                </a>
+
             </div>
 
-            <!-- ❌ REMOVE BUTTON -->
-            <a href="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}"
-               class="unsave-btn"
-               onclick="event.stopPropagation()">
-                Remove
-            </a>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- NO FILTER RESULT -->
+
+    <div
+        id="noCategoryResult"
+        class="empty-wrapper"
+        style="display:none;"
+    >
+
+        <div class="empty-state-card">
+
+            <div class="empty-icon">
+                ❤️
+            </div>
+
+            <h2 id="emptyCategoryTitle">
+                No Recipes Found
+            </h2>
+
+            <p id="emptyCategoryText">
+                Try another category or search keyword.
+            </p>
+
+            <button
+                class="explore-btn"
+                onclick="resetCategoryFilter()"
+            >
+                View All Recipes
+            </button>
 
         </div>
 
     </div>
 
-    {% endfor %}
+    {% else %}
 
-</div>
-
-{% else %}
-
-    <!-- EMPTY STATE -->
     <div class="empty-wrapper">
 
         <div class="empty-state-card">
 
-            <div class="empty-icon">🍽️</div>
+            <div class="empty-icon">
+                ❤️
+            </div>
 
             <h2>No Saved Recipes Yet</h2>
-            <p>Start saving recipes you love and build your collection.</p>
 
-            <a href="/" class="explore-btn">
+            <p>
+                Start saving recipes you love and build your collection.
+            </p>
+
+            <a
+                href="{{ url_for('all_recipes') }}"
+                class="explore-btn"
+            >
                 Explore Recipes
             </a>
 
