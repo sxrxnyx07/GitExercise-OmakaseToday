@@ -1560,7 +1560,7 @@ LAST PAGE BUTTON
             padding: 10px;
         }
 
-    .ingredient-section .tag {
+    .ingredient-section .tags {
         display: inline-block;
         background-color: #ffffff !important;
         color: #000000 !important;
@@ -1580,20 +1580,22 @@ LAST PAGE BUTTON
         transition: box-shadow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
     }
 
-    .ingredient-section .tag:hover {
-        background-color: #ffffff !important; 
+    .ingredient-section .tags:hover {
+        background-color: #ffffff !important;
+        transform: translateY(-4px) !important;
+        transition: all 0.2s ease !important; 
         
   
         box-shadow: 6px 6px 0px #f4c430 !important; 
     }
 
-    .ingredient-section .tag:active {
+    .ingredient-section .tags:active {
         box-shadow: 1px 1px 0px #f4c430 !important;
-        transform: translate(1px, 1px);
+        transform: translateY(2px) !important;
         transition: all 0.10s ease !important;
     }
 
-    .ingredient-section .tag.blocked {
+    .ingredient-section .tags.blocked {
         background-color: #f0f0f0 !important;
         color: #bbbbbb !important;
         border-color: #dddddd !important;
