@@ -144,7 +144,7 @@
                                         {{ ing.strip()|title }}{% if not loop.last %} + {% endif %}
                                     {% endfor %}
                                     {% if rec_ings|length > 5 %}
-                                        <span style="color: #555; font-weight: 600; font-size: 0.95rem;"> ...(+{{ rec_ings|length - 5 }} more)</span>
+                                        <span style="color: red; font-weight: 600; font-size: 0.95rem;"> ...(+{{ rec_ings|length - 5 }} more)</span>
                                     {% endif %}
                                 </span>
                             </div>
