@@ -5,22 +5,36 @@
 {% block content %}
 
 <div class="admin-recipes-wrapper">
-    <h1 class="admin-title">Manage Recipes</h1>
+    <div class="page-hero">
 
-    <div class="admin-controls">
-        <input type="text" id="recipeSearch" class="search-input" 
-            placeholder="Search recipe name...">
+        <span class="hero-tag">
+            ADMIN PANEL
+        </span>
 
-        <button onclick="filterRecipes()" class="search-btn">
-            Search
-        </button>
+        <h1 class="page-title">
+            🍽 RECIPE MANAGEMENT
+        </h1>
 
-        <button type="button" onclick="openAddModal()" class="add-recipe-btn">
-            + Add New Recipe
-        </button>
+        <p class="page-subtitle">
+            Create, edit and organize recipes
+        </p>
 
     </div>
+    <div class="glass-toolbar">
+        <div class="admin-controls">
+            <input type="text" id="recipeSearch" class="search-input" 
+                placeholder="Search recipe name...">
 
+            <button onclick="filterRecipes()" class="search-btn">
+                Search
+            </button>
+
+            <button type="button" onclick="openAddModal()" class="add-recipe-btn">
+                + Add New Recipe
+            </button>
+
+        </div>
+    </div>
     <table class="recipes-table">
         <thead>
             <tr>

@@ -2,7 +2,19 @@
 {% block title %}Profile{% endblock %}
 {% block content %}
 <div class="profile-header">
-    <h1>MY PROFILE</h1>
+    <div class="profile-title-wrapper">
+        <span class="sparkle">✦</span>
+        <h1 class="profile-title">
+            MY PROFILE
+        </h1>
+        <span class="sparkle">✦</span>
+    </div>
+    <div class="profile-divider">
+        <span>✧</span>
+    </div>
+    <p class="profile-subtitle">
+        Manage your account and preferences
+    </p>
 </div>
 <div class="profile-container">
 
@@ -42,7 +54,6 @@
     <div class="profile-right">
 
         <div class="info-card">
-
             <form method="POST">
                 <div class="input-box">
                     <label>Username</label>
@@ -104,7 +115,7 @@
         </div>
         {% if role == 'admin' %}
             <a href="/admin" class="admin-access-btn">
-            Admin Page
+                Admin Page
             </a>
         {% endif %}
     </div>

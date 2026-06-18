@@ -1,24 +1,44 @@
 /* =========================
    GLOBAL
 ========================= */
-*{
-  margin: 0;
-  padding: 0;
-  font-family: 'DM Serif Display', serif;
-}
 
 html{
   text-align: center;
 }
-
-body{
-  height: 100%;
-  background-image: url(../css/picture/background.png);
-  background-size: cover;
+*{
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-
+body{
+  font-family: 'Poppins', sans-serif;
+  background-image: url(../css/picture/background.png);
+  overflow-x:hidden;
+}
+.profile-title,
+.saved-title,
+.category-main-title,
+.hero-title,
+.randompage-container h1,
+.admin-hero h1,
+.admin-title,
+.feature-text h2,
+.scene-title,
+.about-text h2,
+.page-title,
+.auth-wrapper h1,
+.page-header h1,
+.ingredient-header,
+.category-title{
+    font-family: "Playfair Display", serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+button{
+    font-family: 'Poppins', sans-serif;
+}
 /* =========================
    NAVBAR
 ========================= */
@@ -48,7 +68,7 @@ nav a{
     color: black;
     font-weight: 600;
     text-transform: uppercase;
-    transition: all 0.3s wease;
+    transition: all 0.3s ease;
     letter-spacing: 1px;
 }
 nav a:hover{ 
@@ -138,6 +158,19 @@ nav li:first-child a{
 .notif-dropdown::-webkit-scrollbar-track{
     background: transparent;
     margin: 15px 0;
+}
+.notif-link-btn{
+    display:block;
+    text-decoration:none;
+    color:#222;
+    background:white;
+    padding:12px;
+    border-radius:12px;
+    margin-bottom:8px;
+}
+
+.notif-link-btn:hover{
+    background:#fff9ef;
 }
 /* HEADER */
 .notif-header{
@@ -555,40 +588,83 @@ LAST PAGE BUTTON
 /* =========================
    PROFILE PAGE
 ========================= */
-.profile-hero{
+.profile-header{
     text-align:center;
-    margin-bottom:60px;
+
+    margin:10px 0 20px;
+}
+.profile-header h1{
+    letter-spacing: 1px;
+}
+.profile-title-wrapper{
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:30px;
+}
+
+.sparkle{
+    font-size:2rem;
+    color:#f4c430;
+    display: inline-block;
+    animation: sparkle 2s ease-in-out infinite, float 2s ease-in-out infinite;
+}
+@keyframes sparkle{
+    0%, 100%{
+        opacity: 0.6;
+        filter: drop-shadow(0 0 6px #f4c430);
+    }
+    50%{
+        opacity:1;
+        filter:drop-shadow(0 0 16px #f4c430) drop-shadow(0 0 24px #f4c430);
+    }
+}
+@keyframes float{
+    0%,100%{transform: translateY(0);}
+    50%{transform: translateY(-6px);}
+}
+.profile-divider{
+    width:400px;
+
+    height:2px;
+
+    background:#f4c430;
+
+    margin:15px auto;
+
     position:relative;
 }
-
-.profile-hero::before{
-    content:"";
+.profile-divider span{
     position:absolute;
-    width:320px;
-    height:320px;
-    background:
-    radial-gradient(
-        rgba(255,190,70,.25),
-        transparent 70%
-    );
-    left:50%;
-    top:-120px;
-    transform:translateX(-50%);
-    z-index:-1;
-}
 
-.profile-hero h1{
-    display: block;
-    font-size:72px;
-    font-weight:900;
-    color:#081c3a;
-    margin-bottom:15px;
+    left:50%;
+
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+    background:#fdf9ec;
+
+    padding:0 10px;
+
+    color:#f4c430;
+
+    font-size:1rem;
+}
+.profile-subtitle{
+    margin-top:20px;
+    font-size:1.1rem;
+    color:#666;
+    font-weight:400;
 }
 .profile-container{
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 40px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    gap:40px;
     max-width: 1400px;
     margin: 20px auto 20px auto;
     padding: 0 30px;
@@ -601,11 +677,12 @@ LAST PAGE BUTTON
 /* CARD around image */ 
 .profile-card{
     width: 100%;
-    min-height: 320px;
+    min-height: 430px;
     padding: 35px;
-    background: rgba(255,255,255,0.28);
+    background: white;
     backdrop-filter: blur(18px);
-    border-radius: 30px;
+    border-radius: 35px;
+    box-shadow: 0 15px 40px rgba(0,0,0,.08);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -629,6 +706,7 @@ LAST PAGE BUTTON
     height:220px;
     object-fit:cover;
     border-radius:50%;
+    border:5px solid #f4c542;
 }
 
 .chef-badge{
@@ -713,7 +791,6 @@ LAST PAGE BUTTON
     font-size: 2.5rem;
     letter-spacing: 2px;
     color: #d94f4f;
-    font-family: 'Fredoka', sans-serif;
     text-shadow: 0 0 10px rgba(217,79,79,0.4),
                  0 0 20px rgba(217,79,79,0.3);
 }
@@ -731,6 +808,7 @@ LAST PAGE BUTTON
     transition: 0.28s ease;
     box-shadow:
         0 8px 20px rgba(0,0,0,0.10);
+    margin-top:20px;
 }
 
 .profile-action-btn:hover{
@@ -740,35 +818,29 @@ LAST PAGE BUTTON
 }
 
 .secondary-buttons{
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-    margin-left: 575px;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    margin-left:auto;
 }
 
 .admin-access-btn{
-    width: 80px;
-    height: 100%;
-    min-height: 360px;
-    background: linear-gradient(
+    width:130px;
+    min-height:430px;
+    border-radius:35px;
+    background:linear-gradient(
         180deg,
-        #f4c542,
+        #f7d04f,
         #efb810
     );
-    color: #111;
-    text-decoration: none;
-    border-radius: 28px;
-    font-weight: 800;
-    font-size: 1.2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
-    line-height: 1.4;
-    box-shadow:
-        0 10px 25px rgba(0,0,0,0.08);
-    transition: 0.3s ease;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:20px;
+    font-size:1.4rem;
+    color: #000;
 }
 .admin-access-btn:hover{
     transform: translateY(-4px);
@@ -798,7 +870,7 @@ LAST PAGE BUTTON
 }
 
 .input-box label{
-    width: 70px;
+    width: 150px;
     font-size: 0.8rem;
     font-weight: 700;
     color: #333;
@@ -858,13 +930,13 @@ LAST PAGE BUTTON
 .rituals-grid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: left;
+    justify-content: center;
     gap: 25px;
 }
 
 /* ===== CARD ===== */
 .ritual-card {
-    width: 260px;
+    width: 300px;
     background: #ffffff;
     border: 2px solid #000;
     border-radius: 16px;
@@ -1293,7 +1365,6 @@ LAST PAGE BUTTON
             background: white;
             padding: 15px;
             font-size: 22px;
-            font-family: 'Montserrat', sans-serif;
             font-weight: bold;
             border-bottom: 2px solid #111;
         }
@@ -1472,7 +1543,6 @@ LAST PAGE BUTTON
         }
 
         h2 { 
-            font-family: 'Montserrat', sans-serif; 
             margin-top: 50px; font-size: 2rem; 
             color: #111; 
             border-bottom: 4px solid #f4c542; 
@@ -1516,7 +1586,6 @@ LAST PAGE BUTTON
         }
 
         h1 {
-            font-family: 'Fredoka', sans-serif;
             font-weight: 700;
             font-size: 3rem;
             margin-bottom: 15px;
@@ -1540,7 +1609,6 @@ LAST PAGE BUTTON
         }
 
         .kitchen-label {
-            font-family: 'Montserrat', sans-serif;
             font-size: 0.85rem;
             letter-spacing: 3px;
             text-transform: uppercase;
@@ -1567,7 +1635,6 @@ LAST PAGE BUTTON
         border: 2px solid #000000 !important;
         border-radius: 12px !important; 
         padding: 10px 20px !important;
-        font-family: 'Montserrat', sans-serif;
         font-weight: 700;
         text-align: center;
 
@@ -1736,7 +1803,6 @@ LAST PAGE BUTTON
 
 
         .meal-category {
-    font-family: 'Montserrat', sans-serif !important;
     font-size: 0.9rem !important; /* Slightly bigger */
     font-weight: 800 !important; /* Extra bold */
     color: #d32f2f !important; /* That deep red color */
@@ -1748,7 +1814,6 @@ LAST PAGE BUTTON
 
         .recipe-title {
             display: block;
-            font-family: 'Montserrat', sans-serif;
             font-size: 1.5rem;
             font-weight: 700;
             color: #111;
@@ -1879,7 +1944,6 @@ LAST PAGE BUTTON
     padding: 12px 20px;
     cursor: pointer;
     text-align: left;
-    font-family: 'Montserrat', sans-serif;
     border-bottom: 2px solid #C1C7C7; 
     background: white;
 }
@@ -1891,7 +1955,6 @@ LAST PAGE BUTTON
 /* 1. MAKE THE "BROWSE..." SUBTEXT BIGGER & CLEANER */
 .header-subtext, 
 .header-subtext strong {
-    font-family: 'Montserrat', sans-serif !important;
     font-size: 1.1rem !important; /* Made it a bit bigger */
     font-weight: 500 !important; /* Medium weight for readability */
     color: #333 !important;
@@ -1901,7 +1964,6 @@ LAST PAGE BUTTON
 
 /* 2. MAKE THE FILTER PILLS ("ALL", "SPICY", ETC.) MATCH */
 .filter-pill {
-    font-family: 'Montserrat', sans-serif !important;
     font-size: 0.9rem !important; /* Increased size */
     font-weight: 700 !important; /* Kept bold for the "button" look */
     text-transform: uppercase !important;
@@ -1920,14 +1982,12 @@ LAST PAGE BUTTON
 
 /* 3. QUICK FIX FOR THE SEARCH BOX TYPE STYLE (AS DISCUSSED) */
 input#recipeSearch.search-box-bold {
-    font-family: 'Montserrat', sans-serif !important;
     font-weight: 400 !important;
     font-size: 0.95rem !important;
 }
     /* 1. FORCE THE SEARCH INPUT TEXT TO BE THIN/NORMAL */
     input#recipeSearch.search-box-bold,
     .search-box-bold {
-        font-family: 'Montserrat', sans-serif !important;
         font-weight: 400 !important; /* Forces NO BOLD */
         font-size: 0.95rem !important; /* Smaller size from image_841c12.jpg */
         color: #111 !important;
@@ -1937,7 +1997,6 @@ input#recipeSearch.search-box-bold {
     /* 2. FORCE THE DROPDOWN ITEMS TO BE THIN/NORMAL */
     .suggestion-item,
     .suggestion-item * {
-        font-family: 'Montserrat', sans-serif !important;
         font-weight: 400 !important; /* Forces everything in dropdown to be thin */
         font-size: 0.95rem !important;
     }
@@ -1952,9 +2011,9 @@ input#recipeSearch.search-box-bold {
     }
 
     /* 4. FIX THE PLACEHOLDER */
-    .search-box-bold::-webkit-input-placeholder { font-weight: 400 !important; font-family: 'Montserrat' !important; }
-    .search-box-bold::-moz-placeholder { font-weight: 400 !important; font-family: 'Montserrat' !important; }
-    .search-box-bold:-ms-input-placeholder { font-weight: 400 !important; font-family: 'Montserrat' !important; }
+    .search-box-bold::-webkit-input-placeholder { font-weight: 400 !important; }
+    .search-box-bold::-moz-placeholder { font-weight: 400 !important; }
+    .search-box-bold:-ms-input-placeholder { font-weight: 400 !important; }
 
 
     .all-recipes-grid {
@@ -2106,7 +2165,6 @@ input#recipeSearch.search-box-bold {
 
 
 .main-tag-title {
-    font-family: 'Montserrat', sans-serif;
     font-size: 3rem;
     font-weight: 800;
     color: #1a1a1a;
@@ -2176,16 +2234,10 @@ body { background-color: #fdfae5; }
 }
 
 .category-main-title {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 800;
-    font-size: 2.8rem;
-    color: black;
     margin-bottom: 10px;
-    text-transform: uppercase;
 }
 
 .category-subtitle {
-    font-family: 'Montserrat', sans-serif;
     font-size: 1.1rem;
     color: black;
     margin-bottom: 40px;
@@ -2216,7 +2268,6 @@ body { background-color: #fdfae5; }
 .suggestion-item {
     padding: 12px 15px;
     cursor: pointer;
-    font-family: 'Montserrat', sans-serif;
     font-weight: 700;
     border-bottom: 1px solid #eee;
 }
@@ -2273,7 +2324,6 @@ body { background-color: #fdfae5; }
     font-size: 1.2rem;
     color: #1a3a5f;
     margin-top: 15px;
-    font-family: 'Montserrat', sans-serif;
     text-transform: uppercase;
 }
 
@@ -2473,8 +2523,7 @@ h1 {
     
     border-radius: 40px!important; 
     border: 3px solid black!important;
-    
-    font-family: 'Montserrat', sans-serif !important;
+
     font-weight: 400 !important; 
     font-size: 0.9rem !important;
     background: #f5f5f5 !important;
@@ -2576,7 +2625,6 @@ h1 {
     padding: 15px 20px;
     cursor: pointer;
     text-align: left;
-    font-family: 'Montserrat', sans-serif;
     border-bottom: 2px solid #C1C7C7 !important; 
     background: white;
 }
@@ -2703,7 +2751,6 @@ h1 {
 
 .header-description {
     text-align: center;
-    font-family: 'Montserrat', sans-serif;
     color: #555;
     font-size: 1.1rem;
     margin-top: -10px; 
@@ -3139,8 +3186,10 @@ h1 {
     background: red;
     color: white;
     border-radius: 6px;
+    border-color: transparent;
     text-decoration: none;
     font-size: 0.85rem;
+    margin-top: 10px;
 }
 
 .delete-btn:hover{
@@ -3494,25 +3543,48 @@ h1 {
     margin-bottom:40px;
     position:relative;
 }
-.saved-hero::before{
+.saved-title{
+    display:inline-block;
+    position:relative;
+    z-index:2;
+}
+.saved-subtitle{
+    margin-top:15px;
+
+    font-size:1.1rem;
+
+    color:#555;
+}
+.saved-title::before{
     content:"";
     position:absolute;
-    width:350px;
-    height:350px;
-    background:
-        radial-gradient(
-            rgba(255,150,50,.25),
-            transparent 70%
-        );
-    top:-120px;
-    left:50%;
-    transform:translateX(-50%);
+    left:-20px;
+    right:-20px;
+    bottom:15px;
+    height:35px;
+
+    background:#f7cf5d;
+
     z-index:-1;
+
+    border-radius:20px;
+
+    transform:rotate(-1deg);
 }
-.saved-hero h1{
-    font-size:50px;
-    font-weight:900;
-    color:black;
+.heart{
+    color:#ff6b6b;
+    margin-left:10px;
+}
+.saved-count{
+    background:white;
+    padding:15px 30px;
+
+    border-radius:999px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+    color:#ff7a00;
+    font-weight:700;
 }
 .saved-toolbar{
     display:flex;
@@ -3622,7 +3694,7 @@ h1 {
 .saved-grid {
     display: flex;
     flex-wrap: wrap;
-    justify-content: left;
+    justify-content: center;
     gap: 25px;
     padding: 20px;
 }
@@ -4421,18 +4493,53 @@ input:focus, textarea:focus, select:focus {
         font-size: 2.5rem;
     }
 }
-.admin-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin:40px;
+.admin-main-title,
+.page-title{
+    font-size:4rem;
+
+    font-weight:700;
+
+    text-align:center;
+
+    margin:0 0 10px 0;
+
+    line-height:1.1;
 }
 
-.admin-header h1{
-    font-size:3rem;
-    margin:0;
+.admin-subtitle,
+.page-subtitle{
+
+    text-align:center;
+
+    color:#666;
+
+    font-size:1.1rem;
+}
+.admin-badge,
+.hero-tag{
+
+    display:inline-block;
+
+    background:#fff4cc;
+
+    padding:8px 18px;
+
+    border-radius:999px;
+
+    font-weight:700;
+
+    color:#d48b00;
+
+    margin-bottom:15px;
 }
 
+.admin-hero,
+.page-hero{
+
+    text-align:center;
+
+    margin-bottom:40px;
+}
 .admin-btn-group{
     display:flex;
     flex-direction:column;
@@ -4445,6 +4552,8 @@ input:focus, textarea:focus, select:focus {
     border-radius:30px;
     text-decoration:none;
     font-weight:700;
+    width: 250px;
+    margin-left: 70px;
 }
 
 .admin-stats{

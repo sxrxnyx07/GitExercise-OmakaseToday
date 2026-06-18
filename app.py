@@ -5,7 +5,7 @@ import json
 import random
 import secrets
 
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -24,8 +24,8 @@ app.secret_key = "secretkey123"   #Used for encryption: session (login state) to
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'                #Gmail servers
 app.config['MAIL_PORT'] = 587                               #Standard email port
 app.config['MAIL_USE_TLS'] = True                           #Enable encrypted transmission
-app.config['MAIL_USERNAME'] = 'xinfeic195@gmail.com'        #admin(my) gmail acc
-app.config['MAIL_PASSWORD'] = 'jloc xdjj rcfe hufe'         #add password
+app.config['MAIL_USERNAME'] = 'omakasetoday@gmail.com'        #admin(my) gmail acc
+app.config['MAIL_PASSWORD'] = 'agej rxqz yace whvt'         #add password
 
 mail = Mail(app)                                            #Initialize the email system
 
@@ -412,6 +412,16 @@ def profile():
         WHERE email = ?
     """, (email,))
     user = c.fetchone()
+
+    if user is None:
+
+        session.clear()
+
+        flash("Your account no longer exists.")
+
+        conn.close()
+
+        return redirect(url_for("login"))
 
     # saved recipes
     c.execute("""
@@ -865,8 +875,29 @@ def delete_user(email):
         mail.send(msg)
     except Exception as e:
         print("Email failed:", e)
+    # delete saved recipes
+    c.execute("""
+    DELETE FROM saved_recipes
+    WHERE user_email=?
+    """,(email,))
+
+    # delete notifications
+    c.execute("""
+    DELETE FROM notifications
+    WHERE user_email=?
+    """,(email,))
+
+    # delete search history
+    c.execute("""
+    DELETE FROM search_history
+    WHERE user_email=?
+    """,(email,))
+
     # delete user
-    c.execute("DELETE FROM users WHERE email = ?", (email,))
+    c.execute("""
+    DELETE FROM users
+    WHERE email=?
+    """,(email,))
     conn.commit()
     conn.close()
 
@@ -1167,7 +1198,29 @@ def delete_my_account():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    c.execute("SELECT password FROM users WHERE email=?", (email,))
+    # delete saved recipes
+    c.execute("""
+    DELETE FROM saved_recipes
+    WHERE user_email=?
+    """,(email,))
+
+    # delete notifications
+    c.execute("""
+    DELETE FROM notifications
+    WHERE user_email=?
+    """,(email,))
+
+    # delete search history
+    c.execute("""
+    DELETE FROM search_history
+    WHERE user_email=?
+    """,(email,))
+
+    # delete user
+    c.execute("""
+    DELETE FROM users
+    WHERE email=?
+    """,(email,))
     user = c.fetchone()
 
     if user and check_password_hash(user[0], password):

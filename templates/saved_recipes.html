@@ -5,7 +5,16 @@
 <div class="saved-page">
     <!-- HEADER -->
     <div class="saved-hero">
-        <h1>MY SAVED RECIPES</h1>
+        <div class="title-decoration">
+            ✨
+        </div>
+        <h1 class="saved-title">
+            My Saved Recipes
+            <span class="heart">♡</span>
+        </h1>
+        <p class="saved-subtitle">
+            Recipes you love, all in one place ❤️
+        </p>
     </div>
 
     <!-- SEARCH + FILTER -->
@@ -22,7 +31,7 @@
 
         </div>
         <div class="saved-count">
-            {{ saved_recipes|length }} Recipes Saved
+            ❤️ {{ saved_recipes|length }} Recipes Saved
         </div>
     </div>
     <div class="saved-filters">
@@ -153,7 +162,7 @@
                 class="explore-btn"
                 onclick="resetCategoryFilter()"
             >
-                View All Recipes
+                View All Saved Recipes
             </button>
 
         </div>
