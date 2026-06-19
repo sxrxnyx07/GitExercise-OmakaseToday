@@ -2137,27 +2137,6 @@ def send_reply_notification(parent_comment_id, new_reply_id, replier_email, repl
         except Exception as e:
             print("Email failed:", e)
 
-@app.route("/comment/delete-all-fake", methods=["POST", "GET"])
-def delete_fake_comments():
-    fake_emails = [
-        'sosidney307@gmail.com', 'sidney.so1@icloud.com', 'sosidney630@gmail.com'
-    ]
-    
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    
-    for email in fake_emails:
-        c.execute("DELETE FROM comments WHERE user_email = ?", (email,))
-    
-    conn.commit()
-    deleted = c.rowcount
-    conn.close()
-    
-    if request.method == "GET":
-        return f"✅ Deleted {deleted} fake comments!"
-    
-    return jsonify({"success": True, "deleted": deleted})
-
 @app.route("/fill-old-notifications")
 def fill_old_notifs():
     fill_recipe_id_for_old_notifications()
@@ -2188,7 +2167,6 @@ def debug_notifs():
     
     conn.close()
     return html
-
 
 if __name__ == "__main__":
     app.run(debug=True)

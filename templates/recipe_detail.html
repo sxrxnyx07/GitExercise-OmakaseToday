@@ -330,14 +330,37 @@ function loadComments() {
 loadComments().then(() => {
     const hash = window.location.hash;
     if (hash && hash.startsWith('#comment-')) {
-        setTimeout(() => {
-            const target = document.querySelector(hash);
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                target.classList.add('highlight-comment');
-                setTimeout(() => { target.classList.remove('highlight-comment'); }, 4000);
-            }
-        }, 500);
+        const commentId = parseInt(hash.replace('#comment-', ''));
+        if (!isNaN(commentId)) {
+            // 等待评论渲染完成
+            setTimeout(() => {
+                const target = document.querySelector(`#comment-${commentId}`);
+                if (target) {
+                    // ✅ 评论存在：滚动到评论并高亮
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    target.classList.add('highlight-comment');
+                    setTimeout(() => { 
+                        target.classList.remove('highlight-comment'); 
+                    }, 4000);
+                } else {
+                    // ❌ 评论已被删除：先滚动到评论区域，再显示提示
+                    const commentSection = document.querySelector('.comment-display-card');
+                    if (commentSection) {
+                        commentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    
+                    // 延迟一点点显示 Toast，让滚动先发生
+                    setTimeout(() => {
+                        showToast('wakeModeMessage', '❌ This comment has been deleted', 'error');
+                    }, 300);
+                    
+                    // 3秒后移除 URL 中的 hash
+                    setTimeout(() => {
+                        window.location.hash = '';
+                    }, 3000);
+                }
+            }, 1000);
+        }
     }
 });
 
