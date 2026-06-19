@@ -669,9 +669,10 @@ function loadNotifications(){
 
         data.notifications.forEach(n => {
             dropdown.innerHTML += `
-                <div class="notif-item ${n[1] == 0 ? "unread" : ""}">
+                <a href="/recipe/${n[2]}#comment-${n[3]}"
+                    class="notif-item ${n[1] == 0 ? "unread" : ""}">
                     <span>${n[0]}</span>
-                </div>
+                </a>
             `
         })
     })
