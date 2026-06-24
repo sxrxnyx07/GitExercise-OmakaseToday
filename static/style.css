@@ -217,7 +217,7 @@ button:disabled {
 
 .ball.drop {
     opacity: 1;
-    transform: translate(-50%, 30px);
+    transform: translate(-50%, 40px);
     transition: all 0.5s ease;
 }
 
@@ -1907,8 +1907,6 @@ button:disabled {
     }
 
 }
-
-/* ===== NESTED REPLIES ===== */
 
 /* ===== COMMENT AVATAR IMAGE ===== */
 .comment-avatar-img {
