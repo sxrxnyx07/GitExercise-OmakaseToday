@@ -217,7 +217,7 @@ button:disabled {
 
 .ball.drop {
     opacity: 1;
-    transform: translate(-50%, 40px);
+    transform: translate(-50%, 5.5vh);  /* 手机和电脑都适配 */
     transition: all 0.5s ease;
 }
 
@@ -349,48 +349,6 @@ button:disabled {
     transform: scale(0.98);
 }
 
-/* ⭐ HOME按鈕 - 金色調超有質感 */
-.home-btn {
-    padding: 12px 24px;
-    border-radius: 12px;
-    background: linear-gradient(45deg, #f093fb, #f5576c);
-    color: white;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-        0 6px 20px rgba(240, 147, 251, 0.4),
-        0 0 0 1px rgba(255,255,255,0.3) inset;
-    position: relative;
-    overflow: hidden;
-}
-
-.home-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s;
-}
-
-.home-btn:hover::before {
-    left: 100%;
-}
-
-.home-btn:hover {
-    transform: scale(1.08) translateY(-3px);
-    box-shadow: 
-        0 12px 35px rgba(240, 147, 251, 0.6),
-        0 0 0 1px rgba(255,255,255,0.5) inset;
-}
-
-.home-btn:active {
-    transform: scale(1.02);
-}
 
 .recipe-nav {
     margin-top: 40px;
@@ -1141,9 +1099,10 @@ button:disabled {
 }
 
 /* =========================
-   RANDOM PAGE LAYOUT
+   RANDOM PAGE LAYOUT (电脑版 + 手机版)
 ========================= */
 
+/* ========== 电脑版（默认） ========== */
 .subtitle1 {
     font-size: 20px;
     font-weight: bold;
@@ -1187,13 +1146,10 @@ button:disabled {
 
 .right {
     flex: 1;
-
     display: flex;
-    flex-direction: column;   /* ⭐ 关键：变成上下排列 */
-
-    align-items: center;      /* 横向居中 */
-    justify-content: flex-start; /* ⭐ 关键：全部往上对齐 */
-
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
     margin-top: 80px;
     margin-left: -120px;
 }
@@ -1207,13 +1163,11 @@ button:disabled {
 
 .category-buttons {
     display: grid;
-    grid-template-columns: repeat(3, 260px); /* 3 columns */
-    grid-template-rows: auto auto;           /* 2 rows */
-
+    grid-template-columns: repeat(3, 260px);
+    grid-template-rows: auto auto;
     justify-content: center;
-    gap: 35px 60px;  /* row gap, column gap */
-
-    margin: 110px auto 0 auto;  /* push down a bit + center */
+    gap: 35px 60px;
+    margin: 110px auto 0 auto;
     width: fit-content;
 }
 
@@ -1221,33 +1175,23 @@ button:disabled {
     display: flex;
     align-items: center;
     justify-content: center;
-
     width: 200px;
     padding: 16px 20px;
-
     background: linear-gradient(135deg, #fff8e7, #ffe8cc);
-
     border: 3px solid #222;
     border-radius: 18px;
-
     text-decoration: none;
     color: #333;
-
     font-size: 20px;
     font-weight: 700;
-
     box-shadow: 6px 6px 0px #ffb703;
-
     transition: all 0.25s ease;
 }
 
 .category-buttons a:hover {
     transform: translateY(-6px) scale(1.03);
-
     background: linear-gradient(135deg, #fff2cc, #ffd699);
-
     box-shadow: 10px 10px 0px #ffb703;
-
     transition: all 0.25s ease;
 }
 
@@ -1257,6 +1201,104 @@ button:disabled {
 
 .category-buttons a:nth-child(5) {
     grid-column: 2 / 3;
+}
+
+/* ========== 手机版（屏幕 ≤ 768px） ========== */
+@media (max-width: 768px) {
+    .subtitle1 {
+        font-size: 16px;
+    }
+
+    .subtitle2 {
+        font-size: 22px;
+        margin-bottom: -20px;
+    }
+
+    .randompage-container {
+        margin-top: 40px;
+    }
+
+    .layout {
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .left {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+
+    .right {
+        flex: 0 0 auto;
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .gacha-img1 {
+        width: 280px;
+        height: 280px;
+        margin-top: 0;
+    }
+
+    .category-buttons {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 30px;
+        width: 90%;
+        max-width: 450px;
+    }
+
+    .category-buttons a {
+        width: 100%;
+        padding: 14px 10px;
+        font-size: 16px;
+        box-shadow: 4px 4px 0px #ffb703;
+    }
+
+    .category-buttons a:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 6px 6px 0px #ffb703;
+    }
+
+    .category-buttons a:nth-child(4) {
+        grid-column: 1 / 2;
+    }
+
+    .category-buttons a:nth-child(5) {
+        grid-column: 2 / 3;
+    }
+}
+
+/* ========== 超小手机（屏幕 ≤ 480px） ========== */
+@media (max-width: 480px) {
+    .gacha-img1 {
+        width: 200px;
+        height: 200px;
+    }
+
+    .category-buttons {
+        gap: 10px;
+        max-width: 320px;
+    }
+
+    .category-buttons a {
+        font-size: 13px;
+        padding: 10px 6px;
+        box-shadow: 3px 3px 0px #ffb703;
+    }
+
+    .subtitle2 {
+        font-size: 18px;
+    }
+
+    .subtitle1 {
+        font-size: 14px;
+    }
+
+    .randompage-container h1 {
+        font-size: 24px;
+    }
 }
 
 /* ================================
