@@ -402,6 +402,28 @@ def profile():
 
     email = session["user"]
 
+    # ===== SAVE PROFILE =====
+    if request.method == "POST":
+
+        username = request.form.get("username", "").strip()
+        bio = request.form.get("bio", "").strip()
+
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+
+        c.execute("""
+            UPDATE users
+            SET username=?, bio=?
+            WHERE email=?
+        """, (username, bio, email))
+
+        conn.commit()
+        conn.close()
+
+        flash("Profile updated successfully.")
+
+        return redirect(url_for("profile"))
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
