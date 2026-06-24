@@ -554,6 +554,7 @@ def resetpassword():
                 WHERE email=?
             """, (token, email))
             conn.commit()
+            conn.close()
             #Generate a reset link
             reset_link = url_for("reset_with_token", token=token, _external=True)
 
@@ -581,7 +582,18 @@ def resetpassword():
 
             <p>— Omakase Team</p>
             """
-            mail.send(msg)
+            try:
+                mail.send(msg)
+                message = "If email exists, reset link sent."
+
+            except Exception as e:
+                print("Email Error:", e)
+                message = "Email service is currently unavailable."
+
+            return render_template(
+                "resetpassword.html",
+                error=message
+            )
 
         conn.close()
 
