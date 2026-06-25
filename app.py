@@ -505,6 +505,7 @@ def profile():
             unique_recipes.append(recipe)
             seen_ids.add(recipe.id)
 
+    has_search_history = len(top_keywords) > 0
     suggested_recipes = unique_recipes[:6]
     if not suggested_recipes:
         suggested_recipes = Recipe.query.limit(6).all()
@@ -517,7 +518,8 @@ def profile():
         saved_recipes=saved_recipes,
         suggested_recipes=suggested_recipes,
         saved_ids=saved_ids,
-        role=session.get("role")
+        role=session.get("role"),
+        has_search_history=has_search_history
     )
 
 # ---------------- UPLOAD PROFILE PIC ----------------
@@ -1232,63 +1234,59 @@ def delete_my_account():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # delete saved recipes
+    # Check password
     c.execute("""
-    DELETE FROM saved_recipes
-    WHERE user_email=?
-    """,(email,))
-
-    # delete notifications
-    c.execute("""
-    DELETE FROM notifications
-    WHERE user_email=?
-    """,(email,))
-
-    # delete search history
-    c.execute("""
-    DELETE FROM search_history
-    WHERE user_email=?
-    """,(email,))
-
-    # delete user
-    c.execute("""
-    DELETE FROM users
-    WHERE email=?
-    """,(email,))
+        SELECT password
+        FROM users
+        WHERE email=?
+    """, (email,))
     user = c.fetchone()
 
-    if user and check_password_hash(user[0], password):
+    if not user or not check_password_hash(user[0], password):
+        conn.close()
+        return "Wrong password", 403
 
-        # send email BEFORE delete
+    # SEND EMAIL
+    try:
         msg = Message(
-            subject="Your account has been deleted",
-            sender=app.config['MAIL_USERNAME'],   # 
+            subject="Account Deleted",
+            sender=app.config["MAIL_USERNAME"],
             recipients=[email]
         )
-        msg.body = f"""
-Hi,
 
-Your account has been successfully deleted.
+        msg.html = f"""
+        <h2>Account Deleted</h2>
 
-Reason: {reason if reason else "Not provided"}
+        <p>Hi {email},</p>
 
-If this was not you, please contact support.
-"""
-        try:
-            mail.send(msg)
-        except Exception as e:
-            print("Email failed:", e)
+        <p>Your account has been successfully deleted.</p>
 
-        # delete user
-        c.execute("DELETE FROM users WHERE email=?", (email,))
-        conn.commit()
-        conn.close()
+        <p><b>Reason:</b> {reason if reason else "Not provided"}</p>
 
-        session.clear()
-        return redirect("/")
+        <p>Thank you for using Omakase Today.</p>
 
+        <p>If this account was deleted without your permission, please contact our support team immediately.</p>
+
+        <p>— Omakase Today Team</p>
+        """
+
+        mail.send(msg)
+
+    except Exception as e:
+        print("Email failed:", e)
+
+    # Delete user data
+    c.execute("DELETE FROM saved_recipes WHERE user_email=?", (email,))
+    c.execute("DELETE FROM notifications WHERE user_email=?", (email,))
+    c.execute("DELETE FROM search_history WHERE user_email=?", (email,))
+    c.execute("DELETE FROM users WHERE email=?", (email,))
+
+    conn.commit()
     conn.close()
-    return "Wrong password", 403
+
+    session.clear()
+    return redirect("/")
+
 @app.route("/check-password", methods=["POST"])
 def check_password():
     if "user" not in session:

@@ -121,82 +121,19 @@
     </div>
 
 </div>
-<section class="saved-rituals">
-
-    <!-- Header -->
-    <div class="rituals-header">
-        <h2>Saved Rituals</h2>
-        <a href="{{ url_for('saved_recipes') }}" class="view-all">View all</a>
-    </div>
-
-    <div class="rituals-grid" id="savedGrid">
-
-        {% if saved_recipes and saved_recipes|length > 0 %}
-
-            {% for recipe in saved_recipes %}
-            <a href="/recipe/{{ recipe.id }}" class="ritual-link">
-                <div class="ritual-card" id="card-{{ recipe.id }}">
-
-                    <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
-
-                    <div class="card-meta">
-
-                        <div class="meal-category">
-                            {{ recipe.meal_category }}
-                        </div>
-
-                        <span class="recipe-title">
-                            {{ recipe.name }}
-                        </span>
-
-                        <div class="rating-stars">
-
-                            {% set current_rating = recipe.rating|default(0)|int %}
-
-                            {% for i in range(5) %}
-                                <span class="{% if i < current_rating %}star-filled{% else %}star-empty{% endif %}">
-                                    ★
-                                </span>
-                            {% endfor %}
-
-                            <span class="rating-count">
-                                {{ recipe.rating|default('0.0') }}
-                            </span>
-
-                        </div>
-                    </div>
-
-                </div>
-            </a>
-            {% endfor %}
-
-        {% else %}
-
-            <div class="empty-wrapper" id="emptyState">
-
-                <div class="empty-state-card">
-                    <div class="empty-icon">❤️</div>
-
-                    <h2>No Saved Rituals Yet</h2>
-
-                    <p>Start exploring delicious recipes and build your collection.</p>
-
-                    <a href="{{ url_for('all_recipes') }}" class="explore-btn">Explore Recipes</a>
-                </div>
-
-            </div>
-
-        {% endif %}
-
-    </div>
-
 
 <div class="suggested-section">
     <div class="suggested-header">
         <h3>Recommended for You</h3>
+        {% if has_search_history %}
         <span class="suggested-sub">
             Picked based on your preferences
         </span>
+        {% else %}
+        <span class="suggested-sub">
+            Popular recipes you may like
+        </span>
+        {% endif %}
     </div>
     <div class="suggested-recipes">
         {% for recipe in suggested_recipes %}
@@ -240,8 +177,8 @@
         </a>
         {% endfor %}
     </div>
-    </div>
-</section>
+</div>
+
 <!-- DELETE ACCOUNT MODAL -->
 <div id="deleteModal" class="modal hidden">
     <div class="modal-content delete-modal">
