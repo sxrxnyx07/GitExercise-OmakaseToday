@@ -17,13 +17,6 @@
 <body>
 
 <nav>
-    <ul class="sidebar">
-        <li onclick="hideSidebar()"><a href="#">X</a></li>
-        <li><a href="{{ url_for('all_recipes') }}">SEARCH ALL</a></li>
-        <li><a href="{{ url_for('ingredient_index') }}">BY INGREDIENTS</a></li>
-        <li><a href="{{ url_for('saved_recipes') }}">SAVED RECIPE</a></li>
-        <li><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
-    </ul>
 
     <ul>
         <li><a href="{{ url_for('home') }}">Omakase Today</a></li>
@@ -35,6 +28,7 @@
                 <a href="{{ url_for('ingredient_index') }}">By Ingredient</a>
                 <a href="{{ url_for('random_recipe') }}">Spin Recipe</a>
                 <a href="{{ url_for('category_index') }}">By Category</a>
+                <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
             </div>
         </li>
 
@@ -81,7 +75,6 @@
                 {% endif %}
             </div>
         </li>
-        <li class="menu-button" onclick=showSidebar()><a href="#">☰</a></li>
     </ul>
 </nav>
 
