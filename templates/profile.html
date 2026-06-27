@@ -148,7 +148,7 @@
                         onclick="event.preventDefault(); event.stopPropagation(); toggleSave(this)">
                         ❤
                     </button>
-                    <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}">
+                    <img src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
                         alt="{{ recipe.name }}">
                 </div>
                 <div class="card-meta">
