@@ -24,62 +24,107 @@
         <li class="hideOnMobile dropdown">
             <a href="javascript:void(0)" class="dropbtn">SEARCH ▾</a>
             <div class="dropdown-content">
-                <a href="{{ url_for('all_recipes') }}">All Recipes</a>
-                <a href="{{ url_for('ingredient_index') }}">By Ingredient</a>
-                <a href="{{ url_for('random_recipe') }}">Spin Recipe</a>
-                <a href="{{ url_for('category_index') }}">By Category</a>
-                <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+                {% if session.get("user") %}
+                    <a href="{{ url_for('all_recipes') }}">All Recipes</a>
+                    <a href="{{ url_for('ingredient_index') }}">By Ingredient</a>
+                    <a href="{{ url_for('random_recipe') }}">Spin Recipe</a>
+                    <a href="{{ url_for('category_index') }}">By Category</a>
+                {% else %}
+                    <a href="#" onclick="showLoginToast(); return false;">All Recipes</a>
+                    <a href="#" onclick="showLoginToast(); return false;">By Ingredient</a>
+                    <a href="#" onclick="showLoginToast(); return false;">Spin Recipe</a>
+                    <a href="#" onclick="showLoginToast(); return false;">By Category</a>
+                {% endif %}
+
+                {% if session.get("user") %}
+                    <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+                {% endif %}
+
             </div>
         </li>
 
-        <li class="hideOnMobile"><a href="{{ url_for('saved_recipes') }}">SAVED RECIPE</a></li>
-        <li class="hideOnMobile"><a href="{{ url_for('profile') }}">ACCOUNT</a></li>
+        <li class="hideOnMobile">
+            {% if session.get("user") %}
+                <a href="{{ url_for('saved_recipes') }}">SAVED RECIPE</a>
+            {% else %}
+                <a href="#" onclick="showLoginToast(); return false;">SAVED RECIPE</a>
+            {% endif %}
+        </li>
+        <li class="hideOnMobile">
+            {% if session.get("user") %}
+                <a href="{{ url_for('profile') }}">ACCOUNT</a>
+            {% else %}
+                <a href="#" onclick="showLoginToast(); return false;">ACCOUNT</a>
+            {% endif %}
+        </li>
         
         <!-- ⭐ 存 notif_count 的隐藏元素 -->
         <span id="initNotifCount" data-count="{{ notif_count if notif_count is defined else 0 }}" style="display:none;"></span>
         
         <li class="notif-wrapper">
+
+        {% if session.get("user") %}
+
             <a href="#" class="notif-icon" onclick="toggleNotif(event)">
                 🔔
                 {% if notif_count is defined and notif_count > 0 %}
                     <span class="notif-badge">{{ notif_count }}</span>
                 {% endif %}
             </a>
-            
-            <!-- ⭐ dropdown 现在在这里，跟 a 平级 -->
+
+        {% else %}
+
+            <a href="#"
+            class="notif-icon"
+            onclick="showLoginToast(); return false;">
+                🔔
+            </a>
+
+        {% endif %}
+
             <div class="notif-dropdown" id="notifDropdown" onclick="markNotificationsRead()">
+
                 <div class="notif-header">Notifications</div>
-                
+
                 {% if new_notifications %}
                     <div class="notif-section">New 🔔</div>
+
                     {% for notif in new_notifications %}
                         <div class="notif-link-wrapper">
-                            <a href="/recipe/{{ notif[2] }}/#comment-{{ notif[3] }}" class="notif-link-btn">
+                            <a href="/recipe/{{ notif[2] }}/#comment-{{ notif[3] }}"
+                            class="notif-link-btn">
                                 📄 {{ notif[0] }}
                             </a>
                         </div>
                     {% endfor %}
+
                 {% else %}
                     <div class="notif-empty">No new notifications</div>
                 {% endif %}
-                
+
                 {% if old_notifications %}
                     <div class="notif-section">Earlier</div>
+
                     {% for notif in old_notifications %}
                         <div class="notif-link-wrapper">
-                            <a href="/recipe/{{ notif[2] }}/#comment-{{ notif[3] }}" class="notif-link-btn">
+                            <a href="/recipe/{{ notif[2] }}/#comment-{{ notif[3] }}"
+                            class="notif-link-btn">
                                 📄 {{ notif[0] }}
                             </a>
                         </div>
                     {% endfor %}
                 {% endif %}
+
             </div>
+
         </li>
     </ul>
 </nav>
 
 <div id="newNotifToast" class="toast-message" style="display: none;"></div>
-
+<div id="loginToast" class="login-toast">
+    🔒 Please log in to access this feature.
+</div>
 <script>
 var lastNotifCount = 0;
 
@@ -195,6 +240,18 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 setInterval(checkNewNotifications, 30000);
+function showLoginToast() {
+
+    const toast = document.getElementById("loginToast");
+
+    toast.classList.add("show");
+
+    setTimeout(function () {
+        toast.classList.remove("show");
+        window.location.href = "/login";
+    }, 1800);
+
+}
 </script>
 
 {% block content %}{% endblock %}

@@ -7,8 +7,9 @@
         <link rel="icon" href="{{ url_for('static', filename='egg.ico') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
         <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
-
     </head>
+    {% extends "base.html" %}
+    {% block content %}
     <body data-page="register">
         <div class="page-container">
             <div class="book-section">
@@ -126,3 +127,4 @@
         </div>
     </body>
 </html>
+{% endblock %}
