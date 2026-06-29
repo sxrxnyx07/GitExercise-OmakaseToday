@@ -24,12 +24,17 @@
                 Explore delicious recipes, save your favorites,
                 and cook with confidence.
             </p>
-            <a
-                href="{{ url_for('all_recipes') }}"
-                class="primary-btn"
-            >
+            {% if session.get("user") %}
+            <a href="{{ url_for('all_recipes') }}" class="primary-btn">
                 Start Cooking →
             </a>
+            {% else %}
+            <a href="#"
+            class="primary-btn"
+            onclick="showLoginToast(); return false;">
+                Start Cooking →
+            </a>
+            {% endif %}
         </div>
 
         <!-- RIGHT -->
@@ -66,25 +71,35 @@
         <h2 class="scene-title">
             Popular Picks 🔥
         </h2>
+
         <div class="food-showcase">
             {% for recipe in popular_recipes %}
-            <a
-                href="/recipe/{{ recipe.id }}"
-                class="food-card"
-            >
-            <img
-                src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
-                alt="{{ recipe.name }}"
-            >
-                <div class="food-card-body">
-                    <div class="food-card-title">
-                        {{ recipe.name }}
-                    </div>
-                    <div class="saved-badge">
-                        ❤ {{ recipe.saved_count }} saved
-                    </div>
-                </div>
-            </a>
+
+                {% if session.get("user") %}
+                    <a href="/recipe/{{ recipe.id }}" class="food-card">
+                {% else %}
+                    <a href="#"
+                    class="food-card"
+                    onclick="showLoginToast(); return false;">
+                {% endif %}
+
+                        <img
+                            src="{{ recipe.image if recipe.image else url_for('static', filename='css/picture/default.jpg') }}"
+                            alt="{{ recipe.name }}"
+                        >
+
+                        <div class="food-card-body">
+                            <div class="food-card-title">
+                                {{ recipe.name }}
+                            </div>
+
+                            <div class="saved-badge">
+                                ❤ {{ recipe.saved_count }} saved
+                            </div>
+                        </div>
+
+                    </a>
+
             {% endfor %}
         </div>
     </section>
@@ -110,12 +125,17 @@
                     <a class="tag" href="https://www.google.com/search?q=Raisin" target="_blank">Raisin</a>
                     <a class="tag" href="https://www.google.com/search?q=Stevia" target="_blank">Stevia</a>
                 </div>
-                <a
-                    href="{{ url_for('ingredient_index') }}"
-                    class="btn-return"
-                >
+                {% if session.get("user") %}
+                <a href="{{ url_for('ingredient_index') }}" class="btn-return">
                     Cook Now →
                 </a>
+                {% else %}
+                <a href="#"
+                class="btn-return"
+                onclick="showLoginToast(); return false;">
+                    Cook Now →
+                </a>
+                {% endif %}
             </div>
             <div class="feature-visual">
                 <img
@@ -148,12 +168,17 @@
                 <p class="preview-note">
                     Watch how it works 👇
                 </p>
-                <a
-                    href="{{ url_for('random_recipe') }}"
-                    class="btn-return"
-                >
+                {% if session.get("user") %}
+                <a href="{{ url_for('random_recipe') }}" class="btn-return">
                     Try the Spinner →
                 </a>
+                {% else %}
+                <a href="#"
+                class="btn-return"
+                onclick="showLoginToast(); return false;">
+                    Try the Spinner →
+                </a>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -190,12 +215,21 @@
                         Lamb
                     </span>
                 </div>
+                {% if session.get("user") %}
                 <button
                     class="btn-return"
                     onclick="goToSearch()"
                 >
                     Go to Search →
                 </button>
+                {% else %}
+                <button
+                    class="btn-return"
+                    onclick="showLoginToast(); return false;"
+                >
+                    Go to Search →
+                </button>
+                {% endif %}
             </div>
         </div>
     </section>

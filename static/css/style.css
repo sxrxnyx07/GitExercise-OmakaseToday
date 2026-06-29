@@ -4723,3 +4723,33 @@ input:focus, textarea:focus, select:focus {
     cursor: pointer;
     z-index: 10;
 }
+.login-toast{
+    position: fixed;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: white;
+    color: #333;
+    padding: 14px 24px;
+    border-radius: 16px;
+    border: 3px solid #111;
+    box-shadow: 0 8px 25px #f4c542;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: .3s ease;
+
+    z-index: 9999;
+
+    text-align: center;
+}
+
+.login-toast.show{
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
